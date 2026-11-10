@@ -1,0 +1,47 @@
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { T } from '@/components/text';
+import { radius, space } from '@/theme/tokens';
+import { useTheme } from '@/theme/use-theme';
+
+export default function Welcome() {
+  const { c } = useTheme();
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={{ flex: 1, backgroundColor: c.brand, paddingTop: insets.top + space.xxl, paddingBottom: insets.bottom + space.xl, paddingHorizontal: space.xl }}>
+      <StatusBar style="light" />
+      <T variant="headline" tone="onBrand">
+        Tito Finance
+      </T>
+      <View style={{ flex: 1, justifyContent: 'center', gap: space.l }}>
+        <T variant="largeTitle" tone="onBrand" style={{ fontSize: 40, lineHeight: 46 }}>
+          Know where your money goes.
+        </T>
+        <T variant="body" tone="onBrandSoft" style={{ maxWidth: 340 }}>
+          Log what you spend in seconds, see your month at a glance, and set budgets that help instead of nag.
+        </T>
+      </View>
+      <View style={{ gap: space.s }}>
+        <Pressable
+          onPress={() => router.push('/sign-up')}
+          accessibilityRole="button"
+          style={({ pressed }) => ({ minHeight: 52, borderRadius: radius.pill, backgroundColor: pressed ? c.onBrandSoft : c.onBrand, alignItems: 'center', justifyContent: 'center' })}>
+          <T variant="button" style={{ color: '#272C77' }}>
+            Create an account
+          </T>
+        </Pressable>
+        <Pressable
+          onPress={() => router.push('/sign-in')}
+          accessibilityRole="button"
+          style={{ minHeight: 52, alignItems: 'center', justifyContent: 'center' }}>
+          <T variant="button" tone="onBrand">
+            I already have an account
+          </T>
+        </Pressable>
+      </View>
+    </View>
+  );
+}

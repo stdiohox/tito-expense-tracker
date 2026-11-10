@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T12:54:39.290Z",
+  "title": "Design System: Tito Expense Tracker",
+  "extensions": {
+    "colorMeta": {
+      "brand": {
+        "role": "primary",
+        "displayName": "Tito Indigo",
+        "canonical": "#272C77",
+        "tonalRamp": [
+          "oklch(15% 0.025 274.5)",
+          "oklch(26.4% 0.083 274.5)",
+          "oklch(37.9% 0.126 274.5)",
+          "oklch(49.3% 0.126 274.5)",
+          "oklch(60.7% 0.126 274.5)",
+          "oklch(72.1% 0.126 274.5)",
+          "oklch(83.6% 0.073 274.5)",
+          "oklch(95% 0.015 274.5)"
+        ]
+      },
+      "brand-pressed": {
+        "role": "primary",
+        "displayName": "Night Indigo",
+        "canonical": "#1D2160",
+        "tonalRamp": [
+          "oklch(15% 0.022 274.4)",
+          "oklch(26.4% 0.072 274.4)",
+          "oklch(37.9% 0.11 274.4)",
+          "oklch(49.3% 0.11 274.4)",
+          "oklch(60.7% 0.11 274.4)",
+          "oklch(72.1% 0.11 274.4)",
+          "oklch(83.6% 0.063 274.4)",
+          "oklch(95% 0.013 274.4)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Working Indigo",
+        "canonical": "#2F359A",
+        "tonalRamp": [
+          "oklch(15% 0.032 273.6)",
+          "oklch(26.4% 0.106 273.6)",
+          "oklch(37.9% 0.162 273.6)",
+          "oklch(49.3% 0.162 273.6)",
+          "oklch(60.7% 0.162 273.6)",
+          "oklch(72.1% 0.162 273.6)",
+          "oklch(83.6% 0.093 273.6)",
+          "oklch(95% 0.019 273.6)"
+        ]
+      },
+      "accent-tint": {
+        "role": "primary",
+        "displayName": "Indigo Mist",
+        "canonical": "#EBECF8",
+        "tonalRamp": [
+          "oklch(15% 0.003 282.3)",
+          "oklch(26.4% 0.011 282.3)",
+          "oklch(37.9% 0.016 282.3)",
+          "oklch(49.3% 0.016 282.3)",
+          "oklch(60.7% 0.016 282.3)",
+          "oklch(72.1% 0.016 282.3)",
+          "oklch(83.6% 0.009 282.3)",
+          "oklch(95% 0.002 282.3)"
+        ]
+      },
+      "on-brand": {
+        "role": "neutral",
+        "displayName": "On-brand White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26.4% 0 89.9)",
+          "oklch(37.9% 0 89.9)",
+          "oklch(49.3% 0 89.9)",
+          "oklch(60.7% 0 89.9)",
+          "oklch(72.1% 0 89.9)",
+          "oklch(83.6% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "on-brand-soft": {
+        "role": "neutral",
+        "displayName": "On-brand Soft",
+        "canonical": "#C8CBF0",
+        "tonalRamp": [
+          "oklch(15% 0.01 281.6)",
+          "oklch(26.4% 0.034 281.6)",
+          "oklch(37.9% 0.051 281.6)",
+          "oklch(49.3% 0.051 281.6)",
+          "oklch(60.7% 0.051 281.6)",
+          "oklch(72.1% 0.051 281.6)",
+          "oklch(83.6% 0.03 281.6)",
+          "oklch(95% 0.006 281.6)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Today Gold",
+        "canonical": "#E0B04C",
+        "tonalRamp": [
+          "oklch(15% 0.026 83)",
+          "oklch(26.4% 0.085 83)",
+          "oklch(37.9% 0.129 83)",
+          "oklch(49.3% 0.129 83)",
+          "oklch(60.7% 0.129 83)",
+          "oklch(72.1% 0.129 83)",
+          "oklch(83.6% 0.074 83)",
+          "oklch(95% 0.015 83)"
+        ]
+      },
+      "clay": {
+        "role": "secondary",
+        "displayName": "Clay",
+        "canonical": "#A4462A",
+        "tonalRamp": [
+          "oklch(15% 0.026 37.2)",
+          "oklch(26.4% 0.086 37.2)",
+          "oklch(37.9% 0.131 37.2)",
+          "oklch(49.3% 0.131 37.2)",
+          "oklch(60.7% 0.131 37.2)",
+          "oklch(72.1% 0.131 37.2)",
+          "oklch(83.6% 0.076 37.2)",
+          "oklch(95% 0.016 37.2)"
+        ]
+      },
+      "clay-tint": {
+        "role": "secondary",
+        "displayName": "Clay Tint",
+        "canonical": "#F8E7E1",
+        "tonalRamp": [
+          "oklch(15% 0.004 40.5)",
+          "oklch(26.4% 0.013 40.5)",
+          "oklch(37.9% 0.02 40.5)",
+          "oklch(49.3% 0.02 40.5)",
+          "oklch(60.7% 0.02 40.5)",
+          "oklch(72.1% 0.02 40.5)",
+          "oklch(83.6% 0.012 40.5)",
+          "oklch(95% 0.002 40.5)"
+        ]
+      },
+      "positive": {
+        "role": "secondary",
+        "displayName": "Steady Green",
+        "canonical": "#2B6E47",
+        "tonalRamp": [
+          "oklch(15% 0.019 155)",
+          "oklch(26.4% 0.061 155)",
+          "oklch(37.9% 0.093 155)",
+          "oklch(49.3% 0.093 155)",
+          "oklch(60.7% 0.093 155)",
+          "oklch(72.1% 0.093 155)",
+          "oklch(83.6% 0.054 155)",
+          "oklch(95% 0.011 155)"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Cool Ground",
+        "canonical": "#F5F6FB",
+        "tonalRamp": [
+          "oklch(15% 0.001 277.2)",
+          "oklch(26.4% 0.004 277.2)",
+          "oklch(37.9% 0.007 277.2)",
+          "oklch(49.3% 0.007 277.2)",
+          "oklch(60.7% 0.007 277.2)",
+          "oklch(72.1% 0.007 277.2)",
+          "oklch(83.6% 0.004 277.2)",
+          "oklch(95% 0.001 277.2)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "oklch(15% 0 89.9)",
+          "oklch(26.4% 0 89.9)",
+          "oklch(37.9% 0 89.9)",
+          "oklch(49.3% 0 89.9)",
+          "oklch(60.7% 0 89.9)",
+          "oklch(72.1% 0 89.9)",
+          "oklch(83.6% 0 89.9)",
+          "oklch(95% 0 89.9)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#14163A",
+        "tonalRamp": [
+          "oklch(15% 0.014 276.9)",
+          "oklch(26.4% 0.045 276.9)",
+          "oklch(37.9% 0.068 276.9)",
+          "oklch(49.3% 0.068 276.9)",
+          "oklch(60.7% 0.068 276.9)",
+          "oklch(72.1% 0.068 276.9)",
+          "oklch(83.6% 0.039 276.9)",
+          "oklch(95% 0.008 276.9)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "#43476A",
+        "tonalRamp": [
+          "oklch(15% 0.012 278.5)",
+          "oklch(26.4% 0.039 278.5)",
+          "oklch(37.9% 0.059 278.5)",
+          "oklch(49.3% 0.059 278.5)",
+          "oklch(60.7% 0.059 278.5)",
+          "oklch(72.1% 0.059 278.5)",
+          "oklch(83.6% 0.034 278.5)",
+          "oklch(95% 0.007 278.5)"
+        ]
+      },
+      "ink-mute": {
+        "role": "neutral",
+        "displayName": "Ink Mute",
+        "canonical": "#5E6283",
+        "tonalRamp": [
+          "oklch(15% 0.011 279)",
+          "oklch(26.4% 0.035 279)",
+          "oklch(37.9% 0.053 279)",
+          "oklch(49.3% 0.053 279)",
+          "oklch(60.7% 0.053 279)",
+          "oklch(72.1% 0.053 279)",
+          "oklch(83.6% 0.03 279)",
+          "oklch(95% 0.006 279)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#E3E5F0",
+        "tonalRamp": [
+          "oklch(15% 0.003 277.8)",
+          "oklch(26.4% 0.01 277.8)",
+          "oklch(37.9% 0.015 277.8)",
+          "oklch(49.3% 0.015 277.8)",
+          "oklch(60.7% 0.015 277.8)",
+          "oklch(72.1% 0.015 277.8)",
+          "oklch(83.6% 0.009 277.8)",
+          "oklch(95% 0.002 277.8)"
+        ]
+      },
+      "bar-muted": {
+        "role": "neutral",
+        "displayName": "Muted Bar",
+        "canonical": "#8589B8",
+        "tonalRamp": [
+          "oklch(15% 0.014 280.4)",
+          "oklch(26.4% 0.046 280.4)",
+          "oklch(37.9% 0.07 280.4)",
+          "oklch(49.3% 0.07 280.4)",
+          "oklch(60.7% 0.07 280.4)",
+          "oklch(72.1% 0.07 280.4)",
+          "oklch(83.6% 0.041 280.4)",
+          "oklch(95% 0.008 280.4)"
+        ]
+      },
+      "brand-dark": {
+        "role": "primary",
+        "displayName": "Deep Tito Indigo (dark)",
+        "canonical": "#1E2263",
+        "tonalRamp": [
+          "oklch(15% 0.023 274.4)",
+          "oklch(26.4% 0.074 274.4)",
+          "oklch(37.9% 0.113 274.4)",
+          "oklch(49.3% 0.113 274.4)",
+          "oklch(60.7% 0.113 274.4)",
+          "oklch(72.1% 0.113 274.4)",
+          "oklch(83.6% 0.065 274.4)",
+          "oklch(95% 0.014 274.4)"
+        ]
+      },
+      "button-dark": {
+        "role": "primary",
+        "displayName": "Periwinkle (dark)",
+        "canonical": "#AEB3FF",
+        "tonalRamp": [
+          "oklch(15% 0.022 280.7)",
+          "oklch(26.4% 0.071 280.7)",
+          "oklch(37.9% 0.108 280.7)",
+          "oklch(49.3% 0.108 280.7)",
+          "oklch(60.7% 0.108 280.7)",
+          "oklch(72.1% 0.108 280.7)",
+          "oklch(83.6% 0.062 280.7)",
+          "oklch(95% 0.013 280.7)"
+        ]
+      },
+      "button-dark-pressed": {
+        "role": "primary",
+        "displayName": "Periwinkle Pressed (dark)",
+        "canonical": "#9198F2",
+        "tonalRamp": [
+          "oklch(15% 0.026 279.1)",
+          "oklch(26.4% 0.086 279.1)",
+          "oklch(37.9% 0.131 279.1)",
+          "oklch(49.3% 0.131 279.1)",
+          "oklch(60.7% 0.131 279.1)",
+          "oklch(72.1% 0.131 279.1)",
+          "oklch(83.6% 0.076 279.1)",
+          "oklch(95% 0.016 279.1)"
+        ]
+      },
+      "accent-tint-dark": {
+        "role": "primary",
+        "displayName": "Indigo Mist (dark)",
+        "canonical": "#262A5E",
+        "tonalRamp": [
+          "oklch(15% 0.018 276.4)",
+          "oklch(26.4% 0.06 276.4)",
+          "oklch(37.9% 0.091 276.4)",
+          "oklch(49.3% 0.091 276.4)",
+          "oklch(60.7% 0.091 276.4)",
+          "oklch(72.1% 0.091 276.4)",
+          "oklch(83.6% 0.053 276.4)",
+          "oklch(95% 0.011 276.4)"
+        ]
+      },
+      "on-brand-soft-dark": {
+        "role": "neutral",
+        "displayName": "On-brand Soft (dark)",
+        "canonical": "#B9BDEB",
+        "tonalRamp": [
+          "oklch(15% 0.013 280.9)",
+          "oklch(26.4% 0.043 280.9)",
+          "oklch(37.9% 0.065 280.9)",
+          "oklch(49.3% 0.065 280.9)",
+          "oklch(60.7% 0.065 280.9)",
+          "oklch(72.1% 0.065 280.9)",
+          "oklch(83.6% 0.037 280.9)",
+          "oklch(95% 0.008 280.9)"
+        ]
+      },
+      "gold-dark": {
+        "role": "secondary",
+        "displayName": "Today Gold (dark)",
+        "canonical": "#E7BE62",
+        "tonalRamp": [
+          "oklch(15% 0.024 85.5)",
+          "oklch(26.4% 0.079 85.5)",
+          "oklch(37.9% 0.12 85.5)",
+          "oklch(49.3% 0.12 85.5)",
+          "oklch(60.7% 0.12 85.5)",
+          "oklch(72.1% 0.12 85.5)",
+          "oklch(83.6% 0.069 85.5)",
+          "oklch(95% 0.014 85.5)"
+        ]
+      },
+      "clay-dark": {
+        "role": "secondary",
+        "displayName": "Clay (dark)",
+        "canonical": "#F0947B",
+        "tonalRamp": [
+          "oklch(15% 0.023 36)",
+          "oklch(26.4% 0.077 36)",
+          "oklch(37.9% 0.117 36)",
+          "oklch(49.3% 0.117 36)",
+          "oklch(60.7% 0.117 36)",
+          "oklch(72.1% 0.117 36)",
+          "oklch(83.6% 0.068 36)",
+          "oklch(95% 0.014 36)"
+        ]
+      },
+      "clay-tint-dark": {
+        "role": "secondary",
+        "displayName": "Clay Tint (dark)",
+        "canonical": "#3A2430",
+        "tonalRamp": [
+          "oklch(15% 0.008 345.9)",
+          "oklch(26.4% 0.025 345.9)",
+          "oklch(37.9% 0.039 345.9)",
+          "oklch(49.3% 0.039 345.9)",
+          "oklch(60.7% 0.039 345.9)",
+          "oklch(72.1% 0.039 345.9)",
+          "oklch(83.6% 0.022 345.9)",
+          "oklch(95% 0.005 345.9)"
+        ]
+      },
+      "positive-dark": {
+        "role": "secondary",
+        "displayName": "Steady Green (dark)",
+        "canonical": "#86D0A4",
+        "tonalRamp": [
+          "oklch(15% 0.019 157.2)",
+          "oklch(26.4% 0.064 157.2)",
+          "oklch(37.9% 0.097 157.2)",
+          "oklch(49.3% 0.097 157.2)",
+          "oklch(60.7% 0.097 157.2)",
+          "oklch(72.1% 0.097 157.2)",
+          "oklch(83.6% 0.056 157.2)",
+          "oklch(95% 0.012 157.2)"
+        ]
+      },
+      "ground-dark": {
+        "role": "neutral",
+        "displayName": "Cool Ground (dark)",
+        "canonical": "#0D0E22",
+        "tonalRamp": [
+          "oklch(15% 0.008 279.1)",
+          "oklch(26.4% 0.027 279.1)",
+          "oklch(37.9% 0.041 279.1)",
+          "oklch(49.3% 0.041 279.1)",
+          "oklch(60.7% 0.041 279.1)",
+          "oklch(72.1% 0.041 279.1)",
+          "oklch(83.6% 0.024 279.1)",
+          "oklch(95% 0.005 279.1)"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Surface (dark)",
+        "canonical": "#16183A",
+        "tonalRamp": [
+          "oklch(15% 0.013 277.5)",
+          "oklch(26.4% 0.042 277.5)",
+          "oklch(37.9% 0.065 277.5)",
+          "oklch(49.3% 0.065 277.5)",
+          "oklch(60.7% 0.065 277.5)",
+          "oklch(72.1% 0.065 277.5)",
+          "oklch(83.6% 0.037 277.5)",
+          "oklch(95% 0.008 277.5)"
+        ]
+      },
+      "raised-dark": {
+        "role": "neutral",
+        "displayName": "Raised (dark)",
+        "canonical": "#1E2148",
+        "tonalRamp": [
+          "oklch(15% 0.014 277.1)",
+          "oklch(26.4% 0.047 277.1)",
+          "oklch(37.9% 0.071 277.1)",
+          "oklch(49.3% 0.071 277.1)",
+          "oklch(60.7% 0.071 277.1)",
+          "oklch(72.1% 0.071 277.1)",
+          "oklch(83.6% 0.041 277.1)",
+          "oklch(95% 0.009 277.1)"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink (dark)",
+        "canonical": "#F1F2FA",
+        "tonalRamp": [
+          "oklch(15% 0.002 280.5)",
+          "oklch(26.4% 0.007 280.5)",
+          "oklch(37.9% 0.011 280.5)",
+          "oklch(49.3% 0.011 280.5)",
+          "oklch(60.7% 0.011 280.5)",
+          "oklch(72.1% 0.011 280.5)",
+          "oklch(83.6% 0.006 280.5)",
+          "oklch(95% 0.001 280.5)"
+        ]
+      },
+      "ink-soft-dark": {
+        "role": "neutral",
+        "displayName": "Ink Soft (dark)",
+        "canonical": "#BEC1DB",
+        "tonalRamp": [
+          "oklch(15% 0.007 280.3)",
+          "oklch(26.4% 0.024 280.3)",
+          "oklch(37.9% 0.037 280.3)",
+          "oklch(49.3% 0.037 280.3)",
+          "oklch(60.7% 0.037 280.3)",
+          "oklch(72.1% 0.037 280.3)",
+          "oklch(83.6% 0.021 280.3)",
+          "oklch(95% 0.004 280.3)"
+        ]
+      },
+      "ink-mute-dark": {
+        "role": "neutral",
+        "displayName": "Ink Mute (dark)",
+        "canonical": "#9A9EBE",
+        "tonalRamp": [
+          "oklch(15% 0.009 279.5)",
+          "oklch(26.4% 0.031 279.5)",
+          "oklch(37.9% 0.047 279.5)",
+          "oklch(49.3% 0.047 279.5)",
+          "oklch(60.7% 0.047 279.5)",
+          "oklch(72.1% 0.047 279.5)",
+          "oklch(83.6% 0.027 279.5)",
+          "oklch(95% 0.006 279.5)"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "canonical": "#2A2D58",
+        "tonalRamp": [
+          "oklch(15% 0.015 278.1)",
+          "oklch(26.4% 0.05 278.1)",
+          "oklch(37.9% 0.076 278.1)",
+          "oklch(49.3% 0.076 278.1)",
+          "oklch(60.7% 0.076 278.1)",
+          "oklch(72.1% 0.076 278.1)",
+          "oklch(83.6% 0.044 278.1)",
+          "oklch(95% 0.009 278.1)"
+        ]
+      },
+      "bar-muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted Bar (dark)",
+        "canonical": "#5E63A0",
+        "tonalRamp": [
+          "oklch(15% 0.019 279)",
+          "oklch(26.4% 0.063 279)",
+          "oklch(37.9% 0.096 279)",
+          "oklch(49.3% 0.096 279)",
+          "oklch(60.7% 0.096 279)",
+          "oklch(72.1% 0.096 279)",
+          "oklch(83.6% 0.055 279)",
+          "oklch(95% 0.012 279)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "total": {
+        "displayName": "Total",
+        "purpose": "Month total on home and reports; the amount input. Tabular, shrinks to fit one line."
+      },
+      "large-title": {
+        "displayName": "Large Title",
+        "purpose": "Tab and task-screen titles; welcome headline enlarges to 40/46."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headers."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Month switcher, form group labels, section totals."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running copy."
+      },
+      "body-strong": {
+        "displayName": "Body Strong",
+        "purpose": "Row titles and row amounts."
+      },
+      "sub": {
+        "displayName": "Sub",
+        "purpose": "Row subtitles, field labels, hints, errors."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Chart axis and legend, segmented options, category tiles."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Every button label, sentence case."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-action",
+        "value": "0 4px 8px rgba(13,14,34,0.22)",
+        "purpose": "The floating Add expense button (Android elevation 6)."
+      },
+      {
+        "name": "toast",
+        "value": "0 3px 8px rgba(0,0,0,0.18)",
+        "purpose": "The undo snackbar (Android elevation 4)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "fab-in",
+        "value": "fade 160ms",
+        "purpose": "Add button appearing; honours Reduce Motion."
+      },
+      {
+        "name": "fab-out",
+        "value": "fade 120ms",
+        "purpose": "Add button hiding while scrolling down."
+      },
+      {
+        "name": "toast-in",
+        "value": "fade + slide up 220ms",
+        "purpose": "Toast entering."
+      },
+      {
+        "name": "toast-out",
+        "value": "fade + slide down 180ms",
+        "purpose": "Toast leaving."
+      },
+      {
+        "name": "press-dim",
+        "value": "opacity 0.6",
+        "purpose": "Pressed rows and text links."
+      }
+    ],
+    "focus": {
+      "web": "3px solid accent outline, 2px offset, 6px radius (#2F359A light, #AEB3FF dark)"
+    },
+    "categoryColors": {
+      "discAlpha": {
+        "light": 0.12,
+        "dark": 0.18
+      },
+      "rent": [
+        "#3443A0",
+        "#9EA8F6"
+      ],
+      "food": [
+        "#2B6E47",
+        "#86D0A4"
+      ],
+      "transport": [
+        "#1D5C94",
+        "#86BDEB"
+      ],
+      "bills": [
+        "#87600F",
+        "#E7BE62"
+      ],
+      "airtime": [
+        "#5A3E9E",
+        "#BBA6F1"
+      ],
+      "family": [
+        "#A4462A",
+        "#F0947B"
+      ],
+      "faith": [
+        "#77502F",
+        "#DDB591"
+      ],
+      "personal": [
+        "#9C3A67",
+        "#EE9FC4"
+      ],
+      "health": [
+        "#A53737",
+        "#F29C9C"
+      ],
+      "entertainment": [
+        "#246868",
+        "#80CFCF"
+      ],
+      "shopping": [
+        "#843D9C",
+        "#DCA3EE"
+      ],
+      "other": [
+        "#53577A",
+        "#B3B6CF"
+      ],
+      "savings": [
+        "#2B6E47",
+        "#86D0A4"
+      ],
+      "education": [
+        "#1D5C94",
+        "#86BDEB"
+      ],
+      "gift": [
+        "#9C3A67",
+        "#EE9FC4"
+      ],
+      "business": [
+        "#3443A0",
+        "#9EA8F6"
+      ]
+    },
+    "touchTarget": {
+      "ios": "44pt",
+      "android": "48dp"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one full-width action on a task screen, in the bottom bar.",
+      "html": "<button class=\"ds-btn-primary\">Save expense</button>",
+      "css": ".ds-btn-primary { font-family: Manrope, system-ui, sans-serif; font-weight: 700; font-size: 17px; line-height: 22px; min-height: 52px; width: 100%; padding: 0 20px; border: none; border-radius: 999px; background: #272C77; color: #FFFFFF; cursor: pointer; } .ds-btn-primary:hover { background: #1D2160; } .ds-btn-primary:active { background: #1D2160; } .ds-btn-primary:focus-visible { outline: 3px solid #2F359A; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.45; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A supporting action, such as sharing a month as PDF.",
+      "html": "<button class=\"ds-btn-secondary\">Share November as PDF</button>",
+      "css": ".ds-btn-secondary { font-family: Manrope, system-ui, sans-serif; font-weight: 700; font-size: 17px; line-height: 22px; min-height: 52px; width: 100%; padding: 0 20px; border: none; border-radius: 999px; background: #EBECF8; color: #2F359A; cursor: pointer; } .ds-btn-secondary:hover, .ds-btn-secondary:active { background: #E3E5F0; } .ds-btn-secondary:focus-visible { outline: 3px solid #2F359A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Delete, in clay on a clay tint; never alarm red.",
+      "html": "<button class=\"ds-btn-danger\">Delete expense</button>",
+      "css": ".ds-btn-danger { font-family: Manrope, system-ui, sans-serif; font-weight: 700; font-size: 17px; line-height: 22px; min-height: 52px; width: 100%; padding: 0 20px; border: none; border-radius: 999px; background: #F8E7E1; color: #A4462A; cursor: pointer; } .ds-btn-danger:hover, .ds-btn-danger:active { background: #E3E5F0; } .ds-btn-danger:focus-visible { outline: 3px solid #2F359A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Add Expense (floating)",
+      "kind": "button",
+      "refersTo": "add-button",
+      "description": "The one primary action on tab screens; collapses to a round plus once the list scrolls.",
+      "html": "<div class=\"ds-fab-wrap\"><button class=\"ds-fab\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg><span>Add expense</span></button><button class=\"ds-fab ds-fab-compact\" aria-label=\"Add expense\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg></button></div>",
+      "css": ".ds-fab-wrap { display: flex; gap: 16px; align-items: center; } .ds-fab { font-family: Manrope, system-ui, sans-serif; font-weight: 700; font-size: 17px; line-height: 22px; display: inline-flex; align-items: center; gap: 8px; min-height: 56px; min-width: 56px; padding: 0 20px 0 16px; border: none; border-radius: 999px; background: #272C77; color: #FFFFFF; box-shadow: 0 4px 8px rgba(13,14,34,0.22); cursor: pointer; transition: background 0.16s; } .ds-fab:hover, .ds-fab:active { background: #1D2160; } .ds-fab:focus-visible { outline: 3px solid #2F359A; outline-offset: 2px; } .ds-fab-compact { padding: 0; justify-content: center; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Labelled field; focus thickens the border to indigo, error turns it clay.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-field-input\" placeholder=\"you@example.com\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; font-family: Manrope, system-ui, sans-serif; } .ds-field-label { font-weight: 500; font-size: 14px; line-height: 19px; color: #43476A; } .ds-field-input { font-family: Manrope, system-ui, sans-serif; font-weight: 500; font-size: 16px; min-height: 50px; padding: 0 16px; border: 1px solid #E3E5F0; border-radius: 12px; background: #FFFFFF; color: #14163A; outline: none; } .ds-field-input::placeholder { color: #5E6283; } .ds-field-input:hover { border-color: #8589B8; } .ds-field-input:focus-visible, .ds-field-input:focus { border: 2px solid #2F359A; padding-left: 15px; }"
+    },
+    {
+      "name": "Category Row",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "Tinted icon disc, title and subtitle, right-aligned tabular amount; budget bar when a budget is set.",
+      "html": "<div class=\"ds-rows\"><div class=\"ds-row\" tabindex=\"0\"><span class=\"ds-disc\" style=\"color:#3443A0;background:rgba(52,67,160,0.12)\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12H3l9-9 9 9h-2\"/><path d=\"M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7\"/><path d=\"M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6\"/></svg></span><span class=\"ds-row-text\"><span class=\"ds-row-title\">Rent &amp; Housing</span><span class=\"ds-row-sub\">1 payment · 49%</span></span><span class=\"ds-row-amt\">₦150,000</span></div><div class=\"ds-row\" tabindex=\"0\"><span class=\"ds-disc\" style=\"color:#2B6E47;background:rgba(43,110,71,0.12)\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 3h8l-1 9H5z\"/><path d=\"M7 18h2v3H7z\"/><path d=\"M20 3v12h-5c-.023-3.681.184-7.406 5-12z\"/><path d=\"M20 15v6h-1v-3\"/><path d=\"M8 12v6\"/></svg></span><span class=\"ds-row-text\"><span class=\"ds-row-title\">Food &amp; Groceries</span><span class=\"ds-row-sub ds-clay\">₦4,000 over the ₦90k budget</span><span class=\"ds-bar\"><span class=\"ds-bar-fill ds-over\"></span></span></span><span class=\"ds-row-amt\">₦94,000</span></div></div>",
+      "css": ".ds-rows { font-family: Manrope, system-ui, sans-serif; background: #F5F6FB; padding: 0 20px; } .ds-row { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 0; border-bottom: 1px solid #E3E5F0; cursor: pointer; } .ds-row:last-child { border-bottom: none; } .ds-row:hover, .ds-row:active { opacity: 0.6; } .ds-row:focus-visible { outline: 3px solid #2F359A; outline-offset: 2px; border-radius: 6px; } .ds-disc { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; } .ds-row-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; } .ds-row-title, .ds-row-amt { font-weight: 600; font-size: 16px; line-height: 22px; color: #14163A; } .ds-row-amt { font-variant-numeric: tabular-nums; } .ds-row-sub { font-weight: 500; font-size: 14px; line-height: 19px; color: #5E6283; } .ds-clay { color: #A4462A; } .ds-bar { display: block; height: 6px; border-radius: 3px; background: #E3E5F0; overflow: hidden; margin-top: 6px; } .ds-bar-fill { display: block; height: 100%; width: 100%; border-radius: 3px; background: #2F359A; } .ds-bar-fill.ds-over { background: #A4462A; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented-control",
+      "description": "Pill track in the ground tone; the selected option is a surface pill.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><button class=\"ds-seg-opt\" aria-checked=\"true\" role=\"radio\">₦ NGN</button><button class=\"ds-seg-opt\" aria-checked=\"false\" role=\"radio\">$ USD</button></div>",
+      "css": ".ds-seg { display: inline-flex; padding: 2px; border-radius: 999px; background: #F5F6FB; } .ds-seg-opt { font-family: Manrope, system-ui, sans-serif; font-weight: 600; font-size: 12px; line-height: 16px; min-height: 44px; min-width: 64px; padding: 0 12px; border: none; border-radius: 999px; background: transparent; color: #5E6283; cursor: pointer; } .ds-seg-opt[aria-checked=\"true\"] { background: #FFFFFF; color: #14163A; } .ds-seg-opt:hover { color: #14163A; } .ds-seg-opt:focus-visible { outline: 3px solid #2F359A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Grouped Card",
+      "kind": "card",
+      "refersTo": "grouped-card",
+      "description": "Settings group: surface card on the ground with hairline-divided rows.",
+      "html": "<div class=\"ds-group-wrap\"><div class=\"ds-group-title\">Account</div><div class=\"ds-group\"><div class=\"ds-group-row\"><span>Name</span><span class=\"ds-val\">Ada</span></div><div class=\"ds-group-row\"><span>Email</span><span class=\"ds-val\">ada@example.com</span></div></div></div>",
+      "css": ".ds-group-wrap { font-family: Manrope, system-ui, sans-serif; background: #F5F6FB; padding: 0 20px 20px; } .ds-group-title { font-weight: 700; font-size: 17px; line-height: 22px; color: #14163A; padding: 24px 0 8px; } .ds-group { background: #FFFFFF; border-radius: 16px; padding: 0 16px; } .ds-group-row { display: flex; justify-content: space-between; align-items: center; min-height: 56px; font-weight: 600; font-size: 16px; color: #14163A; border-bottom: 1px solid #E3E5F0; } .ds-group-row:last-child { border-bottom: none; } .ds-val { font-weight: 500; color: #43476A; }"
+    },
+    {
+      "name": "Pace Header",
+      "kind": "custom",
+      "refersTo": "brand",
+      "description": "Signature: indigo header with the Fraunces total, the pace line and the gold today dot.",
+      "html": "<div class=\"ds-pace\"><div class=\"ds-pace-month\">November</div><div class=\"ds-pace-total\">₦308,900</div><div class=\"ds-pace-soft\">Spent so far in November</div><div class=\"ds-pace-line\">₦12,050 less than by this day in October</div><svg class=\"ds-pace-chart\" viewBox=\"0 0 320 132\" preserveAspectRatio=\"none\"><defs><linearGradient id=\"dsf\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient></defs><path d=\"M6,110 C40,105 60,90 90,84 C110,80 120,70 140,68 L140,132 L6,132 Z\" fill=\"url(#dsf)\"/><path d=\"M6,108 C60,98 120,80 180,66 S260,40 314,30\" stroke=\"rgba(255,255,255,0.45)\" stroke-width=\"1.5\" stroke-dasharray=\"4 5\" fill=\"none\"/><path d=\"M6,110 C40,105 60,90 90,84 C110,80 120,70 140,68\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\" fill=\"none\"/><circle cx=\"140\" cy=\"68\" r=\"9\" fill=\"#E0B04C\" opacity=\"0.28\"/><circle cx=\"140\" cy=\"68\" r=\"4.5\" fill=\"#E0B04C\"/></svg><div class=\"ds-pace-axis\"><span>1 Nov</span><span>Today</span><span>30 Nov</span></div></div>",
+      "css": ".ds-pace { font-family: Manrope, system-ui, sans-serif; background: #272C77; color: #FFFFFF; padding: 16px 20px 24px; display: flex; flex-direction: column; gap: 4px; } .ds-pace-month { font-weight: 700; font-size: 17px; line-height: 22px; } .ds-pace-total { font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 44px; line-height: 50px; letter-spacing: -0.6px; font-variant-numeric: tabular-nums; margin-top: 12px; } .ds-pace-soft { font-weight: 500; font-size: 16px; line-height: 22px; color: #C8CBF0; } .ds-pace-line { font-weight: 600; font-size: 16px; line-height: 22px; margin-top: 4px; } .ds-pace-chart { width: 100%; height: 132px; margin-top: 16px; } .ds-pace-axis { display: flex; justify-content: space-between; font-weight: 600; font-size: 12px; line-height: 16px; color: #C8CBF0; margin-top: 6px; }"
+    },
+    {
+      "name": "Undo Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Snackbar above the floating Add button, with an optional Undo action.",
+      "html": "<div class=\"ds-toast\" role=\"status\"><span>Expense deleted</span><button class=\"ds-toast-act\">Undo</button></div>",
+      "css": ".ds-toast { font-family: Manrope, system-ui, sans-serif; display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 8px 0 16px; border-radius: 12px; background: #14163A; color: #FFFFFF; font-weight: 500; font-size: 14px; line-height: 19px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); } .ds-toast span { flex: 1; } .ds-toast-act { font-family: Manrope, system-ui, sans-serif; font-weight: 700; font-size: 17px; min-height: 44px; min-width: 64px; padding: 0 12px; border: none; border-radius: 8px; background: transparent; color: #C8CBF0; cursor: pointer; } .ds-toast-act:hover { background: rgba(255,255,255,0.08); } .ds-toast-act:focus-visible { outline: 3px solid #AEB3FF; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Indigo Pace Line",
+    "overview": "The app reads a month as a pace, not a ledger. A deep Tito indigo header holds the one number that matters (what you have spent so far) and a single soft line tracking this month against last month to the same day. Everything below that header is quiet: a cool near-white ground (deep indigo-black in dark mode), white grouped surfaces, hairline dividers, and rows that put the category on the left and the amount on the right. The structure follows Wealthfront iOS (large totals, grouped lists, one accent, one primary button per screen) carried in Tito Finance's own colours and type.\n\nDensity is phone-native and generous: 20px side margins, 64px rows, 44pt (iOS) and 48dp (Android) minimum targets everywhere. Colour is rationed. Indigo is the brand voice and the only action colour; gold appears only as the \"today\" dot; clay marks a passed budget and never reads as an alarm red; category hues live only inside small tinted discs. Type is Manrope for every working word with tabular figures on amounts, and Fraunces only for the big totals and large titles. One look ships on iOS and Android, with native tab bars, pickers, sheets and Back behaviour.\n\nThe world is calm and encouraging. It does not use dashboard tiles, promo cards, multi-colour charts or red warnings.",
+    "keyCharacteristics": [
+      "Indigo drench on the home header and the auth welcome only; light or deep-indigo ground below.",
+      "Fraunces for totals and large titles; Manrope for everything else; tabular figures on every amount.",
+      "Grouped lists with hairline dividers, round tinted icon discs, right-aligned amounts.",
+      "One full-width pill primary button per task screen; a floating pill \"Add expense\" on tab screens.",
+      "Light and dark are designed pairs, not inversions; every text colour meets WCAG AA."
+    ],
+    "rules": [
+      {
+        "name": "The One Meaning Rule",
+        "body": "Gold means today. Clay means a budget passed or an error. Neither appears as decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Disc-Only Rule",
+        "body": "Category colour lives inside the small tinted icon disc and nowhere else: not in bars, legends, fills or multi-colour charts. Ranked rows carry the comparison.",
+        "section": "colors"
+      },
+      {
+        "name": "The Never-Red Rule",
+        "body": "Overspending is shown in clay with words (\"₦4,000 over the ₦90k budget\"), never in alarm red and never by colour alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Faces Rule",
+        "body": "Fraunces is for totals and large titles only. Rows, labels, buttons and section headers are Manrope.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every amount is set with tabular figures so columns of money align.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only-Floaters Rule",
+        "body": "Shadows belong to elements that float over scrolling content. Cards, rows and buttons in the flow have none.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the indigo drench to the home header and the welcome screen; every other screen sits on the cool ground.",
+      "Do give each task screen exactly one full-width pill primary button, in a bottom bar above a hairline.",
+      "Do set every amount in tabular figures and right-align it in its row.",
+      "Do show category identity only as a tinted disc (12% alpha light, 18% dark) behind a 1.75-stroke outline icon.",
+      "Do design light and dark as pairs: in dark mode the primary action becomes Periwinkle with ink text.",
+      "Do keep every touch target at least 44pt on iOS and 48dp on Android, and every text colour at WCAG AA."
+    ],
+    "donts": [
+      "Don't use gold for anything but the today marker.",
+      "Don't signal overspending in red, or by colour alone; use clay plus words.",
+      "Don't put category colours into bars, stacked charts or legends; Reports ranks rows instead.",
+      "Don't use Fraunces below the large-title size or for labels and buttons.",
+      "Don't add shadows to in-flow cards, rows or buttons; only floating elements cast one.",
+      "Don't build home as a bank dashboard of tiles, promos and a transaction list up top."
+    ]
+  }
+}
