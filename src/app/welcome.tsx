@@ -29,7 +29,7 @@ export default function Welcome() {
           onPress={() => router.push('/sign-up')}
           accessibilityRole="button"
           style={({ pressed }) => ({ minHeight: 52, borderRadius: radius.pill, backgroundColor: pressed ? c.onBrandSoft : c.onBrand, alignItems: 'center', justifyContent: 'center' })}>
-          <T variant="button" style={{ color: '#272C77' }}>
+          <T variant="button" style={{ color: c.onWelcomeButton }}>
             Create an account
           </T>
         </Pressable>

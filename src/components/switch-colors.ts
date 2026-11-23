@@ -9,7 +9,7 @@ import type { Palette } from '@/theme/tokens';
 export function switchColors(c: Palette) {
   return {
     trackColor: { true: c.button, false: c.switchOff },
-    thumbColor: '#FFFFFF',
-    ...(Platform.OS === 'web' ? ({ activeTrackColor: c.button, activeThumbColor: '#FFFFFF' } as object) : {}),
+    thumbColor: c.thumb,
+    ...(Platform.OS === 'web' ? ({ activeTrackColor: c.button, activeThumbColor: c.thumb } as object) : {}),
   };
 }

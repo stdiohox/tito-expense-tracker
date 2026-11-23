@@ -41,7 +41,7 @@ export function AddButton({ compact, hidden }: { compact?: boolean; hidden?: boo
           paddingRight: compact ? 0 : space.xl,
           borderRadius: radius.pill,
           backgroundColor: pressed ? c.buttonPressed : c.button,
-          shadowColor: '#0D0E22',
+          shadowColor: c.fabShadow,
           shadowOpacity: 0.22,
           shadowRadius: 8,
           shadowOffset: { width: 0, height: 4 },

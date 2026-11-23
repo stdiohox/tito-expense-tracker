@@ -45,6 +45,19 @@ export type Palette = {
   chartGhost: string;
   chartFill: string;
   scrim: string;
+  /** Snackbar background, its text and its action ("Undo"). */
+  toast: string;
+  onToast: string;
+  toastAction: string;
+  /** Label on the white Welcome button (the brand indigo in both schemes). */
+  onWelcomeButton: string;
+  /** Switch thumb. */
+  thumb: string;
+  /** Shadows of the two floating elements (DESIGN.md, Shadow Vocabulary). */
+  fabShadow: string;
+  toastShadow: string;
+  /** Keyboard focus outline on the web build (web-focus.ts). */
+  focusRing: string;
 };
 
 export const light: Palette = {
@@ -76,6 +89,14 @@ export const light: Palette = {
   chartGhost: 'rgba(255,255,255,0.45)',
   chartFill: 'rgba(255,255,255,0.16)',
   scrim: 'rgba(20,22,58,0.4)',
+  toast: '#14163A',
+  onToast: '#FFFFFF',
+  toastAction: '#C8CBF0',
+  onWelcomeButton: '#272C77',
+  thumb: '#FFFFFF',
+  fabShadow: '#0D0E22',
+  toastShadow: '#000000',
+  focusRing: '#2F359A',
 };
 
 export const dark: Palette = {
@@ -107,6 +128,14 @@ export const dark: Palette = {
   chartGhost: 'rgba(255,255,255,0.4)',
   chartFill: 'rgba(174,179,255,0.18)',
   scrim: 'rgba(0,0,0,0.55)',
+  toast: '#1E2148',
+  onToast: '#FFFFFF',
+  toastAction: '#C8CBF0',
+  onWelcomeButton: '#272C77',
+  thumb: '#FFFFFF',
+  fabShadow: '#0D0E22',
+  toastShadow: '#000000',
+  focusRing: '#AEB3FF',
 };
 
 /** Category icon colour per scheme; the disc behind it is the same hue at low alpha. */

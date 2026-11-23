@@ -28,6 +28,14 @@ for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) 
   check(`${scheme} field border on surface (non-text)`, p.fieldBorder, p.surface, 3);
   check(`${scheme} field border on ground (non-text)`, p.fieldBorder, p.ground, 3);
   check(`${scheme} switch off-track on surface (non-text)`, p.switchOff, p.surface, 3);
+  check(`${scheme} switch on-track on surface (non-text)`, p.button, p.surface, 3);
+  check(`${scheme} switch thumb on off-track (non-text)`, p.thumb, p.switchOff, 3);
+  check(`${scheme} onToast on toast`, p.onToast, p.toast, 4.5);
+  check(`${scheme} toastAction on toast`, p.toastAction, p.toast, 4.5);
+  check(`${scheme} onWelcomeButton on onBrand (Welcome button)`, p.onWelcomeButton, p.onBrand, 4.5);
+  check(`${scheme} onWelcomeButton on onBrandSoft (pressed)`, p.onWelcomeButton, p.onBrandSoft, 4.5);
+  check(`${scheme} focusRing on ground (non-text)`, p.focusRing, p.ground, 3);
+  check(`${scheme} focusRing on surface (non-text)`, p.focusRing, p.surface, 3);
   cats.forEach(([, l, d], i) => {
     const fg = scheme === 'light' ? l : d;
     check(`${scheme} category ${i} icon on its disc (non-text)`, fg, mix(fg, p.surface, scheme === 'light' ? 0.12 : 0.18), 3);
