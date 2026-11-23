@@ -1,12 +1,13 @@
 import { IconChevronRight } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Platform, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AddButton } from '@/components/add-button';
 import { FocusStatusBar } from '@/components/focus-status-bar';
 import { STROKE } from '@/components/icons';
+import { switchColors } from '@/components/switch-colors';
 import { TabTitle } from '@/components/tab-title';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
@@ -16,10 +17,6 @@ import { CURRENCIES } from '@/domain/money';
 import type { CurrencyCode } from '@/domain/types';
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
-
-// react-native-web's Switch ignores trackColor.true and paints a teal thumb unless these are set.
-const webSwitch = (track: string) =>
-  Platform.OS === 'web' ? ({ activeTrackColor: track, activeThumbColor: '#FFFFFF' } as object) : {};
 
 export default function Settings() {
   const { c, scheme } = useTheme();
@@ -89,9 +86,7 @@ export default function Settings() {
               onValueChange={(v) => updateSettings({ reminderOn: v })}
               accessibilityLabel="Daily reminder"
               accessibilityHint={`A nudge at ${settings.reminderTime} if you haven’t logged anything that day`}
-              trackColor={{ true: c.button, false: c.line }}
-              thumbColor="#FFFFFF"
-              {...webSwitch(c.button)}
+              {...switchColors(c)}
             />
           </View>
         </Group>

@@ -9,6 +9,7 @@ import { Button } from '@/components/button';
 import { IconDisc } from '@/components/icon-disc';
 import { PICKABLE_ICONS, STROKE } from '@/components/icons';
 import { safeBack } from '@/components/nav';
+import { switchColors } from '@/components/switch-colors';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
 import { useActions, useCategory, useStore } from '@/data/store';
@@ -158,8 +159,7 @@ export default function EditCategory() {
             onValueChange={setHasBudget}
             accessibilityLabelledBy="budgetLabel"
             accessibilityLabel="Monthly budget"
-            trackColor={{ true: c.button, false: c.line }}
-            thumbColor="#FFFFFF"
+            {...switchColors(c)}
           />
         </View>
         {hasBudget ? (
