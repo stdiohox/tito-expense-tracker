@@ -49,6 +49,7 @@ export default function DeleteAccount() {
           autoCorrect={false}
           accessibilityLabelledBy="confirmLabel"
           accessibilityLabel="Type DELETE to confirm"
+          maxFontSizeMultiplier={2}
           {...confirmFocus.focusProps}
           style={{
             marginTop: space.s,

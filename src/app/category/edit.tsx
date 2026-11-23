@@ -109,6 +109,7 @@ export default function EditCategory() {
           accessibilityLabelledBy="nameLabel"
           accessibilityLabel="Category name"
           maxLength={40}
+          maxFontSizeMultiplier={2}
           {...nameFocus.focusProps}
           style={[field, nameFocus.border, { paddingHorizontal: space.l - nameFocus.inset, marginTop: space.s, opacity: existing?.builtIn ? 0.6 : 1 }]}
         />
@@ -177,6 +178,7 @@ export default function EditCategory() {
               placeholder="50,000"
               placeholderTextColor={c.inkMute}
               accessibilityLabel={`Monthly budget in ${CURRENCIES[cur].name}`}
+              maxFontSizeMultiplier={2}
               {...budgetFocus.focusProps}
               style={{ flex: 1, minHeight: 50, marginLeft: 4, fontFamily: fonts.semibold, fontSize: 16, color: c.ink }}
             />
