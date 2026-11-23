@@ -76,11 +76,14 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
     if (existing) {
       const ok = updateExpense({ ...existing, amount, currency, categoryId, day, note: note.trim() });
       toast({ message: ok ? 'Expense updated' : 'This expense was deleted, so it could not be updated' });
+      // A failed update is not a success: warn instead.
+      const feedback = ok ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning;
+      Haptics.notificationAsync(feedback).catch(() => {});
     } else {
       addExpense({ amount, currency, categoryId, day, note: note.trim() });
       toast({ message: `Saved ${formatMoney(amount, currency)} to ${cat?.name ?? 'your expenses'}` });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     safeBack();
   };
 
