@@ -52,7 +52,7 @@ export default function DeleteAccount() {
             minHeight: 52,
             borderRadius: radius.m,
             borderWidth: 1,
-            borderColor: c.line,
+            borderColor: c.fieldBorder,
             backgroundColor: c.surface,
             paddingHorizontal: space.l,
             fontFamily: fonts.semibold,

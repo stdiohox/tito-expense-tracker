@@ -25,6 +25,9 @@ for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) 
   check(`${scheme} gold dot on brand (non-text)`, p.gold, p.brand, 3);
   check(`${scheme} barMuted on ground (non-text)`, p.barMuted, p.ground, 3);
   check(`${scheme} selected bar on ground (non-text)`, p.button, p.ground, 3);
+  check(`${scheme} field border on surface (non-text)`, p.fieldBorder, p.surface, 3);
+  check(`${scheme} field border on ground (non-text)`, p.fieldBorder, p.ground, 3);
+  check(`${scheme} switch off-track on surface (non-text)`, p.switchOff, p.surface, 3);
   cats.forEach(([, l, d], i) => {
     const fg = scheme === 'light' ? l : d;
     check(`${scheme} category ${i} icon on its disc (non-text)`, fg, mix(fg, p.surface, scheme === 'light' ? 0.12 : 0.18), 3);

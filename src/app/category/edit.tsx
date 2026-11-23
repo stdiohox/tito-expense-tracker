@@ -75,7 +75,7 @@ export default function EditCategory() {
     minHeight: 52,
     borderRadius: radius.m,
     borderWidth: 1,
-    borderColor: c.line,
+    borderColor: c.fieldBorder,
     paddingHorizontal: space.l,
     fontFamily: fonts.medium,
     fontSize: 16,

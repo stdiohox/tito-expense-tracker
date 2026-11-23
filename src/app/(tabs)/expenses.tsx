@@ -93,7 +93,7 @@ export default function Expenses() {
                 backgroundColor: c.surface,
                 borderRadius: radius.m,
                 borderWidth: 1,
-                borderColor: c.line,
+                borderColor: c.fieldBorder,
                 paddingLeft: space.m,
                 marginTop: space.s,
                 marginBottom: space.s,

@@ -18,6 +18,8 @@ colors:
   ink-soft: "#43476A"
   ink-mute: "#5E6283"
   line: "#E3E5F0"
+  field-border: "#878BA5"
+  switch-off: "#878BA5"
   bar-muted: "#8589B8"
   brand-dark: "#1E2263"
   button-dark: "#AEB3FF"
@@ -35,6 +37,8 @@ colors:
   ink-soft-dark: "#BEC1DB"
   ink-mute-dark: "#9A9EBE"
   line-dark: "#2A2D58"
+  field-border-dark: "#63678C"
+  switch-off-dark: "#63678C"
   bar-muted-dark: "#5E63A0"
 typography:
   total:
@@ -222,7 +226,9 @@ One brand indigo plus two warm supporting notes (gold and clay), each rationed t
 - **Cool Ground** (ground / ground-dark): the screen background under lists, and the track of segmented controls and the date stepper.
 - **Surface** (surface / surface-dark) and **Raised** (raised-dark): grouped cards, the add/edit sheet, fields, the selected segment, and the dark toast.
 - **Ink** (ink / ink-dark): titles, row titles, amounts. **Ink Soft** (ink-soft / ink-soft-dark): field labels and supporting body copy. **Ink Mute** (ink-mute / ink-mute-dark): row subtitles, placeholders, unselected tab icons.
-- **Hairline** (line / line-dark): row dividers, field borders at rest, budget-bar track, the top border of the bottom action bar.
+- **Hairline** (line / line-dark): row dividers, budget-bar track, the top border of the bottom action bar.
+- **Field Border** (field-border / field-border-dark): the resting border of text fields, at 3:1 against surface and ground (WCAG 1.4.11).
+- **Switch Off** (switch-off / switch-off-dark): the track of a switch that is off, at 3:1 against surface, with the white thumb at 3:1 against it.
 - **Muted Bar** (bar-muted / bar-muted-dark): unselected bars in the Reports month-by-month chart (3:1 against ground).
 - **On-brand Soft** (on-brand-soft / on-brand-soft-dark): secondary text, axis labels and legend on the indigo header.
 
@@ -301,7 +307,7 @@ The one primary action on tab screens. A 56px indigo pill 16px from the right ed
 - **Internal Padding:** 16px horizontal; rows inside carry their own hairlines.
 
 ### Inputs / Fields
-- **Style:** surface fill, 1px hairline border, 12px radius, 50px tall, 16px Manrope Medium, label in Sub / Ink Soft above.
+- **Style:** surface fill, 1px Field Border, 12px radius, 50px tall, 16px Manrope Medium, label in Sub / Ink Soft above.
 - **Focus:** border becomes 2px Working Indigo. On web, keyboard focus gets a 3px accent outline with 2px offset.
 - **Error:** border turns Clay; the message appears below in Sub / Clay through a polite live region.
 - **Amount input:** no box; Total-size Fraunces digits with the currency symbol in Ink Soft, over a 2px accent underline.

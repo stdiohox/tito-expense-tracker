@@ -16,6 +16,10 @@ export type Palette = {
   inkSoft: string;
   inkMute: string;
   line: string;
+  /** Resting border of text fields: 3:1 against surface and ground (WCAG 1.4.11). */
+  fieldBorder: string;
+  /** Switch track when off: 3:1 against surface, and the white thumb 3:1 against it. */
+  switchOff: string;
   /** Brand header and auth welcome. */
   brand: string;
   onBrand: string;
@@ -51,6 +55,8 @@ export const light: Palette = {
   inkSoft: '#43476A',
   inkMute: '#5E6283',
   line: '#E3E5F0',
+  fieldBorder: '#878BA5',
+  switchOff: '#878BA5',
   brand: '#272C77',
   onBrand: '#FFFFFF',
   onBrandSoft: '#C8CBF0',
@@ -80,6 +86,8 @@ export const dark: Palette = {
   inkSoft: '#BEC1DB',
   inkMute: '#9A9EBE',
   line: '#2A2D58',
+  fieldBorder: '#63678C',
+  switchOff: '#63678C',
   brand: '#1E2263',
   onBrand: '#FFFFFF',
   onBrandSoft: '#B9BDEB',
