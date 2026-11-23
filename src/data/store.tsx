@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 
+import { STARTER_CATEGORIES } from '@/domain/categories';
 import type { Category, CurrencyCode, Expense } from '@/domain/types';
 
 import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
@@ -18,6 +19,15 @@ export type Settings = {
   reminderTime: string;
   firstName: string;
   email: string;
+};
+
+/** A fresh account's settings. Deleting the account returns to these. */
+export const DEFAULT_SETTINGS: Settings = {
+  currency: 'NGN',
+  reminderOn: true,
+  reminderTime: '20:00',
+  firstName: '',
+  email: '',
 };
 
 type State = {
@@ -65,7 +75,14 @@ function reducer(state: State, action: Action): State {
     case 'signOut':
       return { ...state, signedIn: false };
     case 'wipe':
-      return { ...state, expenses: [], categories: SAMPLE_CATEGORIES.map((c) => ({ ...c, budget: null })), signedIn: false };
+      // Starter categories with no budget (and no budgetCurrency), and default settings: no name,
+      // email or preferences survive account deletion.
+      return {
+        expenses: [],
+        categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
+        settings: { ...DEFAULT_SETTINGS },
+        signedIn: false,
+      };
   }
 }
 
@@ -90,7 +107,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     expenses: sampleExpenses(),
     categories: SAMPLE_CATEGORIES,
-    settings: { currency: 'NGN', reminderOn: true, reminderTime: '20:00', firstName: 'Ada', email: 'ada@example.com' },
+    settings: { ...DEFAULT_SETTINGS, firstName: 'Ada', email: 'ada@example.com' },
     signedIn: true,
   }));
   // Latest state for actions that must answer "did it exist?" without stale closures.
