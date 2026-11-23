@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useRef, useState, type ComponentRef } from 'react';
+import { ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { announceError } from '@/components/announce';
 import { Button } from '@/components/button';
 import { Field } from '@/components/field';
 import { safeBack } from '@/components/nav';
@@ -17,6 +18,7 @@ export default function Reset() {
   const [email, setEmail] = useState('');
   const [tried, setTried] = useState(false);
   const [sent, setSent] = useState(false);
+  const emailRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   if (sent) {
     return (
@@ -45,6 +47,7 @@ export default function Reset() {
           Enter the email you signed up with and we’ll send you a link.
         </T>
         <Field
+          ref={emailRef}
           label="Email"
           value={email}
           onChangeText={setEmail}
@@ -59,7 +62,8 @@ export default function Reset() {
           label="Send reset link"
           onPress={() => {
             setTried(true);
-            if (EMAIL.test(email.trim())) setSent(true); // Phase 2: Supabase resetPasswordForEmail.
+            if (!EMAIL.test(email.trim())) return announceError('Enter a valid email', emailRef);
+            setSent(true); // Phase 2: Supabase resetPasswordForEmail.
           }}
         />
       </View>

@@ -118,11 +118,13 @@ export default function EditCategory() {
             Starter categories keep their name.
           </T>
         ) : null}
-        {nameError ? (
-          <T variant="sub" tone="danger">
-            {nameError}
-          </T>
-        ) : null}
+        <View accessibilityLiveRegion="polite" aria-live="polite">
+          {nameError ? (
+            <T variant="sub" tone="danger">
+              {nameError}
+            </T>
+          ) : null}
+        </View>
 
         {!existing?.builtIn ? (
           <>
@@ -184,11 +186,13 @@ export default function EditCategory() {
             />
           </View>
         ) : null}
-        {budgetError ? (
-          <T variant="sub" tone="danger">
-            {budgetError}
-          </T>
-        ) : null}
+        <View accessibilityLiveRegion="polite" aria-live="polite">
+          {budgetError ? (
+            <T variant="sub" tone="danger">
+              {budgetError}
+            </T>
+          ) : null}
+        </View>
       </ScrollView>
       <View style={{ paddingHorizontal: space.xl, paddingTop: space.m, paddingBottom: insets.bottom + space.m, borderTopWidth: 1, borderTopColor: c.line }}>
         <Button label={existing ? 'Save' : 'Create category'} onPress={save} />
