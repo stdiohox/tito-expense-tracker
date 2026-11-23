@@ -17,7 +17,7 @@ export default function Welcome() {
         Tito Finance
       </T>
       <View style={{ flex: 1, justifyContent: 'center', gap: space.l }}>
-        <T variant="largeTitle" tone="onBrand" style={{ fontSize: 40, lineHeight: 46 }}>
+        <T variant="largeTitle" tone="onBrand" accessibilityRole="header" style={{ fontSize: 40, lineHeight: 46 }}>
           Know where your money goes.
         </T>
         <T variant="body" tone="onBrandSoft" style={{ maxWidth: 340 }}>
