@@ -26,7 +26,7 @@ import { useTheme } from '@/theme/use-theme';
 export default function Reports() {
   const { c, scheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const { month, set, isCurrent, today } = useMonth();
+  const { month, current, set, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
   const toast = useToast();
@@ -129,7 +129,7 @@ export default function Reports() {
                     key={h.month}
                     onPress={() => set(h.month)}
                     accessibilityRole="button"
-                    accessibilityLabel={`${monthName(h.month)}, ${formatMoney(h.total, cur)}${h.month === addMonths(today.slice(0, 7) as MonthKey, 0) ? ' so far' : ''}`}
+                    accessibilityLabel={`${monthName(h.month)}, ${formatMoney(h.total, cur)}${h.month === current ? ' so far' : ''}`}
                     accessibilityState={{ selected: isSel }}
                     style={{ flex: 1, maxWidth: 72, minHeight: TARGET, alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 6 }}>
                     <T variant="caption" tone={isSel ? 'ink' : 'inkMute'} numeric>
