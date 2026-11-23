@@ -17,7 +17,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function SignIn() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
-  const { signIn } = useActions();
+  const { signIn, updateSettings } = useActions();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
@@ -38,6 +38,8 @@ export default function SignIn() {
     setBusy(true);
     // Phase 2: Supabase Auth sign-in, with an error path that resets busy.
     timer.current = setTimeout(() => {
+      // Settings shows the account that signed in, not whoever was stored before.
+      updateSettings({ email: email.trim() });
       signIn();
       router.replace('/');
     }, 500);
