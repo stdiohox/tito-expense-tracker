@@ -42,7 +42,7 @@ export default function Home() {
   let paceLine = '';
   if (p) {
     const diff = formatMoney(Math.abs(p.delta), cur);
-    const word = compareWords(p.delta, p.lastMonthByNow);
+    const word = compareWords(p.delta, p.lastMonthByNow, cur);
     const when = isCurrent ? `by this day in ${lastName}` : lastName;
     paceLine = word === 'same' ? `About the same as ${when}` : `${diff} ${word} than ${when}`;
   }

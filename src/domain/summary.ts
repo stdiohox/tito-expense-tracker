@@ -1,4 +1,5 @@
 import { dayOfMonth, daysInMonth, monthOfDay } from './dates';
+import { CURRENCIES } from './money';
 import type { Category, CategoryId, CurrencyCode, DayKey, Expense, MonthKey } from './types';
 
 export type CategoryTotal = { category: Category; total: number; count: number };
@@ -95,8 +96,11 @@ export function pace(
   return { day, spentByNow, lastMonthByNow, delta: spentByNow - lastMonthByNow };
 }
 
-/** "₦12,050 less than …" / "about the same as …" phrasing shared by Home and Reports. */
-export function compareWords(delta: number, base: number): 'less' | 'more' | 'same' {
-  if (Math.abs(delta) < Math.max(100_00, base * 0.02)) return 'same';
+/**
+ * "₦12,050 less than …" / "about the same as …" phrasing shared by Home and Reports.
+ * "Same" when the difference is under the currency's floor (₦100, $1) or 2% of the base.
+ */
+export function compareWords(delta: number, base: number, currency: CurrencyCode): 'less' | 'more' | 'same' {
+  if (Math.abs(delta) < Math.max(CURRENCIES[currency].sameBelow, base * 0.02)) return 'same';
   return delta < 0 ? 'less' : 'more';
 }

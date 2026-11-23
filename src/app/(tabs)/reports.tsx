@@ -56,7 +56,7 @@ export default function Reports() {
   const vsLast = isCurrent ? (p ? { d: p.delta, base: p.lastMonthByNow } : null) : before.total > 0 ? { d: now.total - before.total, base: before.total } : null;
   let headline = `Spent in ${monthName(month)}`;
   if (vsLast) {
-    const word = compareWords(vsLast.d, vsLast.base);
+    const word = compareWords(vsLast.d, vsLast.base, cur);
     const when = isCurrent ? `by this day in ${lastName}` : lastName;
     headline = word === 'same' ? `About the same as ${when}` : `${formatMoney(Math.abs(vsLast.d), cur)} ${word} than ${when}`;
   }
@@ -92,7 +92,7 @@ export default function Reports() {
             const prev = before.byCategory.find((x) => x.category.id === b.category.id)?.total ?? 0;
             const diff = b.total - prev;
             const pct = Math.round((b.total / now.total) * 100);
-            const word = compareWords(diff, prev);
+            const word = compareWords(diff, prev, cur);
             const sub =
               prev === 0
                 ? `${pct}% · none in ${lastName}`

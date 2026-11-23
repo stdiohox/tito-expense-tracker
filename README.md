@@ -237,8 +237,9 @@ The web tracker's bugs come back if these rules are broken.
 
 **Add a currency.**
 1. Add the code to `CurrencyCode` in `src/domain/types.ts`.
-2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol, name, and minor units per major
-   unit. The pickers read `CURRENCIES`, so the UI updates on its own.
+2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol, name, minor units per major
+   unit, and `sameBelow` (the smallest month-to-month difference worth mentioning, in minor units).
+   The pickers read `CURRENCIES`, so the UI updates on its own.
 3. Extend the symbol-stripping regex in `parseAmount`. It only strips `₦` and `$` today.
 4. Add cases to `scripts/check-dates.ts`.
 

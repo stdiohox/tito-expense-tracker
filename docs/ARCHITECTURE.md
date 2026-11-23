@@ -319,8 +319,9 @@ month:
 - It returns `null` when last month has no spending. There is nothing to compare against.
 - `delta > 0` means spending faster than last month.
 
-**`compareWords(delta, base)`** returns `'same'` when the difference is under ₦100 (10,000 minor
-units) or under 2% of last month's figure, whichever is larger. Otherwise it returns `'less'` or
+**`compareWords(delta, base, currency)`** returns `'same'` when the difference is under the
+currency's `sameBelow` floor (₦100 or $1, set in `CURRENCIES`) or under 2% of last month's figure,
+whichever is larger. Otherwise it returns `'less'` or
 `'more'`. Home and Reports both use it, so they always word comparisons the same way.
 
 **`budgetFor(category, currency)`** returns the budget only when it was set in the currency being
