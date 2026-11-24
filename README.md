@@ -3,8 +3,9 @@
 A phone app (iOS and Android) for logging what you spend in seconds and seeing your month at a glance.
 Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.titofinance.com`.
 
-> **Status: phase 1, screens on sample data.** Every screen works, but the data is synthetic and
-> lives in memory. There are no real accounts, no sync and no backend yet. Phase 2 adds on-device
+> **Status: phase 1, real use in memory.** Every screen works and there is no demo data: the app
+> starts empty and everything in it is what you enter. Data lives in memory, so it is lost when the
+> app reloads. There are no real accounts, no sync and no backend yet. Phase 2 adds on-device
 > storage (expo-sqlite) and a Supabase backend owned by Koret. It starts after Mr Tito approves
 > the screens.
 
@@ -90,9 +91,10 @@ npx expo start          # dev server; scan the QR code with Expo Go (phone on th
 npx expo start --web    # browser preview; set the window to phone width (390 × 844)
 ```
 
-The app opens signed in as a sample user ("Ada"), with the last three months of synthetic spending in
-Lagos. To see the welcome and auth screens, use **Settings → Sign out**. **Delete account** clears the
-sample data until the next reload.
+The app opens **signed out, on the onboarding slides**, with no data. Create an account (any name,
+email and an 8-character password; nothing is sent anywhere) to go through the setup steps, or use
+"I already have an account" with any email and password. Everything you then add stays until the app
+reloads. **Settings → Sign out** returns to the slides; **Delete account** clears it all.
 
 ### Static web build
 
@@ -156,7 +158,7 @@ There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test su
     │   ├── setup.tsx        Three-step setup after sign-up (and Settings → Redo setup)
     │   └── welcome.tsx, sign-in.tsx, sign-up.tsx, reset.tsx   (welcome = three intro slides)
     ├── components/          Shared UI: Row, Button, Field, T (text), PaceChart, Toast, ExpenseForm, …
-    ├── data/                State: store (phase 1: in memory), month/today provider, summary hook, sample data
+    ├── data/                State: store (phase 1: in memory, empty at launch), month/today provider, summary hook
     ├── domain/              Pure TypeScript, no React: types, dates, money, summaries, starter categories
     ├── hooks/               Small platform hooks (colour scheme)
     └── theme/               Colour tokens (light and dark), type scale, spacing, web focus ring
@@ -285,7 +287,7 @@ build** (`eas build --profile development`).
 
 | Feature | Phase 1 behaviour | Phase 2 |
 |---|---|---|
-| Data | In memory, seeded from `src/data/sample.ts` on each launch; lost on reload | expo-sqlite on the device plus an outbox, synced to Supabase |
+| Data | In memory, empty at launch (no demo data); lost on reload | expo-sqlite on the device plus an outbox, synced to Supabase |
 | Sign up / sign in | Validates the form, waits 0.5 s, then signs in locally | Supabase Auth with real error states |
 | Password reset | Shows "sent" for any valid email | `resetPasswordForEmail` |
 | Delete account | Clears local data after 0.6 s | Delete-account Edge Function, with an error path |
@@ -294,13 +296,13 @@ build** (`eas build --profile development`).
 | Daily reminder | The switch stores the setting only | Local notifications (expo-notifications) |
 | Privacy policy | Toast | Link to the published policy |
 
-The Settings footer reads "Preview build · showing sample data" so testers know what they are seeing.
+The Settings footer reads "Preview build · your data stays until the app reloads" so testers know what to expect.
 
 ---
 
 ## Roadmap
 
-- **Phase 1, screens on sample data.** Done. Waiting for Mr Tito's review and real-phone checks.
+- **Phase 1, screens in memory (no demo data).** Done. Waiting for Mr Tito's review and real-phone checks.
 - **Phase 2, real data.** See [tasks/todo.md](tasks/todo.md) and
   [docs/ARCHITECTURE.md §10](docs/ARCHITECTURE.md#10-phase-2-target-architecture). Scope:
   - expo-sqlite store and outbox;

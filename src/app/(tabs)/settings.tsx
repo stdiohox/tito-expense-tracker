@@ -34,7 +34,7 @@ export default function Settings() {
           {settings.firstName || 'Your account'}
         </T>
         <T variant="sub" tone="onBrandSoft" numberOfLines={1}>
-          {settings.email || 'Preview build · sample data'}
+          {settings.email || 'No email yet'}
         </T>
       </ScreenHero>
       <View style={{ paddingHorizontal: space.l }}>
@@ -124,7 +124,7 @@ export default function Settings() {
       <View style={{ marginTop: space.xxl, alignItems: 'center', gap: space.s }}>
         <Wordmark align="center" />
         <T variant="caption" tone="inkMute" style={{ textAlign: 'center' }}>
-          Preview build · showing sample data
+          Preview build · your data stays until the app reloads
         </T>
       </View>
       </View>

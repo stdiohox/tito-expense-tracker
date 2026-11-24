@@ -4,10 +4,10 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type
 import { STARTER_CATEGORIES } from '@/domain/categories';
 import type { AppearanceMode, Category, CurrencyCode, Expense, SetupMode } from '@/domain/types';
 
-import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
 
 /*
- * Phase-1 store: in memory, seeded with sample data. Phase 2 replaces the backing with
+ * Phase-1 store: in memory and empty at launch (no demo data): the app opens signed out on the
+ * onboarding, and everything in it is what the tester enters. Phase 2 replaces the backing with
  * expo-sqlite (the single read source) plus an outbox that syncs to Supabase. Screens only
  * talk to the hooks below. Known phase-2 changes (see tasks/todo.md): async mutators with
  * a ready/error state, soft deletes with tombstones, and aggregates computed in SQL.
@@ -109,10 +109,10 @@ export const newId = (): string => Crypto.randomUUID();
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
-    expenses: sampleExpenses(),
-    categories: SAMPLE_CATEGORIES,
-    settings: { ...DEFAULT_SETTINGS, firstName: 'Ada', email: 'ada@example.com', mode: 'budgets' },
-    signedIn: true,
+    expenses: [],
+    categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
+    settings: { ...DEFAULT_SETTINGS },
+    signedIn: false,
   }));
   // Latest state for actions that must answer "did it exist?" without stale closures.
   const latest = useRef(state);

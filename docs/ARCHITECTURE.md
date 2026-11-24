@@ -5,7 +5,7 @@ How the app is built today (phase 1), why it is built that way, and the target d
 
 | | |
 |---|---|
-| **Applies to** | `main` at the phase-1 build (screens on sample data) |
+| **Applies to** | the phase-1 build (in memory, no demo data) |
 | **Last updated** | 2026-11-23 |
 | **Scope source** | `proposals/tito-expense-app/PLAN.md` in the Koret Tech repo. Decision D1 = **Track B**: Koret builds its own backend (2026-11-09). |
 | **Status key** | **Built**: in the code now. **Planned**: agreed in PLAN.md or `tasks/todo.md`, not built. **Proposed**: this document's recommendation, not yet decided. |
@@ -39,7 +39,7 @@ Nothing leaves the phone.
 ```mermaid
 flowchart LR
   user([Tito Finance user]) --> app["Tito Expenses app<br/>Expo / React Native<br/>iOS · Android · web preview"]
-  app --> mem[("In-memory store<br/>sample data")]
+  app --> mem[("In-memory store<br/>empty at launch")]
 ```
 
 ### Target (phase 2 and launch, planned)
@@ -109,7 +109,7 @@ flowchart TD
 |---|---|---|---|
 | **Routes** | `src/app/` | Screens and navigators. Each file is a route; `_layout.tsx` files define navigators. | everything below |
 | **Components** | `src/components/` | Reusable UI (`Row`, `Button`, `Field`, `T`, `PaceChart`, `Toast`, `ExpenseForm`, `ScreenHero`, `MonthSwitcher`, …) and small UI helpers (`nav.ts`, `announce.ts`, `tab-bar.ts`) | data, domain, theme |
-| **Data** | `src/data/` | State providers and hooks: `store.tsx`, `month.tsx`, `use-summary.ts`, `sample.ts` | domain |
+| **Data** | `src/data/` | State providers and hooks: `store.tsx`, `month.tsx`, `use-summary.ts` | domain |
 | **Domain** | `src/domain/` | Pure functions and types: `types.ts`, `dates.ts`, `money.ts`, `summary.ts`, `categories.ts` | only other domain files |
 | **Theme** | `src/theme/` | `tokens.ts` (palettes, category colours, spacing, radius, type), `use-theme.ts`, `web-focus.ts` | domain types only |
 
@@ -406,18 +406,12 @@ There are two exceptions:
 - the Expenses tab's per-day subtotals;
 - the category detail's own month totals.
 
-### 7.4 Sample data (`data/sample.ts`)
+### 7.4 Starting state (no demo data)
 
-A seeded linear congruential generator builds synthetic Lagos-style spending, so it looks the same
-on every launch:
-
-- two full past months, plus the current month up to today;
-- fixed rules: rent on the 1st, bills on fixed days, tithe on Sundays, random food and transport;
-- last month scaled 1.12×, so the pace line has something to show;
-- one USD expense, to show the "counted separately" behaviour;
-- budgets on Food (₦90k), Transport (₦45k) and Airtime (₦6k).
-
-No real person's spending is used.
+The store starts empty and signed out: no expenses, the twelve starter categories with no
+budgets, and `DEFAULT_SETTINGS`. The app opens on the onboarding slides, so testers create their own
+account (sign-up leads through setup) and every figure on screen is one they entered. The earlier
+synthetic sample generator (`data/sample.ts`) has been removed.
 
 ---
 
@@ -782,7 +776,7 @@ So nothing is compiled or mocked.
 | AD5 | **Hand-rolled `formatMoney`** instead of `Intl.NumberFormat` | Identical output on Hermes and the web | `Intl` (output differs by engine and locale data) |
 | AD6 | **Client-generated UUIDs** for expenses | Offline creation without server ids; idempotent retries | Server integer ids (as on the web) |
 | AD7 | **Charts with `react-native-svg`**, not Victory Native/Skia | Two simple charts; Skia needs extra WebAssembly setup for the web build | Victory Native (Skia), suggested in PLAN.md §7.1 |
-| AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for sample data; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
+| AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for phase 1; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
 | AD9 | **`Stack.Protected`** for auth gating | No back gesture into signed-out data | Redirects in `useEffect` |
 | AD10 | **Floating finance dock with `expo-router/ui`** on every platform (redesign, 2026-11-24) | The design calls for a custom dark bar, which the system tab bar can't do; one layout for all platforms | The system tab bar (`NativeTabs`), used until the redesign |
 | AD11 | **Redesign palette** (navy, royal, electric, icy, one mint pop) and **Outfit** | The redesign brief; Outfit's `tnum` gives tabular amounts | The earlier Tito indigo + Manrope/Fraunces look; the web tracker's monospace amounts |
@@ -798,7 +792,7 @@ So nothing is compiled or mocked.
 - Auth, reset, delete account, PDF, CSV, the reminder and the privacy policy are UI stubs (see the
   README).
 - `summarise()` scans every expense, and Reports calls it up to six times for the month-by-month
-  bars. This is fine for sample data. Phase 2 moves it to SQL.
+  bars. This is fine for a phase-1 month of data. Phase 2 moves it to SQL.
 - Only NGN and USD exist. PLAN.md §5.5 lists NGN, USD, EUR, GBP and CAD for settings.
 - Forms use local state and inline checks. PLAN.md §7.1 suggests react-hook-form + Zod. Decide
   before phase 2 whether the extra forms justify it.
