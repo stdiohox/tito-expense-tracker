@@ -30,9 +30,11 @@ export default function Settings() {
     <ScrollView
       style={{ backgroundColor: c.ground }}
       contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: clearance + space.xxl }}>
+      contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: insets.top, paddingBottom: clearance + space.xxl }}>
       <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <TabTitle title="Settings" />
+      <View style={{ paddingHorizontal: space.xs }}>
+        <TabTitle title="Settings" />
+      </View>
 
       <Group title="Account">
         <Item label="Name" value={settings.firstName} />
@@ -127,11 +129,11 @@ function Group({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <View style={{ marginTop: space.xxl }}>
       {title ? (
-        <T variant="headline" accessibilityRole="header" style={{ marginBottom: space.s }}>
+        <T variant="headline" accessibilityRole="header" style={{ marginBottom: space.s, paddingHorizontal: space.xs }}>
           {title}
         </T>
       ) : null}
-      <View style={{ backgroundColor: c.surface, borderRadius: radius.l, paddingHorizontal: space.l }}>{children}</View>
+      <View style={{ backgroundColor: c.surface, borderRadius: radius.xxl, paddingHorizontal: space.l }}>{children}</View>
     </View>
   );
 }
