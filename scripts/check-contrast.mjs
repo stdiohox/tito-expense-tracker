@@ -75,9 +75,9 @@ for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) 
   check(`${scheme} focusRing on ground (non-text)`, p.focusRing, p.ground, 3);
   check(`${scheme} focusRing on surface (non-text)`, p.focusRing, p.surface, 3);
 
-  // The brand gradient, and glass cards on it (navy tint at glass.tint over every sample).
+  // The brand gradient, and frosted glass on it: navy tint at glass.tint, then white frost at glass.frost.
   const pts = gradient(p, scheme);
-  const glassPts = pts.map((bg) => mix(p.glassTint, bg, glass.tint[scheme]));
+  const glassPts = pts.map((bg) => mix(p.glassEdge, mix(p.glassTint, bg, glass.tint[scheme]), glass.frost[scheme]));
   check(`${scheme} onBrand on brand (solid fallback)`, p.onBrand, p.brand, 4.5);
   worst(`${scheme} onBrand on brand gradient`, p.onBrand, pts, 4.5);
   worst(`${scheme} onBrandSoft on brand gradient`, p.onBrandSoft, pts, 4.5);

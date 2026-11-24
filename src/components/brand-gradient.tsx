@@ -9,14 +9,14 @@ import { useTheme } from '@/theme/use-theme';
  * The brand surface (Home header, onboarding): a static diagonal gradient, deep navy (top left)
  * through royal blue to electric blue (bottom right), with two soft light highlights: an icy-blue
  * glow in the top-right corner and a faint white sheen bottom-left. With `fade`, a band at the
- * bottom melts into brandFade (icy blue in light mode, the navy ground in dark); BrandGradient adds
+ * bottom melts into brandFade (icy blue in light mode, the navy ground in dark) or `fadeTo`; BrandGradient adds
  * that band's height below its children, so no content ever sits on it.
  * Never animated. scripts/check-contrast.mjs samples this exact geometry; keep the two in step.
  *
  * Only SVG props go on <Svg>: on the web, react-native-svg forwards every prop to the DOM <svg>.
  * Screen-reader hiding and touch pass-through live on the wrapping View.
  */
-export function BrandGradient({ style, children, fade, ...rest }: ViewProps & { fade?: boolean }) {
+export function BrandGradient({ style, children, fade, fadeTo, ...rest }: ViewProps & { fade?: boolean; fadeTo?: string }) {
   const { c, scheme } = useTheme();
   // Gradient ids are global in the web DOM; useId keeps two instances apart (minus its colons).
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
@@ -53,8 +53,8 @@ export function BrandGradient({ style, children, fade, ...rest }: ViewProps & { 
                 <Stop offset="1" stopColor={c.onBrand} stopOpacity={0} />
               </RadialGradient>
               <LinearGradient id={`${id}fade`} x1="0%" y1="0%" x2="0%" y2="100%">
-                <Stop offset="0" stopColor={c.brandFade} stopOpacity={0} />
-                <Stop offset="1" stopColor={c.brandFade} stopOpacity={1} />
+                <Stop offset="0" stopColor={fadeTo ?? c.brandFade} stopOpacity={0} />
+                <Stop offset="1" stopColor={fadeTo ?? c.brandFade} stopOpacity={1} />
               </LinearGradient>
             </Defs>
             <Rect x={0} y={0} width={size.w} height={size.h} fill={`url(#${id}base)`} />

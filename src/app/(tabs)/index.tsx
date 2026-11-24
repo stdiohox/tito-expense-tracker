@@ -26,12 +26,25 @@ import { addMonths, daysInMonth, dayOfMonth, monthName, shortDay, shortMonth } f
 import { CURRENCIES, formatMoney } from '@/domain/money';
 import { budgetFor, compareWords, pace } from '@/domain/summary';
 import type { CurrencyCode } from '@/domain/types';
-import { radius, space } from '@/theme/tokens';
-import { useTheme } from '@/theme/use-theme';
+import { light, space } from '@/theme/tokens';
+import { AppearanceProvider, useTheme } from '@/theme/use-theme';
 
 const CARD_WIDTH = 230;
 
+/**
+ * Home is the brand scene in both modes, like the onboarding: a bright gradient header that flows
+ * into a deep navy body of dark panels. The header renders with the light palette (the brighter
+ * gradient and its checked text pairs); everything else with the dark palette.
+ */
 export default function Home() {
+  return (
+    <AppearanceProvider mode="dark">
+      <HomeScreen />
+    </AppearanceProvider>
+  );
+}
+
+function HomeScreen() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const clearance = useTabBarClearance();
@@ -97,9 +110,8 @@ export default function Home() {
         onScroll={fab.onScroll}
         scrollEventThrottle={64}
         contentContainerStyle={{ paddingBottom: clearance + 88 }}>
-        <BrandGradient
-          fade
-          style={{ paddingTop: insets.top + space.s, borderBottomLeftRadius: radius.xxl, borderBottomRightRadius: radius.xxl }}>
+        <AppearanceProvider mode="light">
+        <BrandGradient fade fadeTo={c.ground} style={{ paddingTop: insets.top + space.s }}>
           <View style={{ paddingHorizontal: space.xl }}>
             <T variant="title" tone="onBrand" accessibilityRole="header" style={{ marginTop: space.s }}>
               {settings.firstName ? `Hello, ${settings.firstName}` : 'Hello'}
@@ -139,8 +151,8 @@ export default function Home() {
                   style={{ flexDirection: 'row', gap: space.l, marginTop: space.s }}
                   importantForAccessibility="no-hide-descendants"
                   accessibilityElementsHidden>
-                  <Legend color={c.chartLine} label={thisName} />
-                  <Legend color={c.chartGhost} label={lastName} dashed />
+                  <Legend color={light.chartLine} label={thisName} />
+                  <Legend color={light.chartGhost} label={lastName} dashed />
                 </View>
               </View>
             ) : null}
@@ -160,30 +172,31 @@ export default function Home() {
                     i === 0 ? (paceBadge ? `, ${paceBadge.replace('vs', 'compared with')}` : '') : ', counted separately'
                   }`}
                   style={{ gap: space.xs }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <T variant="caption" tone="onBrandSoft">
-                      {CURRENCIES[card.code].symbol} {card.code}
+                  <T variant="caption" tone="onBrandSoft">
+                    {CURRENCIES[card.code].symbol} {card.code}
+                  </T>
+                  <T variant="title" tone="onBrand" numeric numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ marginTop: space.l }}>
+                    {formatMoney(card.total, card.code)}
+                  </T>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.s }}>
+                    <T variant="sub" tone="onBrandSoft" style={{ flexShrink: 1 }}>
+                      {card.count} {card.count === 1 ? 'payment' : 'payments'}
+                      {i === 0 ? '' : ' · counted separately'}
                     </T>
                     {i === 0 && paceBadge ? (
-                      <T variant="caption" numeric style={{ color: c.pop }}>
+                      <T variant="caption" numeric style={{ color: light.pop }}>
                         {paceBadge}
                       </T>
                     ) : null}
                   </View>
-                  <T variant="title" tone="onBrand" numeric numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-                    {formatMoney(card.total, card.code)}
-                  </T>
-                  <T variant="sub" tone="onBrandSoft">
-                    {card.count} {card.count === 1 ? 'payment' : 'payments'}
-                    {i === 0 ? '' : ' · counted separately'}
-                  </T>
                 </View>
               </GlassCard>
             ))}
           </ScrollView>
         </BrandGradient>
+        </AppearanceProvider>
 
-        <View style={{ paddingHorizontal: space.l, gap: space.l, marginTop: space.l }}>
+        <View style={{ paddingHorizontal: space.l, gap: space.l, marginTop: space.s }}>
           <Panel dark title="Quick add">
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -space.xs, marginTop: space.s, marginBottom: space.s }}>
               {quick.map((cat) => (

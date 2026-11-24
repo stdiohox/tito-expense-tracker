@@ -179,10 +179,15 @@ export const brandGradient = {
   fade: 28,
 } as const;
 
-/** Opacity of the glass tint and of its edge, per scheme. */
+/**
+ * Frosted glass on the gradient: a navy tint, then a white frost over it, and a light edge.
+ * 10% frost is the most that keeps white, soft and mint text at AA over every point of the
+ * gradient (check-contrast.mjs); the frosted look also comes from the edge and a top highlight.
+ */
 export const glass = {
-  tint: { light: 0.3, dark: 0.32 },
-  edge: { light: 0.22, dark: 0.18 },
+  tint: { light: 0.25, dark: 0.3 },
+  frost: { light: 0.1, dark: 0.1 },
+  edge: { light: 0.32, dark: 0.28 },
 } as const;
 
 /** Category icon colour per scheme; the disc behind it is the same hue at low alpha. */
