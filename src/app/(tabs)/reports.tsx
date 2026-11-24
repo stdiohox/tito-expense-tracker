@@ -7,7 +7,9 @@ import { Button } from '@/components/button';
 import { FocusStatusBar } from '@/components/focus-status-bar';
 import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
-import { Row, SectionHeader } from '@/components/row';
+import { Panel } from '@/components/panel';
+import { Row } from '@/components/row';
+import { StatCard, StatRow } from '@/components/stat-card';
 import { TabTitle } from '@/components/tab-title';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
@@ -60,65 +62,84 @@ export default function Reports() {
     headline = word === 'same' ? `About the same as ${when}` : `${formatMoney(Math.abs(vsLast.d), cur)} ${word} than ${when}`;
   }
 
+  const deltaPct = vsLast && vsLast.base > 0 ? Math.round((vsLast.d / vsLast.base) * 100) : null;
+
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
       <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: clearance + space.xxl }}>
-        <TabTitle title="Reports">
-          <MonthSwitcher />
-        </TabTitle>
-
-        <View style={{ marginTop: space.m, gap: space.xs }}>
-          <T variant="total" numeric adjustsFontSizeToFit numberOfLines={1} minimumFontScale={0.6}>
-            {formatMoney(now.total, cur)}
-          </T>
-          <T variant="body" tone="inkSoft">
-            {headline}
-          </T>
+        contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: insets.top, paddingBottom: clearance + space.xxl, gap: space.m }}>
+        <View style={{ paddingHorizontal: space.xs }}>
+          <TabTitle title="Reports">
+            <MonthSwitcher />
+          </TabTitle>
         </View>
 
-        <SectionHeader title="By category" />
-        {now.byCategory.length === 0 ? (
-          <T variant="sub" tone="inkMute">
-            Nothing logged in {monthName(month)}.
-          </T>
-        ) : (
-          now.byCategory.map((b, i) => {
-            const prev = before.byCategory.find((x) => x.category.id === b.category.id)?.total ?? 0;
-            const diff = b.total - prev;
-            const pct = Math.round((b.total / now.total) * 100);
-            const word = compareWords(diff, prev, cur);
-            const sub =
-              prev === 0
-                ? `${pct}% · none in ${lastName}`
-                : word === 'same'
-                  ? `${pct}% · same as ${lastShort}`
-                  : `${pct}% · ${formatMoney(Math.abs(diff), cur, { compact: true })} ${word} than ${lastShort}`;
-            return (
-              <Row
-                key={b.category.id}
-                leading={<IconDisc icon={b.category.icon} size={36} />}
-                title={b.category.name}
-                subtitle={sub}
-                trailing={formatMoney(b.total, cur)}
-                accessibilityLabel={`${b.category.name}, ${formatMoney(b.total, cur)}, ${sub.replace(' · ', ' of the month, ')}`}
-                divider={i < now.byCategory.length - 1}
-              />
-            );
-          })
-        )}
+        <Panel>
+          <View style={{ paddingVertical: space.m, gap: space.xs }}>
+            <T variant="total" numeric adjustsFontSizeToFit numberOfLines={1} minimumFontScale={0.6}>
+              {formatMoney(now.total, cur)}
+            </T>
+            <T variant="body" tone="inkSoft">
+              {headline}
+            </T>
+          </View>
+        </Panel>
+
+        <StatRow>
+          <StatCard
+            label={`Compared with ${lastShort}`}
+            value={deltaPct === null ? '—' : `${deltaPct > 0 ? '+' : deltaPct < 0 ? '−' : ''}${Math.abs(deltaPct)}%`}
+            note={deltaPct === null ? `No spending in ${lastName}` : isCurrent ? 'By this day of the month' : 'Whole month'}
+          />
+          <StatCard
+            label="Monthly average"
+            value={past.length ? formatMoney(avg, cur, { compact: true }) : '—'}
+            note={past.length ? `Over ${past.length} ${past.length === 1 ? 'month' : 'months'} before ${monthName(month)}` : 'Builds up month by month'}
+          />
+        </StatRow>
+
+        <Panel title="By category">
+          {now.byCategory.length === 0 ? (
+            <T variant="sub" tone="inkMute" style={{ paddingVertical: space.m }}>
+              Nothing logged in {monthName(month)}.
+            </T>
+          ) : (
+            now.byCategory.map((b, i) => {
+              const prev = before.byCategory.find((x) => x.category.id === b.category.id)?.total ?? 0;
+              const diff = b.total - prev;
+              const pct = Math.round((b.total / now.total) * 100);
+              const word = compareWords(diff, prev, cur);
+              const sub =
+                prev === 0
+                  ? `${pct}% · none in ${lastName}`
+                  : word === 'same'
+                    ? `${pct}% · same as ${lastShort}`
+                    : `${pct}% · ${formatMoney(Math.abs(diff), cur, { compact: true })} ${word} than ${lastShort}`;
+              return (
+                <Row
+                  key={b.category.id}
+                  leading={<IconDisc icon={b.category.icon} size={36} />}
+                  title={b.category.name}
+                  subtitle={sub}
+                  trailing={formatMoney(b.total, cur)}
+                  accessibilityLabel={`${b.category.name}, ${formatMoney(b.total, cur)}, ${sub.replace(' · ', ' of the month, ')}`}
+                  divider={i < now.byCategory.length - 1}
+                />
+              );
+            })
+          )}
+        </Panel>
 
         {history.length > 1 ? (
-          <>
-            <SectionHeader title="Month by month" />
-            <T variant="sub" tone="inkSoft">
+          <Panel title="Month by month">
+            <T variant="sub" tone="inkSoft" style={{ marginTop: space.xs }}>
               {past.length
                 ? `Average ${formatMoney(avg, cur)} a month before ${monthName(month)}${isCurrent ? `. ${monthName(month)} isn’t over yet.` : '.'}`
                 : 'Your monthly totals build up here.'}
             </T>
-            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-evenly', gap: space.m, height: 160, marginTop: space.l }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-evenly', gap: space.m, height: 160, marginTop: space.l, marginBottom: space.m }}>
               {history.map((h) => {
                 const isSel = h.month === month;
                 return (
@@ -136,7 +157,7 @@ export default function Reports() {
                       style={{
                         width: '100%',
                         height: `${Math.max(3, (h.total / maxHist) * 70)}%`,
-                        backgroundColor: isSel ? c.button : c.barMuted,
+                        backgroundColor: isSel ? c.accent : c.barMuted,
                         borderRadius: radius.s,
                       }}>
                       {/* The mint "crown" on the selected month: decorative; the fill and the
@@ -155,10 +176,10 @@ export default function Reports() {
                 );
               })}
             </View>
-          </>
+          </Panel>
         ) : null}
 
-        <View style={{ marginTop: space.xxxl }}>
+        <View style={{ marginTop: space.s }}>
           <Button
             label={`Share ${monthName(month)} as PDF`}
             variant="secondary"
