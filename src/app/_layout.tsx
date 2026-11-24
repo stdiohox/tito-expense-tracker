@@ -10,7 +10,7 @@ import {
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -18,8 +18,8 @@ import { ToastProvider } from '@/components/toast';
 import { MonthProvider } from '@/data/month';
 import { StoreProvider, useStore } from '@/data/store';
 import { fonts } from '@/theme/tokens';
-import '@/theme/web-focus';
-import { useTheme } from '@/theme/use-theme';
+import { AppearanceProvider, useTheme } from '@/theme/use-theme';
+import { applyWebFocusRing } from '@/theme/web-focus';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -35,13 +35,47 @@ export default function RootLayout() {
     Manrope_800ExtraBold,
     Fraunces_600SemiBold,
   });
-  const { c, scheme } = useTheme();
 
   useEffect(() => {
     if (loaded || error) SplashScreen.hideAsync().catch(() => {});
   }, [loaded, error]);
 
   if (!loaded && !error) return null;
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StoreProvider>
+          <ThemedApp />
+        </StoreProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+/**
+ * Applies the Appearance setting. Our own colours follow it through AppearanceProvider; on iOS and
+ * Android, Appearance.setColorScheme also makes native UI follow it (tab bar, switches, sheets,
+ * keyboard). "unspecified" hands control back to the phone. react-native-web has no override, and
+ * there AppearanceProvider alone covers every colour the app draws.
+ */
+function ThemedApp() {
+  const { appearance } = useStore().settings;
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    Appearance.setColorScheme(appearance === 'system' ? 'unspecified' : appearance);
+  }, [appearance]);
+  return (
+    <AppearanceProvider mode={appearance}>
+      <Navigation />
+    </AppearanceProvider>
+  );
+}
+
+function Navigation() {
+  const { c, scheme } = useTheme();
+
+  useEffect(() => applyWebFocusRing(scheme), [scheme]);
 
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navTheme = {
@@ -68,19 +102,13 @@ export default function RootLayout() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ThemeProvider value={navTheme}>
-          <StoreProvider>
-            <MonthProvider>
-              <ToastProvider>
-                <Routes screenOptions={screenOptions} sheet={sheet} />
-              </ToastProvider>
-            </MonthProvider>
-          </StoreProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ThemeProvider value={navTheme}>
+      <MonthProvider>
+        <ToastProvider>
+          <Routes screenOptions={screenOptions} sheet={sheet} />
+        </ToastProvider>
+      </MonthProvider>
+    </ThemeProvider>
   );
 }
 

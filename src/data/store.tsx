@@ -2,7 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 
 import { STARTER_CATEGORIES } from '@/domain/categories';
-import type { Category, CurrencyCode, Expense } from '@/domain/types';
+import type { AppearanceMode, Category, CurrencyCode, Expense } from '@/domain/types';
 
 import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
 
@@ -15,6 +15,7 @@ import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
 
 export type Settings = {
   currency: CurrencyCode;
+  appearance: AppearanceMode;
   reminderOn: boolean;
   reminderTime: string;
   firstName: string;
@@ -24,6 +25,7 @@ export type Settings = {
 /** A fresh account's settings. Deleting the account returns to these. */
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'NGN',
+  appearance: 'system',
   reminderOn: true,
   reminderTime: '20:00',
   firstName: '',

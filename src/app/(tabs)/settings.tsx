@@ -6,14 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FocusStatusBar } from '@/components/focus-status-bar';
 import { STROKE } from '@/components/icons';
+import { Segmented } from '@/components/segmented';
 import { switchColors } from '@/components/switch-colors';
 import { TabTitle } from '@/components/tab-title';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
 import { useActions, useStore } from '@/data/store';
 import { CURRENCIES } from '@/domain/money';
-import type { CurrencyCode } from '@/domain/types';
-import { TARGET, radius, space } from '@/theme/tokens';
+import type { AppearanceMode, CurrencyCode } from '@/domain/types';
+import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export default function Settings() {
@@ -41,29 +42,38 @@ export default function Settings() {
           <T variant="bodyStrong" importantForAccessibility="no">
             Main currency
           </T>
-          <View accessibilityRole="radiogroup" accessibilityLabel="Main currency" style={{ flexDirection: 'row', backgroundColor: c.ground, borderRadius: radius.pill, padding: 2 }}>
-            {(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => {
-              const on = settings.currency === code;
-              return (
-                <Pressable
-                  key={code}
-                  onPress={() => updateSettings({ currency: code })}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on, selected: on }}
-                  accessibilityLabel={`${CURRENCIES[code].symbol} ${CURRENCIES[code].name}`}
-                  style={{ flex: 1, minHeight: TARGET, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.surface : 'transparent' }}>
-                  <T variant="sub" tone={on ? 'ink' : 'inkMute'}>
-                    {CURRENCIES[code].symbol} {CURRENCIES[code].name}
-                  </T>
-                </Pressable>
-              );
-            })}
-          </View>
+          <Segmented
+            label="Main currency"
+            value={settings.currency}
+            onChange={(currency) => updateSettings({ currency })}
+            options={(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => ({
+              key: code,
+              label: `${CURRENCIES[code].symbol} ${CURRENCIES[code].name}`,
+            }))}
+          />
           <T variant="sub" tone="inkMute">
             Totals use this currency. Saved expenses keep the currency you entered them in, and budgets keep the currency you set them in.
           </T>
         </View>
         <Item label="Categories and budgets" onPress={() => router.push('/categories')} last />
+      </Group>
+
+      <Group title="Appearance">
+        <View style={{ paddingVertical: space.m, gap: space.s }}>
+          <Segmented<AppearanceMode>
+            label="Appearance"
+            value={settings.appearance}
+            onChange={(appearance) => updateSettings({ appearance })}
+            options={[
+              { key: 'system', label: 'System', a11yLabel: 'System, follows your phone' },
+              { key: 'light', label: 'Light' },
+              { key: 'dark', label: 'Dark' },
+            ]}
+          />
+          <T variant="sub" tone="inkMute">
+            System follows your phone’s light or dark setting.
+          </T>
+        </View>
       </Group>
 
       <Group title="Reminder">

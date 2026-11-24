@@ -1,5 +1,8 @@
 export type CurrencyCode = 'NGN' | 'USD';
 
+/** Light or dark: follow the phone ("system") or force one. */
+export type AppearanceMode = 'system' | 'light' | 'dark';
+
 /** A month in the user's local calendar, e.g. "2026-11". */
 export type MonthKey = `${number}-${string}`;
 
