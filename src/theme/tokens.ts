@@ -3,9 +3,11 @@ import { Platform } from 'react-native';
 import type { CategoryIcon } from '@/domain/types';
 
 /*
- * Tito Finance brand: indigo #272c77 (primary), clay #C75D3F and gold #C89B3C (supporting).
- * Light ground is a cool near-white leaning to the indigo hue, not the web tracker's cream.
- * Every text colour here is checked by scripts/check-contrast.mjs (WCAG AA).
+ * Tito Finance palette: navy #0B1B3F, Tito indigo #272C77 (brand and primary buttons), French blue
+ * #2F5DA8 (links and accents), sky blue #8EC9F0 (glow and the pace line), champagne ivory #F6EFE2
+ * (light ground), gold #C89B3C (the one "crown" pop, small marks only) and burgundy #7A1F3D (over
+ * budget and errors, always with words). Dark mode is built on the navy.
+ * Every text and indicator pair here is checked by scripts/check-contrast.mjs (WCAG AA).
  */
 
 export type Palette = {
@@ -31,11 +33,12 @@ export type Palette = {
   onButton: string;
   buttonPressed: string;
   accentTint: string;
-  /** "Today" marker only. */
+  /** The "crown": small highlights and active marks only, never a large fill. Decorative on light grounds. */
   gold: string;
-  /** Budget passed. Never used as an alarm red. */
-  clay: string;
-  clayTint: string;
+  /** Gold lifted to 3:1 on the brand header, for the pace chart's "today" dot. */
+  goldOnBrand: string;
+  /** Budget passed. Always paired with words; never an alarm red. */
+  burgundy: string;
   positive: string;
   danger: string;
   dangerTint: string;
@@ -43,8 +46,6 @@ export type Palette = {
   barMuted: string;
   chartLine: string;
   chartGhost: string;
-  chartFill: string;
-  scrim: string;
   /** Snackbar background, its text and its action ("Undo"). */
   toast: string;
   onToast: string;
@@ -61,81 +62,77 @@ export type Palette = {
 };
 
 export const light: Palette = {
-  ground: '#F5F6FB',
-  surface: '#FFFFFF',
-  raised: '#FFFFFF',
-  ink: '#14163A',
-  inkSoft: '#43476A',
-  inkMute: '#5E6283',
-  line: '#E3E5F0',
-  fieldBorder: '#878BA5',
-  switchOff: '#878BA5',
+  ground: '#F6EFE2',
+  surface: '#FFFDF8',
+  raised: '#FFFDF8',
+  ink: '#0B1B3F',
+  inkSoft: '#424F70',
+  inkMute: '#5E6A88',
+  line: '#E7DFD0',
+  fieldBorder: '#838796',
+  switchOff: '#838796',
   brand: '#272C77',
   onBrand: '#FFFFFF',
-  onBrandSoft: '#C8CBF0',
-  accent: '#2F359A',
+  onBrandSoft: '#C4E0F5',
+  accent: '#2F5DA8',
   button: '#272C77',
   onButton: '#FFFFFF',
   buttonPressed: '#1D2160',
-  accentTint: '#EBECF8',
-  gold: '#E0B04C',
-  clay: '#A4462A',
-  clayTint: '#F8E7E1',
+  accentTint: '#E3EBF7',
+  gold: '#C89B3C',
+  goldOnBrand: '#D5B36B',
+  burgundy: '#7A1F3D',
   positive: '#2B6E47',
-  danger: '#A4462A',
-  dangerTint: '#F8E7E1',
-  barMuted: '#8589B8',
-  chartLine: '#FFFFFF',
+  danger: '#7A1F3D',
+  dangerTint: '#F5E3E8',
+  barMuted: '#6C88BA',
+  chartLine: '#8EC9F0',
   chartGhost: 'rgba(255,255,255,0.45)',
-  chartFill: 'rgba(255,255,255,0.16)',
-  scrim: 'rgba(20,22,58,0.4)',
-  toast: '#14163A',
+  toast: '#0B1B3F',
   onToast: '#FFFFFF',
-  toastAction: '#C8CBF0',
+  toastAction: '#8EC9F0',
   onWelcomeButton: '#272C77',
   thumb: '#FFFFFF',
-  fabShadow: '#0D0E22',
+  fabShadow: '#0B1B3F',
   toastShadow: '#000000',
-  focusRing: '#2F359A',
+  focusRing: '#2F5DA8',
 };
 
 export const dark: Palette = {
-  ground: '#0D0E22',
-  surface: '#16183A',
-  raised: '#1E2148',
-  ink: '#F1F2FA',
-  inkSoft: '#BEC1DB',
-  inkMute: '#9A9EBE',
-  line: '#2A2D58',
-  fieldBorder: '#63678C',
-  switchOff: '#63678C',
+  ground: '#0B1B3F',
+  surface: '#122752',
+  raised: '#1A3262',
+  ink: '#F6EFE2',
+  inkSoft: '#ADB4C5',
+  inkMute: '#8992AD',
+  line: '#1F3363',
+  fieldBorder: '#667599',
+  switchOff: '#667599',
   brand: '#1E2263',
   onBrand: '#FFFFFF',
-  onBrandSoft: '#B9BDEB',
-  accent: '#AEB3FF',
+  onBrandSoft: '#B4D3EE',
+  accent: '#8EC9F0',
   button: '#AEB3FF',
-  onButton: '#14163A',
+  onButton: '#0B1B3F',
   buttonPressed: '#9198F2',
-  accentTint: '#262A5E',
-  gold: '#E7BE62',
-  clay: '#F0947B',
-  clayTint: '#3A2430',
+  accentTint: '#1C3A6B',
+  gold: '#C89B3C',
+  goldOnBrand: '#C89B3C',
+  burgundy: '#E58AA3',
   positive: '#86D0A4',
-  danger: '#F0947B',
-  dangerTint: '#3A2430',
-  barMuted: '#5E63A0',
-  chartLine: '#FFFFFF',
+  danger: '#E58AA3',
+  dangerTint: '#3A1830',
+  barMuted: '#4A6B99',
+  chartLine: '#8EC9F0',
   chartGhost: 'rgba(255,255,255,0.4)',
-  chartFill: 'rgba(174,179,255,0.18)',
-  scrim: 'rgba(0,0,0,0.55)',
-  toast: '#1E2148',
+  toast: '#1A3262',
   onToast: '#FFFFFF',
-  toastAction: '#C8CBF0',
+  toastAction: '#8EC9F0',
   onWelcomeButton: '#272C77',
   thumb: '#FFFFFF',
-  fabShadow: '#0D0E22',
+  fabShadow: '#000000',
   toastShadow: '#000000',
-  focusRing: '#AEB3FF',
+  focusRing: '#8EC9F0',
 };
 
 /** Category icon colour per scheme; the disc behind it is the same hue at low alpha. */

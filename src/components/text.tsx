@@ -5,7 +5,7 @@ import { useTheme } from '@/theme/use-theme';
 import type { Palette } from '@/theme/tokens';
 
 type Role = keyof typeof type;
-type Tone = 'ink' | 'inkSoft' | 'inkMute' | 'accent' | 'onBrand' | 'onBrandSoft' | 'clay' | 'positive' | 'danger' | 'onButton';
+type Tone = 'ink' | 'inkSoft' | 'inkMute' | 'accent' | 'onBrand' | 'onBrandSoft' | 'burgundy' | 'positive' | 'danger' | 'onButton';
 
 export function T({
   variant = 'body',

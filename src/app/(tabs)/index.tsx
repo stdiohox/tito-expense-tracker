@@ -140,7 +140,7 @@ export default function Home() {
                     subtitle={
                       budget !== null ? (
                         <View>
-                          <T variant="sub" tone={over ? 'clay' : 'inkMute'} numeric>
+                          <T variant="sub" tone={over ? 'burgundy' : 'inkMute'} numeric>
                             {over
                               ? `${formatMoney(total - budget, cur)} over the ${formatMoney(budget, cur, { compact: true })} budget`
                               : `${formatMoney(budget - total, cur)} left of ${formatMoney(budget, cur, { compact: true })}`}

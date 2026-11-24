@@ -96,7 +96,7 @@ export default function CategoryDetail() {
                 </T>
               </View>
               <BudgetBar spent={total} budget={budget} />
-              <T variant="sub" tone={over ? 'clay' : 'inkSoft'} style={{ marginTop: space.s }}>
+              <T variant="sub" tone={over ? 'burgundy' : 'inkSoft'} style={{ marginTop: space.s }}>
                 {over
                   ? `${formatMoney(total - budget, cur)} over budget. That's fine; it helps to know.`
                   : `${formatMoney(budget - total, cur)} left this month`}
