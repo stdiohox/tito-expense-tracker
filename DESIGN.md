@@ -156,8 +156,8 @@ components:
     backgroundColor: "{colors.surface-dark}"
     rounded: "{rounded.xxl}"
   glass-card:
-    backgroundColor: "navy at 30% (32% dark)"
-    border: "1px white at 22% (18% dark)"
+    backgroundColor: "navy at 25% (30% dark), then white frost at 10%"
+    border: "1px white at 32% (28% dark)"
     rounded: "{rounded.xl}"
     padding: "16px"
   stat-card:
@@ -191,14 +191,14 @@ components:
 
 **Creative North Star: "Your month as a pace, in deep blue"**
 
-The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue gradient header holds the one number that matters (what you have spent so far), a soft icy pace line against last month, and glass cards for each currency. Below it the app is calm and orderly: rounded panels, a dark Quick add panel for logging in one tap, budget cards in two columns, and a floating dark tab bar. The look borrows the general language of premium blue finance apps (gradients, glass, dark panels) and builds it from our own components and SVG shapes; it copies no specific design or artwork.
+The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue gradient header holds the one number that matters (what you have spent so far), a soft icy pace line against last month, and glass cards for each currency. Below it the app is calm and orderly: rounded panels, a dark Quick add panel for logging in one tap, budget cards in two columns, and a dark tab bar docked to the bottom edge. The look borrows the general language of premium blue finance apps (gradients, glass, dark panels) and builds it from our own components and SVG shapes; it copies no specific design or artwork.
 
 Colour is rationed. Royal blue is the brand and the primary action; electric blue marks links, the active tab and progress; icy blue lightens; aqua mint is the one pop, used sparingly and only on dark or blue surfaces; burgundy marks a passed budget or an error, always with words. Type is Outfit throughout, with tabular figures on every amount. One look ships on iOS, Android and the web build.
 
 **Key Characteristics:**
 - A static navy → royal → electric gradient on the Home header and the onboarding slides only.
-- Rounded panels (28px) on a light icy-white ground, or on deep navy in dark mode; Quick add, Latest and the tab bar are dark panels in both modes.
-- Glass cards on the gradient: a translucent navy tint with a thin light edge, no blur.
+- Home is the brand scene in both modes: the bright gradient header flows into a deep navy body of dark panels. Other screens use rounded panels on the icy-white ground (light) or deep navy (dark), following the Appearance setting.
+- Frosted glass cards on the gradient: a navy tint with a white frost, a light edge and a top highlight, no blur.
 - One full-width primary button per task screen; the floating "Add expense" pill on Home and Expenses.
 - Light and dark are designed pairs; every text pair meets WCAG AA and every indicator 3:1.
 
@@ -260,7 +260,7 @@ Sizes scale with the OS text size up to 2× (1.5× for the amount input, 1.6× f
 
 ## Layout
 
-A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Home: the gradient header (greeting, month switcher, total, pace line, chart, glass currency cards) with rounded bottom corners, then Quick add, Budgets (two columns), Where it went (top five) and Latest. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The floating tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
+A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Home: the gradient header (greeting, month switcher, total, pace line, chart, glass currency cards) fading into a deep navy body, then Quick add, Budgets (two columns), Where it went (top five) and Latest, all as dark panels and cards in both modes. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The docked tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
 
 ## Elevation & Depth
 
@@ -277,12 +277,12 @@ Round and soft. Panels 28px; cards, glass cards and budget cards 20px; fields, t
 - **Secondary:** Blue Mist with electric label. **Danger:** burgundy tint with burgundy label. **Plain:** transparent, electric label.
 - **Onboarding:** a white pill with a royal label on the gradient; Next, then Create an account.
 
-### Floating tab bar
-A rounded (28px) dark panel 64px tall, floating 12px above the bottom safe area and 16px in from each side, in both modes. Icon over label; the active tab in electric (#7693EF on the dark bar), the others in Ink Mute. It steps aside while the keyboard is open. Built with expo-router/ui on every platform.
+### Tab bar
+A dark bar docked to the bottom edge in both modes: full width, 64px tall plus the bottom safe area, with 28px rounded top corners. Icon over label; the active tab in electric (#7693EF on the dark bar), the others in Ink Mute. It steps aside while the keyboard is open. Built with expo-router/ui on every platform.
 
 ### Panels and cards
 - **Panel:** 28px corners, surface fill, an optional title row with an action on the right. A **dark panel** renders its contents in the dark palette in both modes (Quick add, Latest).
-- **Glass card:** on the gradient only: navy tint at 30% (32% dark), a 1px white edge at 22% (18%), 20px corners. A translucent fill rather than a blur, so it looks the same in Expo Go, on Android and on the web; the tint darkens what is behind it, which keeps white text on it above AA.
+- **Glass card:** on the gradient only: navy tint at 25%, then a white frost at 10% (the most that keeps white, soft and mint text at AA over the whole gradient), a 1px white edge at 32%, a brighter highlight along the top and a small decorative two-circle mark top-right; 20px corners. A translucent fill rather than a blur, so it looks the same in Expo Go, on Android and on the web; the tint darkens what is behind it, which keeps white text on it above AA.
 - **Stat card:** a label, a figure and a short note, in 2-column rows.
 - **Budget card:** icon disc and % badge, the name, "spent / budget", a slim bar, and "left" or "over" in words.
 - **Badge:** a small pill with a figure: teal on mint-white (mint on dark teal in dark mode); burgundy on its tint when over.

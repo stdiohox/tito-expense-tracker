@@ -71,7 +71,7 @@ owner of that backend provides an export (PLAN.md §7.2, Track B).
 | Framework | Expo SDK 58, React Native 0.88, React 19.3 | Built |
 | Language | TypeScript 6, `strict: true`, path alias `@/*` → `src/*` | Built |
 | Compiler | React Compiler (`experiments.reactCompiler` in `app.json`) | Built |
-| Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `expo-router/ui` tabs with a floating bar | Built |
+| Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `expo-router/ui` tabs with a docked dark bar | Built |
 | State | React Context + `useReducer` (in memory) | Built; replaced in phase 2 |
 | Charts | `react-native-svg`, hand-drawn (pace line, bars) | Built |
 | Animation | `react-native-reanimated` 4 (toast, Add button), honours Reduce Motion | Built |
@@ -161,7 +161,7 @@ somewhere sensible.
 ```
 Stack (root)
 ├─ Protected guard = signedIn
-│  ├─ (tabs)                 expo-router/ui tabs, floating dark bar on every platform
+│  ├─ (tabs)                 expo-router/ui tabs, docked dark bar on every platform
 │  │  ├─ index      Home
 │  │  ├─ expenses   Expenses
 │  │  ├─ reports    Reports
@@ -189,9 +189,11 @@ Stack (root)
   The web stack has no form sheet, so the same options choose `card` when `Platform.OS === 'web'`.
 - **Tabs are sections, not actions.** Adding an expense is the floating `AddButton`, not a tab
   (DESIGN.md, Layout).
-- **Floating tab bar.** `(tabs)/_layout.tsx` uses `expo-router/ui` (`Tabs`, `TabList`,
-  `TabTrigger`, `TabSlot`) to draw one floating, rounded dark bar on iOS, Android and the web. The
-  system tab bar can't float, so `NativeTabs` was dropped in the redesign. The bar overlays the
+- **Docked tab bar.** `(tabs)/_layout.tsx` uses `expo-router/ui` (`Tabs`, `TabList`,
+  `TabTrigger`, `TabSlot`) to draw one dark bar, docked to the bottom edge with rounded top corners,
+  on iOS, Android and the web. The system tab bar can't take this look, so `NativeTabs` was dropped
+  in the redesign. Home renders as the dark brand scene in both modes (`AppearanceProvider
+  mode="dark"`, with the header in the light palette). The bar overlays the
   content: `useTabBarClearance()` (`components/tab-bar.ts`) tells screens, the Add button and the
   toast how much room to leave, and the bar steps aside while the keyboard is open.
 - **Appearance.** `settings.appearance` (System, Light, Dark) reaches `useTheme()` through
@@ -530,7 +532,7 @@ sequenceDiagram
 
 | Area | iOS | Android | Web |
 |---|---|---|---|
-| Tab bar | Floating `expo-router/ui` bar, Tabler icons | Same | Same |
+| Tab bar | Docked `expo-router/ui` bar, Tabler icons | Same | Same |
 | Sheets | `formSheet` with grabber | `formSheet` | Full-screen `card` |
 | Touch target | 44 pt | 48 dp | 44 px |
 | Announcements | `announceForAccessibility` (no live regions) | Live regions | `aria-live`, and focus moves to the field |
@@ -783,7 +785,7 @@ So nothing is compiled or mocked.
 | AD7 | **Charts with `react-native-svg`**, not Victory Native/Skia | Two simple charts; Skia needs extra WebAssembly setup for the web build | Victory Native (Skia), suggested in PLAN.md §7.1 |
 | AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for sample data; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
 | AD9 | **`Stack.Protected`** for auth gating | No back gesture into signed-out data | Redirects in `useEffect` |
-| AD10 | **Floating tab bar with `expo-router/ui`** on every platform (redesign, 2026-11-24) | The design calls for a floating dark bar, which the system tab bar can't do; one layout for all platforms | The system tab bar (`NativeTabs`), used until the redesign |
+| AD10 | **Docked dark tab bar with `expo-router/ui`** on every platform (redesign, 2026-11-24) | The design calls for a custom dark bar, which the system tab bar can't do; one layout for all platforms | The system tab bar (`NativeTabs`), used until the redesign |
 | AD11 | **Redesign palette** (navy, royal, electric, icy, one mint pop) and **Outfit** | The redesign brief; Outfit's `tnum` gives tabular amounts | The earlier Tito indigo + Manrope/Fraunces look; the web tracker's monospace amounts |
 | AD12 | **SQLite as the only read source in phase 2**, with an outbox | Offline first, instant screens, one cache | Reading straight from the network; two caches |
 
@@ -801,7 +803,7 @@ So nothing is compiled or mocked.
 - Only NGN and USD exist. PLAN.md §5.5 lists NGN, USD, EUR, GBP and CAD for settings.
 - Forms use local state and inline checks. PLAN.md §7.1 suggests react-hook-form + Zod. Decide
   before phase 2 whether the extra forms justify it.
-- The floating tab bar and toast offsets come from `useTabBarClearance()`; confirm them on devices.
+- The tab bar and toast offsets come from `useTabBarClearance()`; confirm them on devices.
 - There is no unit-test runner. Domain checks are assertions in a script.
 
 **Open questions**

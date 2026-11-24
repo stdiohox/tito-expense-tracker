@@ -148,7 +148,7 @@ There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test su
     ├── app/                 Routes (Expo Router). Every file is a screen; _layout files are navigators.
     │   ├── _layout.tsx      Root: fonts, splash, providers, signed-in / signed-out stacks
     │   ├── (tabs)/          Home (index), Expenses, Reports, Settings
-    │   │   └── _layout.tsx      Floating dark tab bar (expo-router/ui), every platform
+    │   │   └── _layout.tsx      Docked dark tab bar (expo-router/ui), every platform
     │   ├── expense/         new.tsx (add sheet), [id].tsx (edit sheet)
     │   ├── category/        [id].tsx (detail), edit.tsx (create/edit sheet)
     │   ├── categories.tsx   Categories and budgets list
