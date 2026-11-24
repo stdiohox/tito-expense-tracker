@@ -108,7 +108,7 @@ function Routes({ screenOptions, sheet }: { screenOptions: object; sheet: object
   return (
     <Stack screenOptions={screenOptions}>
       <Stack.Protected guard={signedIn}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Tito Expenses' }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'TET · Tito Finance Expense Tracker' }} />
         <Stack.Screen name="expense/new" options={{ ...sheet, title: 'Add expense' }} />
         <Stack.Screen name="expense/[id]" options={{ ...sheet, title: 'Edit expense' }} />
         <Stack.Screen name="category/[id]" options={{ title: 'Category' }} />

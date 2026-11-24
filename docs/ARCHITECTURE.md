@@ -1,4 +1,4 @@
-# Architecture: Tito Expenses
+# Architecture: TET (Tito Finance Expense Tracker)
 
 How the app is built today (phase 1), why it is built that way, and the target design for phase 2
 (real data, sync and a Supabase backend).

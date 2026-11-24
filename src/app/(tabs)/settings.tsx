@@ -9,6 +9,7 @@ import { ScreenHero } from '@/components/screen-hero';
 import { switchColors } from '@/components/switch-colors';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
+import { Wordmark } from '@/components/wordmark';
 import { useToast } from '@/components/toast';
 import { useActions, useStore } from '@/data/store';
 import { CURRENCIES } from '@/domain/money';
@@ -120,9 +121,12 @@ export default function Settings() {
         <Item label="Delete account" tone="danger" onPress={() => router.push('/account/delete')} last />
       </Group>
 
-      <T variant="caption" tone="inkMute" style={{ textAlign: 'center', marginTop: space.xxl }}>
-        Preview build · showing sample data
-      </T>
+      <View style={{ marginTop: space.xxl, alignItems: 'center', gap: space.s }}>
+        <Wordmark align="center" />
+        <T variant="caption" tone="inkMute" style={{ textAlign: 'center' }}>
+          Preview build · showing sample data
+        </T>
+      </View>
       </View>
     </ScrollView>
   );

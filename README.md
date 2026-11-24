@@ -1,4 +1,4 @@
-# Tito Expenses
+# TET · Tito Finance Expense Tracker
 
 A phone app (iOS and Android) for logging what you spend in seconds and seeing your month at a glance.
 Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.titofinance.com`.

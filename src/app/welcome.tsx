@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandGradient } from '@/components/brand-gradient';
 import { IntroHero } from '@/components/intro-hero';
 import { T } from '@/components/text';
+import { Wordmark } from '@/components/wordmark';
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -72,16 +73,8 @@ export default function Welcome() {
   return (
     <BrandGradient style={{ flex: 1, paddingTop: insets.top + space.s, paddingBottom: insets.bottom + space.l }}>
       <StatusBar style="light" />
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.xl, minHeight: TARGET }}>
-        <T
-          variant="headline"
-          tone="onBrand"
-          numeric
-          accessibilityLabel={`Slide ${index + 1} of ${SLIDES.length}`}
-          accessibilityLiveRegion="polite"
-          aria-live="polite">
-          {pad(index + 1)} / {pad(SLIDES.length)}
-        </T>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingHorizontal: space.xl, minHeight: TARGET }}>
+        <Wordmark onBrand />
         {last ? null : (
           <Pressable
             onPress={() => goTo(SLIDES.length - 1)}
@@ -95,6 +88,16 @@ export default function Welcome() {
           </Pressable>
         )}
       </View>
+      <T
+        variant="headline"
+        tone="onBrand"
+        numeric
+        accessibilityLabel={`Slide ${index + 1} of ${SLIDES.length}`}
+        accessibilityLiveRegion="polite"
+        aria-live="polite"
+        style={{ paddingHorizontal: space.xl, marginTop: space.m }}>
+        {pad(index + 1)} / {pad(SLIDES.length)}
+      </T>
 
       <View style={{ flex: 1 }} onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}>
         {width > 0 ? (
