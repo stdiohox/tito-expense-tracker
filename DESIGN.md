@@ -144,7 +144,7 @@ components:
     rounded: "{rounded.pill}"
     height: "56px"
   dock-add-button:
-    backgroundColor: "{colors.button-dark}"
+    backgroundColor: "{colors.royal}"
     textColor: "{colors.white}"
     rounded: "{rounded.pill}"
     size: "56px"
@@ -170,10 +170,11 @@ components:
     typography: "{typography.caption}"
     rounded: "{rounded.pill}"
   dock:
-    backgroundColor: "{colors.surface-dark}"
-    rounded: "{rounded.xxl}"
+    backgroundColor: "white at 94% (frosted glass), both modes"
+    border: "1px ink at 10%"
+    rounded: "{rounded.pill}"
     height: "64px"
-    float: "12px above the safe area, 16px in from each side"
+    width: "88% of the screen, centred, 16px above the safe area"
   field:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
@@ -192,7 +193,7 @@ components:
 
 **Creative North Star: "Your month as a pace, in deep blue"**
 
-The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue gradient header holds the one number that matters (what you have spent so far), a soft icy pace line against last month, and glass cards for each currency. Below it the app is calm and orderly: rounded panels, a dark Quick add panel for logging in one tap, budget cards in two columns, and a floating dark finance dock with the Add expense button at its centre. The look borrows the general language of premium blue finance apps (gradients, glass, dark panels) and builds it from our own components and SVG shapes; it copies no specific design or artwork.
+The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue gradient header holds the one number that matters (what you have spent so far), a soft icy pace line against last month, and glass cards for each currency. Below it the app is calm and orderly: rounded panels, a dark Quick add panel for logging in one tap, budget cards in two columns, and a floating white-glass finance dock with the Add expense button at its centre. The look borrows the general language of premium blue finance apps (gradients, glass, dark panels) and builds it from our own components and SVG shapes; it copies no specific design or artwork.
 
 Colour is rationed. Royal blue is the brand and the primary action; electric blue marks links, the active tab and progress; icy blue lightens; aqua mint is the one pop, used sparingly and only on dark or blue surfaces; burgundy marks a passed budget or an error, always with words. Type is Outfit throughout, with tabular figures on every amount. One look ships on iOS, Android and the web build.
 
@@ -265,7 +266,7 @@ A single phone column. Screens use 16px side margins with panels edge to edge in
 
 ## Elevation & Depth
 
-Flat by default, separated by tone: panels and cards (surface) on the ground; in dark mode ground, surface and raised step up in light. Shadows only on things that float: the dock (navy at 30%, 16px blur) and the toast (black at 18%).
+Flat by default, separated by tone: panels and cards (surface) on the ground; in dark mode ground, surface and raised step up in light. Shadows only on things that float: the dock (navy at 22%, 24px blur, 10px down) and the toast (black at 18%).
 
 ## Shapes
 
@@ -279,7 +280,7 @@ Round and soft. Panels 28px; cards, glass cards and budget cards 20px; fields, t
 - **Onboarding:** a white pill with a royal label on the gradient; Next, then Create an account.
 
 ### Finance dock
-A rounded (28px) dark bar 64px tall, floating 12px above the bottom safe area and 16px in from each side, in both modes. Home and Expenses on the left, Reports and Settings on the right, icon over label; the active tab in electric (#7693EF on the dark bar), the others in Ink Mute. In the middle, a raised 56px round **+** (electric #3560E8 with a white plus, set 14px above the bar in a ring of the bar's colour) opens Add expense from any tab: the app's one primary action, one tap away. The dock steps aside while the keyboard is open. Built with expo-router/ui on every platform.
+A frosted white-glass bar floating over the page in both modes: 88% of the screen width, centred, 16px above the bottom safe area, 64px tall with pill ends. White at 94% (the most see-through it can be while its labels stay at AA with deep navy scrolling behind it), a 1px ink-tinted edge, a light highlight along the top and a soft navy shadow, so it always stands out from the page. Home and Expenses on the left, Reports and Settings on the right, icon over label, in the light palette: the active tab in electric, the others in Ink Mute. In the middle, a raised 56px round **+** in royal blue with a white plus, set 14px above the bar in a ring of the same glass, opens Add expense from any tab: the app's one primary action, one tap away. The dock steps aside while the keyboard is open. Built with expo-router/ui on every platform.
 
 ### Panels and cards
 - **Panel:** 28px corners, surface fill, an optional title row with an action on the right. A **dark panel** renders its contents in the dark palette in both modes (Quick add, Latest).

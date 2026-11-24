@@ -190,8 +190,9 @@ Stack (root)
 - **Tabs are sections, not actions.** Adding an expense is the raised + in the middle of the
   dock, a plain button inside `TabList` (only `TabTrigger`s become tabs), not a tab.
 - **Finance dock.** `(tabs)/_layout.tsx` uses `expo-router/ui` (`Tabs`, `TabList`,
-  `TabTrigger`, `TabSlot`) to draw one floating, rounded dark dock with a raised Add button in the
-  middle, on iOS, Android and the web. The system tab bar can't take this look, so `NativeTabs` was dropped
+  `TabTrigger`, `TabSlot`) to draw one floating dock of frosted white glass (88% wide, the same in
+  both modes, `dock` and `dockGlass` tokens) with a raised Add button in the middle, on iOS,
+  Android and the web. The system tab bar can't take this look, so `NativeTabs` was dropped
   in the redesign. Every tab opens with `ScreenHero` (`components/screen-hero.tsx`): the brand
   gradient with its top-right flare, rendered in the light palette in both modes, and fading into
   the current mode's ground. The rest of each screen follows the Appearance setting. The bar overlays the
@@ -563,7 +564,7 @@ indigo, and the other tabs follow the colour scheme.
 - **Text scaling** follows the OS. `maxFontSizeMultiplier` caps it at 2× for all text and fields,
   1.6× for category tile names and 1.5× for the amount input. Totals shrink to fit, down to 60%.
 - **Motion:** Reanimated animations use `ReduceMotion.System`.
-- **Contrast:** `npm run check:contrast` checks 174 pairs in light and dark (text at 4.5:1,
+- **Contrast:** `npm run check:contrast` checks 180 pairs in light and dark (text at 4.5:1,
   non-text at 3:1).
 
 ### 9.5 Adding from the dock
@@ -755,7 +756,7 @@ create index on expenses (user_id, day) where deleted_at is null;
 | Types | `npm run typecheck` | Strict TS, typed routes |
 | Lint | `npm run lint` | Expo ESLint rules, hooks rules |
 | Domain | `npm run check:dates` | Local-calendar month/day maths in `Africa/Lagos`; DST; money format and parse; summaries (unknown category, malformed day, other currency) |
-| Contrast | `npm run check:contrast` | WCAG AA for 174 text and non-text pairs (header text against the worst point of the sampled brand gradient, and on glass cards over it) in light and dark |
+| Contrast | `npm run check:contrast` | WCAG AA for 180 text and non-text pairs (header text against the worst point of the sampled brand gradient, and on glass cards over it) in light and dark |
 | Dependencies | `npx expo-doctor` | SDK 58 compatibility |
 | Visual | Web build at 390 × 844, light and dark | Layout and states |
 | Devices | Expo Go on a real iPhone and Android phone | Safe areas, keyboard, VoiceOver/TalkBack, 200% text (checklist in `tasks/todo.md`) |
