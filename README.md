@@ -35,7 +35,7 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 
 ## What the app does
 
-- **Log a payment fast.** A floating "Add expense" button sits on every tab. The sheet opens with
+- **Log a payment fast.** A floating "Add expense" button sits on the Home and Expenses tabs. The sheet opens with
   the keyboard on the amount. Pick a category, optionally change the date or add a note, and save.
 - **See the month at a glance.** Home shows:
   - the month's total;
@@ -237,8 +237,9 @@ The web tracker's bugs come back if these rules are broken.
 
 **Add a currency.**
 1. Add the code to `CurrencyCode` in `src/domain/types.ts`.
-2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol, name, and minor units per major
-   unit. The pickers read `CURRENCIES`, so the UI updates on its own.
+2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol, name, minor units per major
+   unit, and `sameBelow` (the smallest month-to-month difference worth mentioning, in minor units).
+   The pickers read `CURRENCIES`, so the UI updates on its own.
 3. Extend the symbol-stripping regex in `parseAmount`. It only strips `₦` and `$` today.
 4. Add cases to `scripts/check-dates.ts`.
 

@@ -6,7 +6,7 @@ process.env.TZ = process.env.TZ ?? 'Africa/Lagos';
 const assert = (await import('node:assert/strict')).default;
 const { addDays, addMonths, dayKey, daysInMonth, monthKey } = await import('../src/domain/dates.ts');
 const { formatMoney, parseAmount } = await import('../src/domain/money.ts');
-const { summarise } = await import('../src/domain/summary.ts');
+const { compareWords, summarise } = await import('../src/domain/summary.ts');
 
 assert.equal(addMonths('2026-11', 1), '2026-12');
 assert.equal(addMonths('2026-11', -1), '2026-10');
@@ -35,6 +35,15 @@ assert.equal(parseAmount('.5', 'NGN'), 50);
 assert.equal(parseAmount('5.', 'NGN'), 500);
 assert.equal(parseAmount('0', 'NGN'), null);
 assert.equal(parseAmount('12.345', 'NGN'), null);
+
+// "About the same" floor is per currency: ₦100 or $1, or 2% of last month, whichever is larger.
+assert.equal(compareWords(8_000, 100_000, 'NGN'), 'same'); // ₦80 < ₦100
+assert.equal(compareWords(8_000, 100_000, 'USD'), 'more'); // $80 on $1,000 is not "the same"
+assert.equal(compareWords(-8_000, 100_000, 'USD'), 'less');
+assert.equal(compareWords(50, 10_000, 'USD'), 'same'); // 50 cents < $1
+assert.equal(compareWords(1_500, 100_000, 'USD'), 'same'); // $15 < 2% of $1,000
+assert.equal(compareWords(-20_000, 100_000_00, 'NGN'), 'same'); // ₦200 < 2% of ₦100,000
+assert.equal(compareWords(300_000, 100_000_00, 'NGN'), 'more'); // ₦3,000 > ₦2,000
 
 const cats = [
   { id: 'food', name: 'Food', icon: 'food', budget: null, builtIn: true },

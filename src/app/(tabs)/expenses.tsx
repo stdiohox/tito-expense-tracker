@@ -13,6 +13,7 @@ import { Row } from '@/components/row';
 import { TabTitle } from '@/components/tab-title';
 import { T } from '@/components/text';
 import { useFabScroll } from '@/components/use-fab-scroll';
+import { useFocusBorder } from '@/components/use-focus-border';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { dayLabel, monthName } from '@/domain/dates';
@@ -28,6 +29,7 @@ export default function Expenses() {
   const { expenses, categories, settings } = useStore();
   const [query, setQuery] = useState('');
   const fab = useFabScroll();
+  const searchFocus = useFocusBorder();
   const q = useDeferredValue(query.trim().toLowerCase());
   const catById = useMemo(() => new Map(categories.map((k) => [k.id, k])), [categories]);
 
@@ -92,9 +94,8 @@ export default function Expenses() {
                 gap: space.s,
                 backgroundColor: c.surface,
                 borderRadius: radius.m,
-                borderWidth: 1,
-                borderColor: c.line,
-                paddingLeft: space.m,
+                ...searchFocus.border,
+                paddingLeft: space.m - searchFocus.inset,
                 marginTop: space.s,
                 marginBottom: space.s,
               }}>
@@ -106,6 +107,7 @@ export default function Expenses() {
                 placeholderTextColor={c.inkMute}
                 accessibilityLabel={`Search ${monthName(month)} by note or category`}
                 returnKeyType="search"
+                {...searchFocus.focusProps}
                 maxFontSizeMultiplier={2}
                 style={{ flex: 1, minWidth: 0, minHeight: 48, fontFamily: fonts.medium, fontSize: 16, color: c.ink }}
               />

@@ -9,8 +9,10 @@ import { Button } from '@/components/button';
 import { IconDisc } from '@/components/icon-disc';
 import { PICKABLE_ICONS, STROKE } from '@/components/icons';
 import { safeBack } from '@/components/nav';
+import { switchColors } from '@/components/switch-colors';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
+import { useFocusBorder } from '@/components/use-focus-border';
 import { useActions, useCategory, useStore } from '@/data/store';
 import { CURRENCIES, amountToInput, formatMoney, parseAmount } from '@/domain/money';
 import { budgetFor } from '@/domain/summary';
@@ -50,6 +52,8 @@ export default function EditCategory() {
   const budget = hasBudget ? parseAmount(budgetText, cur) : null;
   const nameError = tried && !name.trim() ? 'Give the category a name' : null;
   const budgetError = tried && hasBudget && budget === null ? 'Enter a monthly amount' : null;
+  const nameFocus = useFocusBorder(!!nameError);
+  const budgetFocus = useFocusBorder(!!budgetError);
 
   const save = () => {
     if (busy.current) return;
@@ -73,9 +77,6 @@ export default function EditCategory() {
   const field = {
     minHeight: 52,
     borderRadius: radius.m,
-    borderWidth: 1,
-    borderColor: c.line,
-    paddingHorizontal: space.l,
     fontFamily: fonts.medium,
     fontSize: 16,
     color: c.ink,
@@ -108,18 +109,22 @@ export default function EditCategory() {
           accessibilityLabelledBy="nameLabel"
           accessibilityLabel="Category name"
           maxLength={40}
-          style={[field, { marginTop: space.s, opacity: existing?.builtIn ? 0.6 : 1 }]}
+          maxFontSizeMultiplier={2}
+          {...nameFocus.focusProps}
+          style={[field, nameFocus.border, { paddingHorizontal: space.l - nameFocus.inset, marginTop: space.s, opacity: existing?.builtIn ? 0.6 : 1 }]}
         />
         {existing?.builtIn ? (
           <T variant="sub" tone="inkMute" style={{ marginTop: space.xs }}>
             Starter categories keep their name.
           </T>
         ) : null}
-        {nameError ? (
-          <T variant="sub" tone="danger">
-            {nameError}
-          </T>
-        ) : null}
+        <View accessibilityLiveRegion="polite" aria-live="polite">
+          {nameError ? (
+            <T variant="sub" tone="danger">
+              {nameError}
+            </T>
+          ) : null}
+        </View>
 
         {!existing?.builtIn ? (
           <>
@@ -158,12 +163,11 @@ export default function EditCategory() {
             onValueChange={setHasBudget}
             accessibilityLabelledBy="budgetLabel"
             accessibilityLabel="Monthly budget"
-            trackColor={{ true: c.button, false: c.line }}
-            thumbColor="#FFFFFF"
+            {...switchColors(c)}
           />
         </View>
         {hasBudget ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: space.s, ...field }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: space.s, ...field, ...budgetFocus.border, paddingHorizontal: space.l - budgetFocus.inset }}>
             <T variant="bodyStrong" tone="inkSoft">
               {CURRENCIES[cur].symbol}
             </T>
@@ -176,15 +180,19 @@ export default function EditCategory() {
               placeholder="50,000"
               placeholderTextColor={c.inkMute}
               accessibilityLabel={`Monthly budget in ${CURRENCIES[cur].name}`}
+              maxFontSizeMultiplier={2}
+              {...budgetFocus.focusProps}
               style={{ flex: 1, minHeight: 50, marginLeft: 4, fontFamily: fonts.semibold, fontSize: 16, color: c.ink }}
             />
           </View>
         ) : null}
-        {budgetError ? (
-          <T variant="sub" tone="danger">
-            {budgetError}
-          </T>
-        ) : null}
+        <View accessibilityLiveRegion="polite" aria-live="polite">
+          {budgetError ? (
+            <T variant="sub" tone="danger">
+              {budgetError}
+            </T>
+          ) : null}
+        </View>
       </ScrollView>
       <View style={{ paddingHorizontal: space.xl, paddingTop: space.m, paddingBottom: insets.bottom + space.m, borderTopWidth: 1, borderTopColor: c.line }}>
         <Button label={existing ? 'Save' : 'Create category'} onPress={save} />

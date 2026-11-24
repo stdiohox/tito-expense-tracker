@@ -17,7 +17,7 @@ export default function Welcome() {
         Tito Finance
       </T>
       <View style={{ flex: 1, justifyContent: 'center', gap: space.l }}>
-        <T variant="largeTitle" tone="onBrand" style={{ fontSize: 40, lineHeight: 46 }}>
+        <T variant="largeTitle" tone="onBrand" accessibilityRole="header" style={{ fontSize: 40, lineHeight: 46 }}>
           Know where your money goes.
         </T>
         <T variant="body" tone="onBrandSoft" style={{ maxWidth: 340 }}>
@@ -29,7 +29,7 @@ export default function Welcome() {
           onPress={() => router.push('/sign-up')}
           accessibilityRole="button"
           style={({ pressed }) => ({ minHeight: 52, borderRadius: radius.pill, backgroundColor: pressed ? c.onBrandSoft : c.onBrand, alignItems: 'center', justifyContent: 'center' })}>
-          <T variant="button" style={{ color: '#272C77' }}>
+          <T variant="button" style={{ color: c.onWelcomeButton }}>
             Create an account
           </T>
         </Pressable>

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
+import { useEffect, useRef, useState, type ComponentRef } from 'react';
+import { KeyboardAvoidingView, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -26,6 +26,9 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
+  const nameRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const emailRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   const errors = {
     name: tried && !name.trim() ? 'Tell us what to call you' : null,
@@ -36,9 +39,9 @@ export default function SignUp() {
   const submit = () => {
     if (busy) return;
     setTried(true);
-    if (!name.trim()) return announceError('Tell us what to call you');
-    if (!EMAIL.test(email.trim())) return announceError('Enter a valid email');
-    if (password.length < 8) return announceError('Use at least 8 characters for the password');
+    if (!name.trim()) return announceError('Tell us what to call you', nameRef);
+    if (!EMAIL.test(email.trim())) return announceError('Enter a valid email', emailRef);
+    if (password.length < 8) return announceError('Use at least 8 characters for the password', passwordRef);
     setBusy(true);
     // Phase 2: Supabase Auth sign-up + email confirmation.
     timer.current = setTimeout(() => {
@@ -57,9 +60,9 @@ export default function SignUp() {
         <T variant="body" tone="inkSoft" style={{ marginTop: -space.s }}>
           Your expenses are saved to your account, so they’re safe if you change phones.
         </T>
-        <Field label="First name" value={name} onChangeText={setName} autoComplete="given-name" textContentType="givenName" error={errors.name} />
-        <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" error={errors.email} />
-        <Field label="Password" value={password} onChangeText={setPassword} secure autoComplete="new-password" textContentType="newPassword" error={errors.password} hint="At least 8 characters" />
+        <Field ref={nameRef} label="First name" value={name} onChangeText={setName} autoComplete="given-name" textContentType="givenName" error={errors.name} />
+        <Field ref={emailRef} label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" error={errors.email} />
+        <Field ref={passwordRef} label="Password" value={password} onChangeText={setPassword} secure autoComplete="new-password" textContentType="newPassword" error={errors.password} hint="At least 8 characters" />
         <T variant="sub" tone="inkMute">
           By creating an account you agree to the Terms and Privacy Policy.
         </T>

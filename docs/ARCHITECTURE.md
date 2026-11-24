@@ -122,8 +122,8 @@ flowchart TD
    `useSummary()`, and write through `useActions()`. This is the seam phase 2 replaces.
 3. **Non-route code stays out of `src/app/`.** Expo Router treats every file there as a screen.
 4. **Colours come only from `src/theme/tokens.ts`.** Components ask `useTheme()` for the palette
-   (`c`) and never hard-code a hex. Two exceptions exist: the white label on the welcome button and
-   the toast's fixed text colours, both covered by the contrast check.
+   (`c`) and never hard-code a hex. That includes the toast, the Welcome button label, shadows,
+   switch thumbs and the web focus ring; the contrast check covers every text and indicator pair.
 
 ---
 
@@ -319,8 +319,9 @@ month:
 - It returns `null` when last month has no spending. There is nothing to compare against.
 - `delta > 0` means spending faster than last month.
 
-**`compareWords(delta, base)`** returns `'same'` when the difference is under ₦100 (10,000 minor
-units) or under 2% of last month's figure, whichever is larger. Otherwise it returns `'less'` or
+**`compareWords(delta, base, currency)`** returns `'same'` when the difference is under the
+currency's `sameBelow` floor (₦100 or $1, set in `CURRENCIES`) or under 2% of last month's figure,
+whichever is larger. Otherwise it returns `'less'` or
 `'more'`. Home and Reports both use it, so they always word comparisons the same way.
 
 **`budgetFor(category, currency)`** returns the budget only when it was set in the currency being
@@ -551,7 +552,7 @@ indigo, and the other tabs follow the colour scheme.
 - **Text scaling** follows the OS. `maxFontSizeMultiplier` caps it at 2× for all text and fields,
   1.6× for category tile names and 1.5× for the amount input. Totals shrink to fit, down to 60%.
 - **Motion:** Reanimated animations use `ReduceMotion.System`.
-- **Contrast:** `npm run check:contrast` checks 76 pairs in light and dark (text at 4.5:1,
+- **Contrast:** `npm run check:contrast` checks 98 pairs in light and dark (text at 4.5:1,
   non-text at 3:1).
 
 ### 9.5 Floating Add button
@@ -562,7 +563,7 @@ indigo, and the other tabs follow the colour scheme.
 - **`hidden`:** the button hides while scrolling down, so it never covers the amounts being read,
   and comes back on any scroll up.
 
-Lists reserve `120 + safe-area` bottom padding, so the last row is never hidden.
+It appears on Home and Expenses only. Those two lists reserve `120 + safe-area` bottom padding, so the last row is never hidden.
 
 ---
 
@@ -746,7 +747,7 @@ create index on expenses (user_id, day) where deleted_at is null;
 | Types | `npm run typecheck` | Strict TS, typed routes |
 | Lint | `npm run lint` | Expo ESLint rules, hooks rules |
 | Domain | `npm run check:dates` | Local-calendar month/day maths in `Africa/Lagos`; DST; money format and parse; summaries (unknown category, malformed day, other currency) |
-| Contrast | `npm run check:contrast` | WCAG AA for 76 text and non-text pairs in light and dark |
+| Contrast | `npm run check:contrast` | WCAG AA for 98 text and non-text pairs in light and dark |
 | Dependencies | `npx expo-doctor` | SDK 58 compatibility |
 | Visual | Web build at 390 × 844, light and dark | Layout and states |
 | Devices | Expo Go on a real iPhone and Android phone | Safe areas, keyboard, VoiceOver/TalkBack, 200% text (checklist in `tasks/todo.md`) |

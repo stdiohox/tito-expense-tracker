@@ -18,6 +18,8 @@ colors:
   ink-soft: "#43476A"
   ink-mute: "#5E6283"
   line: "#E3E5F0"
+  field-border: "#878BA5"
+  switch-off: "#878BA5"
   bar-muted: "#8589B8"
   brand-dark: "#1E2263"
   button-dark: "#AEB3FF"
@@ -35,6 +37,8 @@ colors:
   ink-soft-dark: "#BEC1DB"
   ink-mute-dark: "#9A9EBE"
   line-dark: "#2A2D58"
+  field-border-dark: "#63678C"
+  switch-off-dark: "#63678C"
   bar-muted-dark: "#5E63A0"
 typography:
   total:
@@ -201,7 +205,7 @@ The world is calm and encouraging. It does not use dashboard tiles, promo cards,
 - Indigo drench on the home header and the auth welcome only; light or deep-indigo ground below.
 - Fraunces for totals and large titles; Manrope for everything else; tabular figures on every amount.
 - Grouped lists with hairline dividers, round tinted icon discs, right-aligned amounts.
-- One full-width pill primary button per task screen; a floating pill "Add expense" on tab screens.
+- One full-width pill primary button per task screen; a floating pill "Add expense" on the Home and Expenses tabs.
 - Light and dark are designed pairs, not inversions; every text colour meets WCAG AA.
 
 ## Colors
@@ -222,7 +226,9 @@ One brand indigo plus two warm supporting notes (gold and clay), each rationed t
 - **Cool Ground** (ground / ground-dark): the screen background under lists, and the track of segmented controls and the date stepper.
 - **Surface** (surface / surface-dark) and **Raised** (raised-dark): grouped cards, the add/edit sheet, fields, the selected segment, and the dark toast.
 - **Ink** (ink / ink-dark): titles, row titles, amounts. **Ink Soft** (ink-soft / ink-soft-dark): field labels and supporting body copy. **Ink Mute** (ink-mute / ink-mute-dark): row subtitles, placeholders, unselected tab icons.
-- **Hairline** (line / line-dark): row dividers, field borders at rest, budget-bar track, the top border of the bottom action bar.
+- **Hairline** (line / line-dark): row dividers, budget-bar track, the top border of the bottom action bar.
+- **Field Border** (field-border / field-border-dark): the resting border of text fields, at 3:1 against surface and ground (WCAG 1.4.11).
+- **Switch Off** (switch-off / switch-off-dark): the track of a switch that is off, at 3:1 against surface, with the white thumb at 3:1 against it.
 - **Muted Bar** (bar-muted / bar-muted-dark): unselected bars in the Reports month-by-month chart (3:1 against ground).
 - **On-brand Soft** (on-brand-soft / on-brand-soft-dark): secondary text, axis labels and legend on the indigo header.
 
@@ -260,7 +266,7 @@ Each category has a light and dark text colour; its disc is the same hue at 12% 
 
 ## Layout
 
-A single phone column with 20px side margins, on a fixed 4/8-based scale (4, 8, 12, 16, 20, 24, 32, 44). Section headers sit 24px above their rows and 4px above the first one; task screens separate form groups by 24px. Home's indigo header runs under the status bar and fills roughly the top 45% (month switcher, total, pace line, chart, legend); the list starts on the ground below it. Tab screens open with a large title; task screens open with a close control and a large title, and end with a fixed bottom bar (top hairline, 12px padding plus safe area) holding the one primary button. Lists reserve 120px plus the safe area at the bottom so the floating Add button never hides the last row. The native tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab.
+A single phone column with 20px side margins, on a fixed 4/8-based scale (4, 8, 12, 16, 20, 24, 32, 44). Section headers sit 24px above their rows and 4px above the first one; task screens separate form groups by 24px. Home's indigo header runs under the status bar and fills roughly the top 45% (month switcher, total, pace line, chart, legend); the list starts on the ground below it. Tab screens open with a large title; task screens open with a close control and a large title, and end with a fixed bottom bar (top hairline, 12px padding plus safe area) holding the one primary button. The Home and Expenses lists reserve 120px plus the safe area at the bottom so the floating Add button never hides the last row. The native tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab.
 
 ## Elevation & Depth
 
@@ -288,7 +294,7 @@ Calm, wide and unmistakable.
 - **Welcome variant:** white pill with indigo label on the indigo ground, with a text-only second action below.
 
 ### Add expense (floating)
-The one primary action on tab screens. A 56px indigo pill 16px from the right edge, above the tab bar: "+ Add expense" at rest, collapsing to a round "+" once the list scrolls and hiding while scrolling down. Fades in over 160ms and out over 120ms, honouring Reduce Motion.
+The one primary action on the Home and Expenses tabs (not on Reports or Settings). A 56px indigo pill 16px from the right edge, above the tab bar: "+ Add expense" at rest, collapsing to a round "+" once the list scrolls and hiding while scrolling down. Fades in over 160ms and out over 120ms, honouring Reduce Motion.
 
 ### Chips (segmented control)
 - **Style:** a pill track in the ground tone with 2px padding; options are caption text in Ink Mute.
@@ -301,7 +307,7 @@ The one primary action on tab screens. A 56px indigo pill 16px from the right ed
 - **Internal Padding:** 16px horizontal; rows inside carry their own hairlines.
 
 ### Inputs / Fields
-- **Style:** surface fill, 1px hairline border, 12px radius, 50px tall, 16px Manrope Medium, label in Sub / Ink Soft above.
+- **Style:** surface fill, 1px Field Border, 12px radius, 50px tall, 16px Manrope Medium, label in Sub / Ink Soft above.
 - **Focus:** border becomes 2px Working Indigo. On web, keyboard focus gets a 3px accent outline with 2px offset.
 - **Error:** border turns Clay; the message appears below in Sub / Clay through a polite live region.
 - **Amount input:** no box; Total-size Fraunces digits with the currency symbol in Ink Soft, over a 2px accent underline.

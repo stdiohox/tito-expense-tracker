@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { safeBack } from '@/components/nav';
+import { useFocusBorder } from '@/components/use-focus-border';
 import { T } from '@/components/text';
 import { useActions, useStore } from '@/data/store';
 import { fonts, radius, space } from '@/theme/tokens';
@@ -23,6 +24,7 @@ export default function DeleteAccount() {
   const [typed, setTyped] = useState('');
   const [busy, setBusy] = useState(false);
   const ok = typed.trim().toUpperCase() === 'DELETE';
+  const confirmFocus = useFocusBorder();
 
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
@@ -47,14 +49,15 @@ export default function DeleteAccount() {
           autoCorrect={false}
           accessibilityLabelledBy="confirmLabel"
           accessibilityLabel="Type DELETE to confirm"
+          maxFontSizeMultiplier={2}
+          {...confirmFocus.focusProps}
           style={{
             marginTop: space.s,
             minHeight: 52,
             borderRadius: radius.m,
-            borderWidth: 1,
-            borderColor: c.line,
+            ...confirmFocus.border,
             backgroundColor: c.surface,
-            paddingHorizontal: space.l,
+            paddingHorizontal: space.l - confirmFocus.inset,
             fontFamily: fonts.semibold,
             fontSize: 16,
             color: c.ink,

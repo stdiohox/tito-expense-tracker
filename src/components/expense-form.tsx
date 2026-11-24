@@ -19,6 +19,7 @@ import { STROKE } from './icons';
 import { safeBack } from './nav';
 import { T } from './text';
 import { useToast } from './toast';
+import { useFocusBorder } from './use-focus-border';
 
 type InputRef = ComponentRef<typeof TextInput>;
 
@@ -41,6 +42,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
   const amountRef = useRef<InputRef>(null);
   const noteRef = useRef<InputRef>(null);
   const firstCatRef = useRef<ComponentRef<typeof View>>(null);
+  const noteFocus = useFocusBorder();
 
   // Open the keyboard on the amount for a new expense, unless a screen reader is on:
   // then the user should land on the heading and hear where they are first.
@@ -74,11 +76,14 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
     if (existing) {
       const ok = updateExpense({ ...existing, amount, currency, categoryId, day, note: note.trim() });
       toast({ message: ok ? 'Expense updated' : 'This expense was deleted, so it could not be updated' });
+      // A failed update is not a success: warn instead.
+      const feedback = ok ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning;
+      Haptics.notificationAsync(feedback).catch(() => {});
     } else {
       addExpense({ amount, currency, categoryId, day, note: note.trim() });
       toast({ message: `Saved ${formatMoney(amount, currency)} to ${cat?.name ?? 'your expenses'}` });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     safeBack();
   };
 
@@ -270,13 +275,13 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
           maxFontSizeMultiplier={2}
           accessibilityLabel="Note, optional"
           returnKeyType="done"
+          {...noteFocus.focusProps}
           style={{
             marginTop: space.s,
             minHeight: 52,
             borderRadius: radius.m,
-            borderWidth: 1,
-            borderColor: c.line,
-            paddingHorizontal: space.l,
+            ...noteFocus.border,
+            paddingHorizontal: space.l - noteFocus.inset,
             fontFamily: fonts.medium,
             fontSize: 16,
             color: c.ink,

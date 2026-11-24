@@ -30,7 +30,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const seq = useRef(0);
   const readerOn = useRef(false);
   const insets = useSafeAreaInsets();
-  const { c, scheme } = useTheme();
+  const { c } = useTheme();
 
   useEffect(() => {
     AccessibilityInfo.isScreenReaderEnabled().then((v) => (readerOn.current = v)).catch(() => {});
@@ -51,7 +51,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     timer.current = setTimeout(() => setToast(null), ms);
   }, []);
 
-  const bg = scheme === 'dark' ? c.raised : c.ink;
   return (
     <Ctx.Provider value={show}>
       {children}
@@ -66,7 +65,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             accessibilityLiveRegion="polite"
             aria-live="polite"
             style={{
-              backgroundColor: bg,
+              backgroundColor: c.toast,
               borderRadius: radius.m,
               paddingLeft: space.l,
               paddingRight: space.s,
@@ -74,13 +73,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               flexDirection: 'row',
               alignItems: 'center',
               gap: space.s,
-              shadowColor: '#000',
+              shadowColor: c.toastShadow,
               shadowOpacity: 0.18,
               shadowRadius: 8,
               shadowOffset: { width: 0, height: 3 },
               elevation: 4,
             }}>
-            <T variant="sub" style={{ flex: 1, color: '#FFFFFF' }}>
+            <T variant="sub" style={{ flex: 1, color: c.onToast }}>
               {toast.message}
             </T>
             {toast.actionLabel && (
@@ -93,7 +92,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 }}
                 hitSlop={8}
                 style={{ minHeight: TARGET, minWidth: 64, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.m }}>
-                <T variant="headline" style={{ color: '#C8CBF0' }}>
+                <T variant="headline" style={{ color: c.toastAction }}>
                   {toast.actionLabel}
                 </T>
               </Pressable>

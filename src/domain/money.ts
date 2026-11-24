@@ -1,8 +1,12 @@
 import type { CurrencyCode } from './types';
 
-export const CURRENCIES: Record<CurrencyCode, { symbol: string; name: string; minor: number }> = {
-  NGN: { symbol: '₦', name: 'Nigerian naira', minor: 100 },
-  USD: { symbol: '$', name: 'US dollar', minor: 100 },
+/**
+ * `sameBelow` (minor units): differences smaller than this read as "about the same" when
+ * comparing months (₦100, $1), so the wording means the same thing in every currency.
+ */
+export const CURRENCIES: Record<CurrencyCode, { symbol: string; name: string; minor: number; sameBelow: number }> = {
+  NGN: { symbol: '₦', name: 'Nigerian naira', minor: 100, sameBelow: 100_00 },
+  USD: { symbol: '$', name: 'US dollar', minor: 100, sameBelow: 1_00 },
 };
 
 const group = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');

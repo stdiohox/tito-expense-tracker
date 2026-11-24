@@ -29,7 +29,7 @@ export const Field = forwardRef<ComponentRef<typeof TextInput>, Props>(function 
           alignItems: 'center',
           borderRadius: radius.m,
           borderWidth: focused ? 2 : 1,
-          borderColor: error ? c.danger : focused ? c.accent : c.line,
+          borderColor: error ? c.danger : focused ? c.accent : c.fieldBorder,
           backgroundColor: c.surface,
           paddingLeft: focused ? space.l - 1 : space.l,
         }}>
