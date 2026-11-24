@@ -11,9 +11,10 @@ import { dark, radius } from '@/theme/tokens';
 import { AppearanceProvider, useTheme } from '@/theme/use-theme';
 
 /**
- * A floating, rounded dark tab bar on every platform (sections only; adding an expense is the
- * floating Add button). It is always dark, in light mode too, so its contents use the dark palette.
- * It steps aside while the keyboard is open. Screens pad their content by useTabBarClearance().
+ * A dark tab bar docked to the bottom edge on every platform, full width with rounded top corners
+ * (sections only; adding an expense is the floating Add button). It is always dark, in light mode
+ * too, so its contents use the dark palette. It covers the bottom safe area and steps aside while
+ * the keyboard is open. Screens pad their content by useTabBarClearance().
  */
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
@@ -26,19 +27,21 @@ export default function TabsLayout() {
         style={{
           display: keyboardOpen ? 'none' : 'flex',
           position: 'absolute',
-          left: TAB_BAR.inset,
-          right: TAB_BAR.inset,
-          bottom: insets.bottom + TAB_BAR.gap,
-          height: TAB_BAR.height,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: TAB_BAR.height + insets.bottom,
+          paddingBottom: insets.bottom,
           flexDirection: 'row',
           alignItems: 'center',
           paddingHorizontal: 6,
-          borderRadius: radius.xxl,
+          borderTopLeftRadius: radius.xxl,
+          borderTopRightRadius: radius.xxl,
           backgroundColor: dark.surface,
           shadowColor: dark.fabShadow,
           shadowOpacity: 0.25,
           shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
+          shadowOffset: { width: 0, height: -4 },
           elevation: 8,
         }}>
         <TabTrigger name="index" href="/" asChild>
