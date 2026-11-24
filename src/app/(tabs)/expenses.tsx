@@ -2,18 +2,15 @@ import { IconSearch, IconX } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AddButton } from '@/components/add-button';
-import { FocusStatusBar } from '@/components/focus-status-bar';
 import { IconDisc } from '@/components/icon-disc';
 import { STROKE } from '@/components/icons';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
-import { StatCard, StatRow } from '@/components/stat-card';
+import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
-import { TabTitle } from '@/components/tab-title';
 import { T } from '@/components/text';
 import { useFabScroll } from '@/components/use-fab-scroll';
 import { useFocusBorder } from '@/components/use-focus-border';
@@ -27,8 +24,7 @@ import { TARGET, fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export default function Expenses() {
-  const { c, scheme } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
@@ -81,23 +77,31 @@ export default function Expenses() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
-      <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
         onScroll={fab.onScroll}
         scrollEventThrottle={64}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: insets.top, paddingBottom: clearance + 88, gap: space.m }}>
-        <View style={{ paddingHorizontal: space.xs }}>
-          <TabTitle title="Expenses">
-            <MonthSwitcher />
-          </TabTitle>
-        </View>
+        contentContainerStyle={{ paddingBottom: clearance + 88 }}>
+        <ScreenHero title="Expenses">
+          <MonthSwitcher onBrand />
+          <T
+            variant="total"
+            tone="onBrand"
+            numeric
+            adjustsFontSizeToFit
+            numberOfLines={1}
+            minimumFontScale={0.6}
+            accessibilityLabel={`${formatMoney(now.total, settings.currency)} spent in ${monthName(month)}`}>
+            {formatMoney(now.total, settings.currency)}
+          </T>
+          <T variant="sub" tone="onBrandSoft" numeric>
+            {now.count + foreign} {now.count + foreign === 1 ? 'payment' : 'payments'} · about {formatMoney(Math.round(now.total / days), settings.currency, { compact: true })} a day
+            {foreign ? ` · plus ${foreign} in other currencies` : ''}
+          </T>
+        </ScreenHero>
 
-        <StatRow>
-          <StatCard label={`Spent in ${monthName(month)}`} value={formatMoney(now.total, settings.currency)} note={foreign ? `Plus ${foreign} in other currencies` : undefined} />
-          <StatCard label="Payments" value={String(now.count + foreign)} note={`About ${formatMoney(Math.round(now.total / days), settings.currency, { compact: true })} a day`} />
-        </StatRow>
+        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.s }}>
 
         <View
           style={{
@@ -173,6 +177,7 @@ export default function Expenses() {
             </Panel>
           ))
         )}
+        </View>
       </ScrollView>
       <AddButton compact={fab.compact} hidden={fab.hidden} />
     </View>

@@ -2,13 +2,11 @@ import { IconChevronRight } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FocusStatusBar } from '@/components/focus-status-bar';
 import { STROKE } from '@/components/icons';
 import { Segmented } from '@/components/segmented';
+import { ScreenHero } from '@/components/screen-hero';
 import { switchColors } from '@/components/switch-colors';
-import { TabTitle } from '@/components/tab-title';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
@@ -19,8 +17,7 @@ import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export default function Settings() {
-  const { c, scheme } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { settings } = useStore();
   const { updateSettings, signOut } = useActions();
@@ -30,11 +27,16 @@ export default function Settings() {
     <ScrollView
       style={{ backgroundColor: c.ground }}
       contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: insets.top, paddingBottom: clearance + space.xxl }}>
-      <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <View style={{ paddingHorizontal: space.xs }}>
-        <TabTitle title="Settings" />
-      </View>
+      contentContainerStyle={{ paddingBottom: clearance + space.xxl }}>
+      <ScreenHero title="Settings">
+        <T variant="largeTitle" tone="onBrand" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          {settings.firstName || 'Your account'}
+        </T>
+        <T variant="sub" tone="onBrandSoft" numberOfLines={1}>
+          {settings.email || 'Preview build · sample data'}
+        </T>
+      </ScreenHero>
+      <View style={{ paddingHorizontal: space.l }}>
 
       <Group title="Account">
         <Item label="Name" value={settings.firstName} />
@@ -121,6 +123,7 @@ export default function Settings() {
       <T variant="caption" tone="inkMute" style={{ textAlign: 'center', marginTop: space.xxl }}>
         Preview build · showing sample data
       </T>
+      </View>
     </ScrollView>
   );
 }

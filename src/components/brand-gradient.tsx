@@ -11,12 +11,21 @@ import { useTheme } from '@/theme/use-theme';
  * glow in the top-right corner and a faint white sheen bottom-left. With `fade`, a band at the
  * bottom melts into brandFade (icy blue in light mode, the navy ground in dark) or `fadeTo`; BrandGradient adds
  * that band's height below its children, so no content ever sits on it.
+ * With `flare`, a brighter white highlight fills the top-right corner (the hero look); keep text
+ * out of that corner (brandGradient.flareRadius of the box).
  * Never animated. scripts/check-contrast.mjs samples this exact geometry; keep the two in step.
  *
  * Only SVG props go on <Svg>: on the web, react-native-svg forwards every prop to the DOM <svg>.
  * Screen-reader hiding and touch pass-through live on the wrapping View.
  */
-export function BrandGradient({ style, children, fade, fadeTo, ...rest }: ViewProps & { fade?: boolean; fadeTo?: string }) {
+export function BrandGradient({
+  style,
+  children,
+  fade,
+  fadeTo,
+  flare,
+  ...rest
+}: ViewProps & { fade?: boolean; fadeTo?: string; flare?: boolean }) {
   const { c, scheme } = useTheme();
   // Gradient ids are global in the web DOM; useId keeps two instances apart (minus its colons).
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
@@ -52,6 +61,10 @@ export function BrandGradient({ style, children, fade, fadeTo, ...rest }: ViewPr
                 <Stop offset="0" stopColor={c.onBrand} stopOpacity={brandGradient.sheen[scheme]} />
                 <Stop offset="1" stopColor={c.onBrand} stopOpacity={0} />
               </RadialGradient>
+              <RadialGradient id={`${id}flare`} cx="100%" cy="0%" fx="100%" fy="0%" r={`${brandGradient.flareRadius * 100}%`}>
+                <Stop offset="0" stopColor={c.onBrand} stopOpacity={brandGradient.flare[scheme]} />
+                <Stop offset="1" stopColor={c.onBrand} stopOpacity={0} />
+              </RadialGradient>
               <LinearGradient id={`${id}fade`} x1="0%" y1="0%" x2="0%" y2="100%">
                 <Stop offset="0" stopColor={fadeTo ?? c.brandFade} stopOpacity={0} />
                 <Stop offset="1" stopColor={fadeTo ?? c.brandFade} stopOpacity={1} />
@@ -60,6 +73,7 @@ export function BrandGradient({ style, children, fade, fadeTo, ...rest }: ViewPr
             <Rect x={0} y={0} width={size.w} height={size.h} fill={`url(#${id}base)`} />
             <Rect x={0} y={0} width={size.w} height={size.h} fill={`url(#${id}glow)`} />
             <Rect x={0} y={0} width={size.w} height={size.h} fill={`url(#${id}sheen)`} />
+            {flare ? <Rect x={0} y={0} width={size.w} height={size.h} fill={`url(#${id}flare)`} /> : null}
             {fade ? <Rect x={0} y={size.h - band} width={size.w} height={band} fill={`url(#${id}fade)`} /> : null}
           </Svg>
         ) : null}

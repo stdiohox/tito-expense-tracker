@@ -176,6 +176,12 @@ export const brandGradient = {
   mid: { light: 0.45, dark: 0.5 },
   glow: { light: 0.22, dark: 0.14 },
   sheen: { light: 0.06, dark: 0.04 },
+  /**
+   * Optional white flare in the top-right corner (screen heroes): peak opacity, fading to 0 at
+   * flareRadius of the box. Heroes keep text out of that corner, so text contrast is unaffected.
+   */
+  flare: { light: 0.55, dark: 0.45 },
+  flareRadius: 0.32,
   fade: 28,
 } as const;
 

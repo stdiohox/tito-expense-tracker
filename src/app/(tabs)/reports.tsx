@@ -1,16 +1,14 @@
 import { IconShare } from '@tabler/icons-react-native';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
-import { FocusStatusBar } from '@/components/focus-status-bar';
 import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
+import { ScreenHero } from '@/components/screen-hero';
 import { StatCard, StatRow } from '@/components/stat-card';
-import { TabTitle } from '@/components/tab-title';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
@@ -25,8 +23,7 @@ import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export default function Reports() {
-  const { c, scheme } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, current, set, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
@@ -66,26 +63,27 @@ export default function Reports() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
-      <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: insets.top, paddingBottom: clearance + space.xxl, gap: space.m }}>
-        <View style={{ paddingHorizontal: space.xs }}>
-          <TabTitle title="Reports">
-            <MonthSwitcher />
-          </TabTitle>
-        </View>
+        contentContainerStyle={{ paddingBottom: clearance + space.xxl }}>
+        <ScreenHero title="Reports">
+          <MonthSwitcher onBrand />
+          <T
+            variant="total"
+            tone="onBrand"
+            numeric
+            adjustsFontSizeToFit
+            numberOfLines={1}
+            minimumFontScale={0.6}
+            accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${monthName(month)}`}>
+            {formatMoney(now.total, cur)}
+          </T>
+          <T variant="body" tone="onBrandSoft">
+            {headline}
+          </T>
+        </ScreenHero>
 
-        <Panel>
-          <View style={{ paddingVertical: space.m, gap: space.xs }}>
-            <T variant="total" numeric adjustsFontSizeToFit numberOfLines={1} minimumFontScale={0.6}>
-              {formatMoney(now.total, cur)}
-            </T>
-            <T variant="body" tone="inkSoft">
-              {headline}
-            </T>
-          </View>
-        </Panel>
+        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.s }}>
 
         <StatRow>
           <StatCard
@@ -186,6 +184,7 @@ export default function Reports() {
             icon={<IconShare size={20} color={c.accent} strokeWidth={1.75} />}
             onPress={() => toast({ message: 'PDF sharing arrives in the next build' })}
           />
+        </View>
         </View>
       </ScrollView>
     </View>

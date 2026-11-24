@@ -22,7 +22,9 @@ const mix = (fg, bg, a) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(fg.sli
 
 // The brand gradient as BrandGradient draws it, in bounding-box units: linear (0,0) -> (1,1) with stops
 // at 0, mid and 1; an icy glow centred (1,0), radius 0.65; a white sheen centred (0,1), radius 0.55;
-// both fading linearly to 0. Sampled on a 21 x 21 grid. The bottom fade band holds no content (the
+// both fading linearly to 0. Sampled on a 21 x 21 grid. The optional hero flare (brandGradient.flare)
+// paints only inside flareRadius of the top-right corner, where heroes place no text, so it is left
+// out of these samples on purpose. The bottom fade band holds no content (the
 // component pads below its children), so it is not a text background and is not sampled.
 const gradient = (p, scheme) => {
   const mid = geometry.mid[scheme];

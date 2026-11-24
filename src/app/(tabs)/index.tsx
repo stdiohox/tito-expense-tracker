@@ -1,13 +1,10 @@
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 
 import { AddButton } from '@/components/add-button';
-import { BrandGradient } from '@/components/brand-gradient';
 import { BudgetCard } from '@/components/budget-card';
-import { FocusStatusBar } from '@/components/focus-status-bar';
 import { GlassCard } from '@/components/glass-card';
 import { IconDisc } from '@/components/icon-disc';
 import { LinkButton } from '@/components/link-button';
@@ -15,6 +12,7 @@ import { MonthSwitcher } from '@/components/month-switcher';
 import { PaceChart } from '@/components/pace-chart';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
+import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useFabScroll } from '@/components/use-fab-scroll';
@@ -27,26 +25,17 @@ import { CURRENCIES, formatMoney } from '@/domain/money';
 import { budgetFor, compareWords, pace } from '@/domain/summary';
 import type { CurrencyCode } from '@/domain/types';
 import { light, space } from '@/theme/tokens';
-import { AppearanceProvider, useTheme } from '@/theme/use-theme';
+import { useTheme } from '@/theme/use-theme';
 
 const CARD_WIDTH = 230;
 
 /**
- * Home is the brand scene in both modes, like the onboarding: a bright gradient header that flows
- * into a deep navy body of dark panels. The header renders with the light palette (the brighter
- * gradient and its checked text pairs); everything else with the dark palette.
+ * Home: the shared screen hero (bright gradient, the same in both modes), then a body that follows
+ * the Appearance setting: light panels on the icy-white ground in light mode, dark panels on navy
+ * in dark mode. Quick add stays a dark panel in both, as the screen's one dark accent.
  */
 export default function Home() {
-  return (
-    <AppearanceProvider mode="dark">
-      <HomeScreen />
-    </AppearanceProvider>
-  );
-}
-
-function HomeScreen() {
   const { c } = useTheme();
-  const insets = useSafeAreaInsets();
   const clearance = useTabBarClearance();
   const { month, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
@@ -104,18 +93,50 @@ function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
-      <FocusStatusBar style="light" />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
         onScroll={fab.onScroll}
         scrollEventThrottle={64}
         contentContainerStyle={{ paddingBottom: clearance + 88 }}>
-        <AppearanceProvider mode="light">
-        <BrandGradient fade fadeTo={c.ground} style={{ paddingTop: insets.top + space.s }}>
-          <View style={{ paddingHorizontal: space.xl }}>
-            <T variant="title" tone="onBrand" accessibilityRole="header" style={{ marginTop: space.s }}>
-              {settings.firstName ? `Hello, ${settings.firstName}` : 'Hello'}
-            </T>
+        <ScreenHero
+          title={settings.firstName ? `Hello, ${settings.firstName}` : 'Hello'}
+          bleed={
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={CARD_WIDTH + space.m}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingHorizontal: space.xl, gap: space.m, paddingTop: space.l }}>
+            {currencyCards.map((card, i) => (
+              <GlassCard key={card.code} style={{ width: CARD_WIDTH, gap: space.xs }}>
+                <View
+                  accessible
+                  accessibilityLabel={`${CURRENCIES[card.code].name}: ${formatMoney(card.total, card.code)}, ${card.count} ${card.count === 1 ? 'payment' : 'payments'}${
+                    i === 0 ? (paceBadge ? `, ${paceBadge.replace('vs', 'compared with')}` : '') : ', counted separately'
+                  }`}
+                  style={{ gap: space.xs }}>
+                  <T variant="caption" tone="onBrandSoft">
+                    {CURRENCIES[card.code].symbol} {card.code}
+                  </T>
+                  <T variant="title" tone="onBrand" numeric numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ marginTop: space.l }}>
+                    {formatMoney(card.total, card.code)}
+                  </T>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.s }}>
+                    <T variant="sub" tone="onBrandSoft" style={{ flexShrink: 1 }}>
+                      {card.count} {card.count === 1 ? 'payment' : 'payments'}
+                      {i === 0 ? '' : ' · counted separately'}
+                    </T>
+                    {i === 0 && paceBadge ? (
+                      <T variant="caption" numeric style={{ color: light.pop }}>
+                        {paceBadge}
+                      </T>
+                    ) : null}
+                  </View>
+                </View>
+              </GlassCard>
+            ))}
+          </ScrollView>
+          }>
             <MonthSwitcher onBrand />
             <View style={{ marginTop: space.s, gap: space.xs }}>
               <T
@@ -156,45 +177,7 @@ function HomeScreen() {
                 </View>
               </View>
             ) : null}
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={CARD_WIDTH + space.m}
-            decelerationRate="fast"
-            contentContainerStyle={{ paddingHorizontal: space.xl, gap: space.m, paddingTop: space.l }}>
-            {currencyCards.map((card, i) => (
-              <GlassCard key={card.code} style={{ width: CARD_WIDTH, gap: space.xs }}>
-                <View
-                  accessible
-                  accessibilityLabel={`${CURRENCIES[card.code].name}: ${formatMoney(card.total, card.code)}, ${card.count} ${card.count === 1 ? 'payment' : 'payments'}${
-                    i === 0 ? (paceBadge ? `, ${paceBadge.replace('vs', 'compared with')}` : '') : ', counted separately'
-                  }`}
-                  style={{ gap: space.xs }}>
-                  <T variant="caption" tone="onBrandSoft">
-                    {CURRENCIES[card.code].symbol} {card.code}
-                  </T>
-                  <T variant="title" tone="onBrand" numeric numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ marginTop: space.l }}>
-                    {formatMoney(card.total, card.code)}
-                  </T>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.s }}>
-                    <T variant="sub" tone="onBrandSoft" style={{ flexShrink: 1 }}>
-                      {card.count} {card.count === 1 ? 'payment' : 'payments'}
-                      {i === 0 ? '' : ' · counted separately'}
-                    </T>
-                    {i === 0 && paceBadge ? (
-                      <T variant="caption" numeric style={{ color: light.pop }}>
-                        {paceBadge}
-                      </T>
-                    ) : null}
-                  </View>
-                </View>
-              </GlassCard>
-            ))}
-          </ScrollView>
-        </BrandGradient>
-        </AppearanceProvider>
+        </ScreenHero>
 
         <View style={{ paddingHorizontal: space.l, gap: space.l, marginTop: space.s }}>
           <Panel dark title="Quick add">
@@ -274,7 +257,6 @@ function HomeScreen() {
               ) : null}
 
               <Panel
-                dark
                 title="Latest"
                 action={<LinkButton role="link" label="View all" accessibilityHint={`Shows all ${allCount} expenses`} onPress={() => router.navigate('/expenses')} />}>
                 {recent.map((e, i) => {
