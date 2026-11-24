@@ -136,8 +136,16 @@ export default function Reports() {
                         height: `${Math.max(3, (h.total / maxHist) * 70)}%`,
                         backgroundColor: isSel ? c.button : c.barMuted,
                         borderRadius: radius.s,
-                      }}
-                    />
+                      }}>
+                      {/* The gold "crown" on the selected month: decorative; the fill and the
+                          selected state already say which month it is. */}
+                      {isSel ? (
+                        <View
+                          accessible={false}
+                          style={{ position: 'absolute', top: -5, left: '30%', width: '40%', height: 3, borderRadius: 2, backgroundColor: c.gold }}
+                        />
+                      ) : null}
+                    </View>
                     <T variant="caption" tone={isSel ? 'ink' : 'inkMute'}>
                       {shortMonth(h.month)}
                     </T>
