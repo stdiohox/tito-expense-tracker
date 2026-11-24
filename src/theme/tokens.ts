@@ -209,7 +209,7 @@ export const categoryColors: Record<CategoryIcon, { light: string; dark: string 
 export const TARGET = Platform.select({ android: 48, default: 44 });
 
 export const space = { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24, xxxl: 32, huge: 44 } as const;
-export const radius = { s: 8, m: 12, l: 16, pill: 999 } as const;
+export const radius = { s: 8, m: 12, l: 16, xl: 20, xxl: 28, pill: 999 } as const;
 
 /** Outfit in three weights. Its `tnum` feature gives every digit the same width (590 units). */
 export const fonts = {

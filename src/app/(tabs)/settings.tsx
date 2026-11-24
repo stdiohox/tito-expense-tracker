@@ -9,6 +9,7 @@ import { STROKE } from '@/components/icons';
 import { Segmented } from '@/components/segmented';
 import { switchColors } from '@/components/switch-colors';
 import { TabTitle } from '@/components/tab-title';
+import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
 import { useActions, useStore } from '@/data/store';
@@ -20,6 +21,7 @@ import { useTheme } from '@/theme/use-theme';
 export default function Settings() {
   const { c, scheme } = useTheme();
   const insets = useSafeAreaInsets();
+  const clearance = useTabBarClearance();
   const { settings } = useStore();
   const { updateSettings, signOut } = useActions();
   const toast = useToast();
@@ -28,7 +30,7 @@ export default function Settings() {
     <ScrollView
       style={{ backgroundColor: c.ground }}
       contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + space.xxxl }}>
+      contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: clearance + space.xxl }}>
       <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <TabTitle title="Settings" />
 

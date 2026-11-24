@@ -13,6 +13,7 @@ import { LinkButton } from '@/components/link-button';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { PaceChart } from '@/components/pace-chart';
 import { Row, SectionHeader } from '@/components/row';
+import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useFabScroll } from '@/components/use-fab-scroll';
 import { useMonth } from '@/data/month';
@@ -27,6 +28,7 @@ import { useTheme } from '@/theme/use-theme';
 export default function Home() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  const clearance = useTabBarClearance();
   const { month, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
@@ -68,7 +70,7 @@ export default function Home() {
         contentInsetAdjustmentBehavior="never"
         onScroll={fab.onScroll}
         scrollEventThrottle={64}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}>
+        contentContainerStyle={{ paddingBottom: clearance + 88 }}>
         <BrandGradient style={{ paddingTop: insets.top + space.s, paddingHorizontal: space.xl, paddingBottom: space.xxl }}>
           <MonthSwitcher onBrand />
           <View style={{ marginTop: space.l, gap: space.xs }}>

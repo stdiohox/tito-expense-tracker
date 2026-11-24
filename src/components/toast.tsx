@@ -1,23 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, Pressable, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown, ReduceMotion } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
+import { useTabBarClearance } from './tab-bar';
 import { T } from './text';
 
 type Toast = { message: string; actionLabel?: string; actionA11yLabel?: string; onAction?: () => void };
 
 const Ctx = createContext<(t: Toast) => void>(() => {});
 
-/**
- * The toast lives at the root, so it adds the tab bar's height itself, then clears the
- * floating Add expense button (56 tall, 16 above the bar). Verify on devices: bar heights
- * are the system defaults (iOS 49, Android 80, web 62).
- */
-const TAB_BAR = Platform.select({ ios: 49, android: 80, default: 62 });
+/** Room above the floating tab bar for the Add expense button (56 tall, 16 above the bar). */
 const ABOVE_ADD_BUTTON = space.l + 56 + space.s;
 
 /**
@@ -29,7 +24,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const seq = useRef(0);
   const readerOn = useRef(false);
-  const insets = useSafeAreaInsets();
+  const clearance = useTabBarClearance();
   const { c } = useTheme();
 
   useEffect(() => {
@@ -60,7 +55,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           entering={FadeInDown.duration(220).reduceMotion(ReduceMotion.System)}
           exiting={FadeOutDown.duration(180).reduceMotion(ReduceMotion.System)}
           pointerEvents="box-none"
-          style={{ position: 'absolute', left: space.l, right: space.l, bottom: insets.bottom + TAB_BAR + ABOVE_ADD_BUTTON }}>
+          style={{ position: 'absolute', left: space.l, right: space.l, bottom: clearance + ABOVE_ADD_BUTTON }}>
           <View
             accessibilityLiveRegion="polite"
             aria-live="polite"

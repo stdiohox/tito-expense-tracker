@@ -11,6 +11,7 @@ import { STROKE } from '@/components/icons';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Row } from '@/components/row';
 import { TabTitle } from '@/components/tab-title';
+import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useFabScroll } from '@/components/use-fab-scroll';
 import { useFocusBorder } from '@/components/use-focus-border';
@@ -25,6 +26,7 @@ import { useTheme } from '@/theme/use-theme';
 export default function Expenses() {
   const { c, scheme } = useTheme();
   const insets = useSafeAreaInsets();
+  const clearance = useTabBarClearance();
   const { month } = useMonth();
   const { expenses, categories, settings } = useStore();
   const [query, setQuery] = useState('');
@@ -80,7 +82,7 @@ export default function Expenses() {
         contentInsetAdjustmentBehavior="never"
         onScroll={fab.onScroll}
         scrollEventThrottle={64}
-        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + 120 }}
+        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: clearance + 88 }}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View>

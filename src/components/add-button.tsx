@@ -1,12 +1,12 @@
 import { IconPlus } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 import Animated, { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
+import { useTabBarClearance } from './tab-bar';
 import { T } from './text';
 
 /**
@@ -15,10 +15,8 @@ import { T } from './text';
  */
 export function AddButton({ compact, hidden }: { compact?: boolean; hidden?: boolean }) {
   const { c } = useTheme();
-  const insets = useSafeAreaInsets();
-  // Android native tabs already lay content out above the system bars; iOS tab screens report
-  // the tab bar in their own safe-area inset.
-  const bottom = Platform.OS === 'android' ? space.l : insets.bottom + space.l;
+  // Sits 16 above the floating tab bar, which already clears the bottom safe area.
+  const bottom = useTabBarClearance() + space.l;
   if (hidden) return null;
   return (
     <Animated.View

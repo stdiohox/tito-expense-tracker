@@ -9,6 +9,7 @@ import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Row, SectionHeader } from '@/components/row';
 import { TabTitle } from '@/components/tab-title';
+import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
 import { useMonth } from '@/data/month';
@@ -24,6 +25,7 @@ import { useTheme } from '@/theme/use-theme';
 export default function Reports() {
   const { c, scheme } = useTheme();
   const insets = useSafeAreaInsets();
+  const clearance = useTabBarClearance();
   const { month, current, set, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
@@ -63,7 +65,7 @@ export default function Reports() {
       <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + space.xxxl }}>
+        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: clearance + space.xxl }}>
         <TabTitle title="Reports">
           <MonthSwitcher />
         </TabTitle>
