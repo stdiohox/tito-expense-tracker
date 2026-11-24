@@ -1,3 +1,4 @@
+import { IconCircleCheck } from '@tabler/icons-react-native';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, Pressable, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown, ReduceMotion } from 'react-native-reanimated';
@@ -5,10 +6,12 @@ import Animated, { FadeInDown, FadeOutDown, ReduceMotion } from 'react-native-re
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
+import { STROKE } from './icons';
 import { useTabBarClearance } from './tab-bar';
 import { T } from './text';
 
-type Toast = { message: string; actionLabel?: string; actionA11yLabel?: string; onAction?: () => void };
+/** `success` adds a small mint check (the pop colour, on the dark toast). */
+type Toast = { message: string; success?: boolean; actionLabel?: string; actionA11yLabel?: string; onAction?: () => void };
 
 const Ctx = createContext<(t: Toast) => void>(() => {});
 
@@ -74,6 +77,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               shadowOffset: { width: 0, height: 3 },
               elevation: 4,
             }}>
+            {toast.success ? <IconCircleCheck size={20} color={c.pop} strokeWidth={STROKE} /> : null}
             <T variant="sub" style={{ flex: 1, color: c.onToast }}>
               {toast.message}
             </T>

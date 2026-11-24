@@ -70,7 +70,7 @@ export default function EditCategory() {
       budgetCurrency: keepForeign ? foreignBudget.budgetCurrency : budget !== null ? cur : undefined,
       builtIn: existing?.builtIn ?? false,
     });
-    toast({ message: existing ? 'Category saved' : `${name.trim()} added` });
+    toast({ message: existing ? 'Category saved' : `${name.trim()} added`, success: true });
     safeBack();
   };
 
