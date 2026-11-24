@@ -96,7 +96,7 @@ export default function Expenses() {
           </T>
         </ScreenHero>
 
-        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.s }}>
+        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
 
         <View
           style={{

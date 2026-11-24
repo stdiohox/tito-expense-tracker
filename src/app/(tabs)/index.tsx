@@ -101,7 +101,7 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             snapToInterval={CARD_WIDTH + space.m}
             decelerationRate="fast"
-            contentContainerStyle={{ paddingHorizontal: space.xl, gap: space.m, paddingTop: space.l }}>
+            contentContainerStyle={{ paddingHorizontal: space.l, gap: space.m, paddingTop: space.l }}>
             {currencyCards.map((card, i) => (
               <GlassCard key={card.code} style={{ width: CARD_WIDTH, gap: space.xs }}>
                 <View
@@ -174,7 +174,7 @@ export default function Home() {
             ) : null}
         </ScreenHero>
 
-        <View style={{ paddingHorizontal: space.l, gap: space.l, marginTop: space.s }}>
+        <View style={{ paddingHorizontal: space.l, gap: space.l, marginTop: space.l }}>
           <Panel dark title="Quick add">
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -space.xs, marginTop: space.s, marginBottom: space.s }}>
               {quick.map((cat) => (

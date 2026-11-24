@@ -83,7 +83,7 @@ export default function Reports() {
           </T>
         </ScreenHero>
 
-        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.s }}>
+        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
 
         <StatRow>
           <StatCard
