@@ -3,11 +3,14 @@ import { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Badge } from '@/components/badge';
 import { Button } from '@/components/button';
 import { BudgetBar } from '@/components/budget-bar';
 import { IconDisc } from '@/components/icon-disc';
 import { LinkButton } from '@/components/link-button';
-import { Row, SectionHeader } from '@/components/row';
+import { Panel } from '@/components/panel';
+import { Row } from '@/components/row';
+import { StatCard, StatRow } from '@/components/stat-card';
 import { T } from '@/components/text';
 import { useMonth } from '@/data/month';
 import { useCategory, useStore } from '@/data/store';
@@ -74,64 +77,74 @@ export default function CategoryDetail() {
           headerRight,
         }}
       />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space.xl, paddingBottom: insets.bottom + 110 }}>
-        <View style={{ paddingTop: space.l, gap: space.s }}>
-          <IconDisc icon={category.icon} size={56} />
-          <T variant="total" numeric adjustsFontSizeToFit numberOfLines={1} minimumFontScale={0.6} style={{ marginTop: space.s }}>
-            {formatMoney(total, cur)}
-          </T>
-          <T variant="body" tone="inkSoft">
-            Spent on {category.name.toLowerCase()} in {monthName(month)}
-            {lastTotal > 0 ? ` · ${formatMoney(lastTotal, cur)} in ${lastName}` : ''}
-          </T>
-        </View>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: space.s, paddingBottom: insets.bottom + 110, gap: space.m }}>
+        <Panel>
+          <View style={{ paddingVertical: space.m, gap: space.s }}>
+            <IconDisc icon={category.icon} size={56} />
+            <T variant="total" numeric adjustsFontSizeToFit numberOfLines={1} minimumFontScale={0.6} style={{ marginTop: space.xs }}>
+              {formatMoney(total, cur)}
+            </T>
+            <T variant="body" tone="inkSoft">
+              Spent on {category.name.toLowerCase()} in {monthName(month)}
+            </T>
+          </View>
+        </Panel>
 
-        <View style={{ marginTop: space.xxl, paddingVertical: space.l, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.line }}>
-          {budget !== null ? (
-            <>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <T variant="headline">Monthly budget</T>
-                <T variant="headline" numeric>
-                  {formatMoney(budget, cur)}
+        <StatRow>
+          <StatCard label="Payments" value={String(items.length)} note={`In ${monthName(month)}`} />
+          <StatCard label={`In ${lastName}`} value={formatMoney(lastTotal, cur, { compact: true })} note={lastTotal > 0 ? 'The month before' : 'Nothing logged'} />
+        </StatRow>
+
+        <Panel>
+          <View style={{ paddingVertical: space.l }}>
+            {budget !== null ? (
+              <>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.m }}>
+                  <T variant="headline">Monthly budget</T>
+                  <Badge label={`${Math.round((total / budget) * 100)}%`} over={over} />
+                </View>
+                <T variant="title" numeric style={{ marginTop: space.xs }}>
+                  {formatMoney(total, cur)} / {formatMoney(budget, cur)}
                 </T>
+                <BudgetBar spent={total} budget={budget} />
+                <T variant="sub" tone={over ? 'burgundy' : 'inkSoft'} style={{ marginTop: space.s }}>
+                  {over
+                    ? `${formatMoney(total - budget, cur)} over budget. That's fine; it helps to know.`
+                    : `${formatMoney(budget - total, cur)} left this month`}
+                </T>
+              </>
+            ) : (
+              <View style={{ gap: space.s }}>
+                <T variant="headline">No budget yet</T>
+                <T variant="sub" tone="inkSoft">
+                  Set a monthly amount for {category.name.toLowerCase()} and see how much is left as you go.
+                </T>
+                <LinkButton label="Set a budget" onPress={() => router.push({ pathname: '/category/edit', params: { id: category.id } })} />
               </View>
-              <BudgetBar spent={total} budget={budget} />
-              <T variant="sub" tone={over ? 'burgundy' : 'inkSoft'} style={{ marginTop: space.s }}>
-                {over
-                  ? `${formatMoney(total - budget, cur)} over budget. That's fine; it helps to know.`
-                  : `${formatMoney(budget - total, cur)} left this month`}
-              </T>
-            </>
-          ) : (
-            <View style={{ gap: space.s }}>
-              <T variant="headline">No budget yet</T>
-              <T variant="sub" tone="inkSoft">
-                Set a monthly amount for {category.name.toLowerCase()} and see how much is left as you go.
-              </T>
-              <LinkButton label="Set a budget" onPress={() => router.push({ pathname: '/category/edit', params: { id: category.id } })} />
-            </View>
-          )}
-        </View>
+            )}
+          </View>
+        </Panel>
 
-        <SectionHeader title="Activity" />
-        {items.length === 0 ? (
-          <T variant="sub" tone="inkMute" style={{ paddingVertical: space.m }}>
-            Nothing here in {monthName(month)}.
-          </T>
-        ) : (
-          items.map((e, i) => (
-            <Row
-              key={e.id}
-              title={e.note || category.name}
-              subtitle={dayLabel(e.day)}
-              trailing={formatMoney(e.amount, e.currency)}
-              onPress={() => router.push({ pathname: '/expense/[id]', params: { id: e.id } })}
-              divider={i < items.length - 1}
-            />
-          ))
-        )}
+        <Panel title="Activity">
+          {items.length === 0 ? (
+            <T variant="sub" tone="inkMute" style={{ paddingVertical: space.m }}>
+              Nothing here in {monthName(month)}.
+            </T>
+          ) : (
+            items.map((e, i) => (
+              <Row
+                key={e.id}
+                title={e.note || category.name}
+                subtitle={dayLabel(e.day)}
+                trailing={formatMoney(e.amount, e.currency)}
+                onPress={() => router.push({ pathname: '/expense/[id]', params: { id: e.id } })}
+                divider={i < items.length - 1}
+              />
+            ))
+          )}
+        </Panel>
       </ScrollView>
-      <View style={{ position: 'absolute', left: space.xl, right: space.xl, bottom: insets.bottom + space.l }}>
+      <View style={{ position: 'absolute', left: space.l, right: space.l, bottom: insets.bottom + space.l }}>
         <Button
           label={`Add to ${category.name}`}
           onPress={() => router.push({ pathname: '/expense/new', params: { category: category.id } })}
