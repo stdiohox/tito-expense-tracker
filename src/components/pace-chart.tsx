@@ -97,8 +97,8 @@ export function PaceChart({
             <Path d={curPath} stroke={c.chartLine} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
             {last ? (
               <>
-                <Circle cx={last[0]} cy={last[1]} r={9} fill={c.goldOnBrand} opacity={0.28} />
-                <Circle cx={last[0]} cy={last[1]} r={4.5} fill={c.goldOnBrand} />
+                <Circle cx={last[0]} cy={last[1]} r={9} fill={c.pop} opacity={0.28} />
+                <Circle cx={last[0]} cy={last[1]} r={4.5} fill={c.pop} />
               </>
             ) : null}
           </Svg>

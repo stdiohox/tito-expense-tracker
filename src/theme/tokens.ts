@@ -3,10 +3,11 @@ import { Platform } from 'react-native';
 import type { CategoryIcon } from '@/domain/types';
 
 /*
- * Tito Finance palette: navy #0B1B3F, Tito indigo #272C77 (brand and primary buttons), French blue
- * #2F5DA8 (links and accents), sky blue #8EC9F0 (glow and the pace line), champagne ivory #F6EFE2
- * (light ground), gold #C89B3C (the one "crown" pop, small marks only) and burgundy #7A1F3D (over
- * budget and errors, always with words). Dark mode is built on the navy.
+ * Tito Finance palette (redesign): deep navy #141033, royal blue #2631AD (brand, primary buttons),
+ * electric blue #2F5BE7 (gradient, links, active tab, progress), icy blue #CBE9FD (light-mode
+ * gradient end, light tints), aqua mint #2AFFCC (the ONE pop: today, active dots, % badges, success;
+ * only on dark or blue surfaces, with teal popOnGround for light ones), white, and burgundy/rose for
+ * over-budget and errors (always with words). Dark mode is built on the deep navy.
  * Every text and indicator pair here is checked by scripts/check-contrast.mjs (WCAG AA).
  */
 
@@ -22,26 +23,35 @@ export type Palette = {
   fieldBorder: string;
   /** Switch track when off: 3:1 against surface, and the white thumb 3:1 against it. */
   switchOff: string;
-  /** Brand header and auth welcome: solid fallback, and the gradient drawn by BrandGradient. */
+  /** Brand surfaces (Home header, onboarding): solid fallback, and the gradient BrandGradient draws. */
   brand: string;
   brandStart: string;
   brandMid: string;
   brandEnd: string;
+  /** Soft highlight in the top-right corner of the gradient. */
   brandGlow: string;
+  /** Colour the gradient's bottom band fades to (icy blue in light mode, the ground in dark). */
+  brandFade: string;
   onBrand: string;
   onBrandSoft: string;
-  /** Interactive accent on ground/surface: links, icons, selection. */
+  /** Glass cards on the gradient: a translucent navy tint (see glass) with a light edge. */
+  glassTint: string;
+  glassEdge: string;
+  /** Interactive accent on ground/surface: links, active tab, progress fills, selection. */
   accent: string;
   /** Primary button fill and its label. */
   button: string;
   onButton: string;
   buttonPressed: string;
   accentTint: string;
-  /** The "crown": small highlights and active marks only, never a large fill. Decorative on light grounds. */
-  gold: string;
-  /** Gold lifted to 3:1 on the brand header, for the pace chart's "today" dot. */
-  goldOnBrand: string;
-  /** Budget passed. Always paired with words; never an alarm red. */
+  /** The ONE pop (aqua mint). Only on dark or blue surfaces: today dot, active dots, success. */
+  pop: string;
+  /** The pop as it may appear on this scheme's ground and surface (teal in light, mint in dark). */
+  popOnGround: string;
+  /** Percent badges: background and text. */
+  badge: string;
+  onBadge: string;
+  /** Budget passed and errors. Always paired with words; never an alarm red. */
   burgundy: string;
   positive: string;
   danger: string;
@@ -54,11 +64,11 @@ export type Palette = {
   toast: string;
   onToast: string;
   toastAction: string;
-  /** Label on the white Welcome button (the brand indigo in both schemes). */
+  /** Label on the white onboarding button (royal blue in both schemes). */
   onWelcomeButton: string;
   /** Switch thumb. */
   thumb: string;
-  /** Shadows of the two floating elements (DESIGN.md, Shadow Vocabulary). */
+  /** Shadows of the floating elements (DESIGN.md, Shadow Vocabulary). */
   fabShadow: string;
   toastShadow: string;
   /** Keyboard focus outline on the web build (web-focus.ts). */
@@ -66,89 +76,114 @@ export type Palette = {
 };
 
 export const light: Palette = {
-  ground: '#F6EFE2',
-  surface: '#FFFDF8',
-  raised: '#FFFDF8',
-  ink: '#0B1B3F',
-  inkSoft: '#424F70',
-  inkMute: '#5E6A88',
-  line: '#E7DFD0',
-  fieldBorder: '#838796',
-  switchOff: '#838796',
-  brand: '#272C77',
-  brandStart: '#0B1B3F',
-  brandMid: '#272C77',
-  brandEnd: '#2F5DA8',
-  brandGlow: '#8EC9F0',
+  ground: '#F1F5FC',
+  surface: '#FFFFFF',
+  raised: '#FFFFFF',
+  ink: '#141033',
+  inkSoft: '#4D4E74',
+  inkMute: '#69698B',
+  line: '#E1E7F3',
+  fieldBorder: '#8589A7',
+  switchOff: '#8589A7',
+  brand: '#2631AD',
+  brandStart: '#141033',
+  brandMid: '#2631AD',
+  brandEnd: '#2F5BE7',
+  brandGlow: '#CBE9FD',
+  brandFade: '#CBE9FD',
   onBrand: '#FFFFFF',
-  onBrandSoft: '#C4E0F5',
-  accent: '#2F5DA8',
-  button: '#272C77',
+  onBrandSoft: '#E1EAFB',
+  glassTint: '#141033',
+  glassEdge: '#FFFFFF',
+  accent: '#2F5BE7',
+  button: '#2631AD',
   onButton: '#FFFFFF',
-  buttonPressed: '#1D2160',
-  accentTint: '#E3EBF7',
-  gold: '#C89B3C',
-  goldOnBrand: '#D5B36B',
+  buttonPressed: '#1C2589',
+  accentTint: '#E2EEFD',
+  pop: '#2AFFCC',
+  popOnGround: '#0D7B62',
+  badge: '#E9FFFA',
+  onBadge: '#0D7B62',
   burgundy: '#7A1F3D',
   positive: '#2B6E47',
   danger: '#7A1F3D',
-  dangerTint: '#F5E3E8',
-  barMuted: '#6C88BA',
-  chartLine: '#8EC9F0',
+  dangerTint: '#F7E3E9',
+  barMuted: '#7A86D0',
+  chartLine: '#CBE9FD',
   chartGhost: 'rgba(255,255,255,0.45)',
-  toast: '#0B1B3F',
+  toast: '#141033',
   onToast: '#FFFFFF',
-  toastAction: '#8EC9F0',
-  onWelcomeButton: '#272C77',
+  toastAction: '#CBE9FD',
+  onWelcomeButton: '#2631AD',
   thumb: '#FFFFFF',
-  fabShadow: '#0B1B3F',
+  fabShadow: '#141033',
   toastShadow: '#000000',
-  focusRing: '#2F5DA8',
+  focusRing: '#2F5BE7',
 };
 
 export const dark: Palette = {
-  ground: '#0B1B3F',
-  surface: '#122752',
-  raised: '#1A3262',
-  ink: '#F6EFE2',
-  inkSoft: '#ADB4C5',
-  inkMute: '#8992AD',
-  line: '#1F3363',
-  fieldBorder: '#667599',
-  switchOff: '#667599',
-  brand: '#1E2263',
-  brandStart: '#0B1B3F',
-  brandMid: '#1E2263',
-  brandEnd: '#244A86',
-  brandGlow: '#8EC9F0',
+  ground: '#141033',
+  surface: '#1E1A4A',
+  raised: '#29245E',
+  ink: '#F4F5FF',
+  inkSoft: '#B7B9D8',
+  inkMute: '#9194B6',
+  line: '#2C2862',
+  fieldBorder: '#6A6999',
+  switchOff: '#6A6999',
+  brand: '#1F2690',
+  brandStart: '#141033',
+  brandMid: '#1F2690',
+  brandEnd: '#2A50CF',
+  brandGlow: '#CBE9FD',
+  brandFade: '#141033',
   onBrand: '#FFFFFF',
-  onBrandSoft: '#B4D3EE',
-  accent: '#8EC9F0',
-  button: '#AEB3FF',
-  onButton: '#0B1B3F',
-  buttonPressed: '#9198F2',
-  accentTint: '#1C3A6B',
-  gold: '#C89B3C',
-  goldOnBrand: '#C89B3C',
+  onBrandSoft: '#C6D8F8',
+  glassTint: '#141033',
+  glassEdge: '#FFFFFF',
+  accent: '#7693EF',
+  button: '#3560E8',
+  onButton: '#FFFFFF',
+  buttonPressed: '#2631AD',
+  accentTint: '#212665',
+  pop: '#2AFFCC',
+  popOnGround: '#2AFFCC',
+  badge: '#10383F',
+  onBadge: '#2AFFCC',
   burgundy: '#E58AA3',
   positive: '#86D0A4',
   danger: '#E58AA3',
-  dangerTint: '#3A1830',
-  barMuted: '#4A6B99',
-  chartLine: '#8EC9F0',
+  dangerTint: '#3A1838',
+  barMuted: '#505FAD',
+  chartLine: '#CBE9FD',
   chartGhost: 'rgba(255,255,255,0.4)',
-  toast: '#1A3262',
+  toast: '#29245E',
   onToast: '#FFFFFF',
-  toastAction: '#8EC9F0',
-  onWelcomeButton: '#272C77',
+  toastAction: '#CBE9FD',
+  onWelcomeButton: '#2631AD',
   thumb: '#FFFFFF',
   fabShadow: '#000000',
   toastShadow: '#000000',
-  focusRing: '#8EC9F0',
+  focusRing: '#7693EF',
 };
 
-/** Peak opacity of the sky glow on the brand gradient (fades to 0 at 60% of the box). */
-export const brandGlowOpacity = { light: 0.28, dark: 0.2 } as const;
+/**
+ * Geometry of the brand gradient, shared by BrandGradient and the contrast check: where the middle
+ * stop sits, the peak opacity of the icy top-right glow and of the white bottom-left sheen, and the
+ * height of the bottom band (no content sits in it) that fades to brandFade.
+ */
+export const brandGradient = {
+  mid: { light: 0.45, dark: 0.5 },
+  glow: { light: 0.22, dark: 0.14 },
+  sheen: { light: 0.06, dark: 0.04 },
+  fade: 28,
+} as const;
+
+/** Opacity of the glass tint and of its edge, per scheme. */
+export const glass = {
+  tint: { light: 0.3, dark: 0.32 },
+  edge: { light: 0.22, dark: 0.18 },
+} as const;
 
 /** Category icon colour per scheme; the disc behind it is the same hue at low alpha. */
 export const categoryColors: Record<CategoryIcon, { light: string; dark: string }> = {

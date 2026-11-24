@@ -18,8 +18,8 @@ export default function Welcome() {
         <T variant="headline" tone="onBrand">
           Tito Finance
         </T>
-        {/* A short gold rule under the wordmark: the one crown note on this screen (decorative). */}
-        <View accessible={false} style={{ width: 24, height: 3, borderRadius: 2, backgroundColor: c.goldOnBrand }} />
+        {/* A short mint rule under the wordmark: the one crown note on this screen (decorative). */}
+        <View accessible={false} style={{ width: 24, height: 3, borderRadius: 2, backgroundColor: c.pop }} />
       </View>
       <View style={{ flex: 1, justifyContent: 'center', gap: space.l }}>
         <T variant="largeTitle" tone="onBrand" accessibilityRole="header" style={{ fontSize: 40, lineHeight: 46 }}>
