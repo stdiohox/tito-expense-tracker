@@ -1,6 +1,10 @@
 import type { Category } from './types';
 
 /** Categories offered for new expenses and listed in Categories: everything not hidden. */
+/** Short labels for tight grids (Quick add); screen readers still get the full name. */
+const SHORT: Record<string, string> = { transport: 'Transport', personal: 'Care', entertainment: 'Fun' };
+export const shortLabel = (c: Category): string => (c.builtIn && SHORT[c.id]) || c.name.split(/\s*&\s*|\s+/)[0] || c.name;
+
 export const visibleCategories = (categories: Category[]): Category[] => categories.filter((c) => !c.hidden);
 
 /** The twelve categories carried over from the web tracker, in its order. */
