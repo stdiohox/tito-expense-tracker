@@ -12,6 +12,7 @@ const perScheme = (name) => {
 };
 const geometry = perScheme('brandGradient');
 const glass = perScheme('glass');
+const dockGlass = perScheme('dockGlass');
 
 const lum = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
@@ -96,6 +97,19 @@ for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) 
       check(`${scheme} category ${i} icon on its disc over ${bg} (non-text)`, fg, mix(fg, p[bg], scheme === 'light' ? 0.12 : 0.18), 3);
     }
   });
+}
+// The floating dock: frosted white glass in both modes, its content in the light palette. Anything
+// can scroll behind it, so its fill is checked over the darkest and lightest grounds and panels.
+{
+  const L = block('light');
+  const D = block('dark');
+  const behind = [L.ground, L.surface, D.ground, D.surface, D.raised, L.brandStart, L.brandMid, L.brandEnd];
+  for (const scheme of ['light', 'dark']) {
+    const fills = behind.map((bg) => mix(L.dock, bg, dockGlass.fill[scheme]));
+    worst(`${scheme} dock: inactive tab (inkMute) on the glass`, L.inkMute, fills, 4.5);
+    worst(`${scheme} dock: active tab (accent) on the glass`, L.accent, fills, 4.5);
+    worst(`${scheme} dock: + button (button) on the glass (non-text)`, L.button, fills, 3);
+  }
 }
 console.log(`${count - fail} of ${count} pairs pass`);
 process.exitCode = fail ? 1 : 0;

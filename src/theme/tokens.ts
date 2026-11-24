@@ -73,6 +73,8 @@ export type Palette = {
   toastShadow: string;
   /** Keyboard focus outline on the web build (web-focus.ts). */
   focusRing: string;
+  /** The floating dock: frosted white glass in both modes (see dockGlass); its content uses the light palette. */
+  dock: string;
 };
 
 export const light: Palette = {
@@ -119,6 +121,7 @@ export const light: Palette = {
   fabShadow: '#141033',
   toastShadow: '#000000',
   focusRing: '#2F5BE7',
+  dock: '#FFFFFF',
 };
 
 export const dark: Palette = {
@@ -165,6 +168,7 @@ export const dark: Palette = {
   fabShadow: '#000000',
   toastShadow: '#000000',
   focusRing: '#7693EF',
+  dock: '#FFFFFF',
 };
 
 /**
@@ -194,6 +198,16 @@ export const glass = {
   tint: { light: 0.25, dark: 0.3 },
   frost: { light: 0.1, dark: 0.1 },
   edge: { light: 0.32, dark: 0.28 },
+} as const;
+
+/**
+ * The dock's frosted white glass: fill opacity, and the ink-tinted edge. 94% is the most see-through
+ * the dock can be while its grey labels stay at AA even when deep navy scrolls behind it
+ * (check-contrast.mjs); the glass look also comes from the edge, a top highlight and the shadow.
+ */
+export const dockGlass = {
+  fill: { light: 0.94, dark: 0.94 },
+  edge: { light: 0.1, dark: 0.1 },
 } as const;
 
 /** Category icon colour per scheme; the disc behind it is the same hue at low alpha. */

@@ -3,10 +3,10 @@ import { Keyboard, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
- * The floating finance dock: a rounded dark bar 64 tall, 12 above the bottom safe area and 16 in
- * from each side, with the Add expense button raised 14 above its top edge in the middle.
+ * The floating finance dock: a frosted white bar 64 tall, 88% of the screen width and centred,
+ * 16 above the bottom safe area, with the Add expense button raised 14 above its top edge.
  */
-export const TAB_BAR = { height: 64, gap: 12, inset: 16, raise: 14 } as const;
+export const TAB_BAR = { height: 64, gap: 16, width: '88%', side: '6%', raise: 14 } as const;
 
 /**
  * Distance from the bottom of the screen to the top of the dock (its raised Add button included).

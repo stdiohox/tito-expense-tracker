@@ -8,18 +8,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { STROKE } from '@/components/icons';
 import { TAB_BAR, useKeyboardOpen } from '@/components/tab-bar';
 import { T } from '@/components/text';
-import { dark, radius } from '@/theme/tokens';
-import { AppearanceProvider, useTheme } from '@/theme/use-theme';
+import { dockGlass, light, radius } from '@/theme/tokens';
+import { AppearanceProvider, hexAlpha, useTheme } from '@/theme/use-theme';
 
 const ADD_SIZE = 56;
 
 /**
- * The floating finance dock on every platform: a rounded dark bar floating above the bottom edge
- * with Home, Expenses, Reports and Settings, and a raised round Add expense button in the middle,
- * the app's one primary action, one tap away from any tab. Always dark (light mode too), so its
- * contents use the dark palette. It steps aside while the keyboard is open. Screens pad their
- * content by useTabBarClearance().
+ * The floating finance dock on every platform: a frosted white glass bar, 88% of the screen wide,
+ * floating above the page with a soft shadow, holding Home, Expenses, Reports and Settings and a
+ * raised round Add expense button in the middle (the app's one primary action, one tap away from
+ * any tab). It looks the same in light and dark mode and its contents use the light palette;
+ * check-contrast.mjs checks them over anything that can scroll behind the glass. It steps aside
+ * while the keyboard is open. Screens pad their content by useTabBarClearance().
  */
+const DOCK_FILL = hexAlpha(light.dock, dockGlass.fill.light);
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const keyboardOpen = useKeyboardOpen();
@@ -31,21 +33,29 @@ export default function TabsLayout() {
         style={{
           display: keyboardOpen ? 'none' : 'flex',
           position: 'absolute',
-          left: TAB_BAR.inset,
-          right: TAB_BAR.inset,
+          left: TAB_BAR.side,
+          right: TAB_BAR.side,
           bottom: insets.bottom + TAB_BAR.gap,
           height: TAB_BAR.height,
           flexDirection: 'row',
           alignItems: 'center',
-          paddingHorizontal: 6,
-          borderRadius: radius.xxl,
-          backgroundColor: dark.surface,
-          shadowColor: dark.fabShadow,
-          shadowOpacity: 0.3,
-          shadowRadius: 16,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 10,
+          paddingHorizontal: 4,
+          borderRadius: radius.pill,
+          backgroundColor: DOCK_FILL,
+          borderWidth: 1,
+          borderColor: hexAlpha(light.ink, dockGlass.edge.light),
+          shadowColor: light.fabShadow,
+          shadowOpacity: 0.22,
+          shadowRadius: 24,
+          shadowOffset: { width: 0, height: 10 },
+          elevation: 12,
         }}>
+        {/* A light highlight along the top edge: part of the glass look, decorative. */}
+        <View
+          accessible={false}
+          aria-hidden
+          style={{ position: 'absolute', top: 0, left: 28, right: 28, height: 1, backgroundColor: hexAlpha(light.onBrand, 0.9), pointerEvents: 'none' }}
+        />
         <TabTrigger name="index" href="/" asChild>
           <TabButton icon={IconHome} label="Home" />
         </TabTrigger>
@@ -64,7 +74,7 @@ export default function TabsLayout() {
   );
 }
 
-/** The raised + in the middle of the dock: opens Add expense. A ring in the bar's colour sets it off. */
+/** The raised + in the middle of the dock: opens Add expense. A ring in the dock's glass sets it off. */
 function AddDockButton() {
   return (
     <View style={{ flex: 1, alignItems: 'center', height: TAB_BAR.height }}>
@@ -77,7 +87,7 @@ function AddDockButton() {
           width: ADD_SIZE + 8,
           height: ADD_SIZE + 8,
           borderRadius: radius.pill,
-          backgroundColor: dark.surface,
+          backgroundColor: DOCK_FILL,
           alignItems: 'center',
           justifyContent: 'center',
           opacity: pressed ? 0.85 : 1,
@@ -88,11 +98,11 @@ function AddDockButton() {
               width: ADD_SIZE,
               height: ADD_SIZE,
               borderRadius: radius.pill,
-              backgroundColor: pressed ? dark.buttonPressed : dark.button,
+              backgroundColor: pressed ? light.buttonPressed : light.button,
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <IconPlus size={26} color={dark.onButton} strokeWidth={2.25} />
+            <IconPlus size={26} color={light.onButton} strokeWidth={2.25} />
           </View>
         )}
       </Pressable>
@@ -110,7 +120,7 @@ const TabButton = forwardRef<ComponentRef<typeof View>, TabTriggerSlotProps & { 
         accessibilityLabel={label}
         accessibilityState={{ selected: !!isFocused }}
         style={{ flex: 1, alignItems: 'center', justifyContent: 'center', height: TAB_BAR.height, gap: 2 }}>
-        <AppearanceProvider mode="dark">
+        <AppearanceProvider mode="light">
           <TabFace icon={icon} label={label} active={!!isFocused} />
         </AppearanceProvider>
       </Pressable>
