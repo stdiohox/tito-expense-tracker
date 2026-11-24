@@ -32,6 +32,8 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
   const today = useToday();
 
   const validPreset = categories.some((k) => k.id === presetCategory) ? presetCategory : undefined;
+  // Hidden categories are not offered, except the one this expense (or the preset) already uses.
+  const offered = categories.filter((k) => !k.hidden || k.id === existing?.categoryId || k.id === validPreset);
   const [currency, setCurrency] = useState<CurrencyCode>(existing?.currency ?? settings.currency);
   const [amountText, setAmountText] = useState(existing ? amountToInput(existing.amount, existing.currency) : '');
   const [categoryId, setCategoryId] = useState<string | undefined>(existing?.categoryId ?? validPreset);
@@ -191,7 +193,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
           accessibilityRole="radiogroup"
           accessibilityLabel="Category"
           style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: space.s, marginHorizontal: -4 }}>
-          {categories.map((cat, i) => {
+          {offered.map((cat, i) => {
             const on = cat.id === categoryId;
             return (
               <Pressable

@@ -1,5 +1,8 @@
 import type { Category } from './types';
 
+/** Categories offered for new expenses and listed in Categories: everything not hidden. */
+export const visibleCategories = (categories: Category[]): Category[] => categories.filter((c) => !c.hidden);
+
 /** The twelve categories carried over from the web tracker, in its order. */
 export const STARTER_CATEGORIES: Category[] = [
   { id: 'rent', name: 'Rent & Housing', icon: 'rent', budget: null, builtIn: true },

@@ -2,7 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 
 import { STARTER_CATEGORIES } from '@/domain/categories';
-import type { AppearanceMode, Category, CurrencyCode, Expense } from '@/domain/types';
+import type { AppearanceMode, Category, CurrencyCode, Expense, SetupMode } from '@/domain/types';
 
 import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
 
@@ -16,6 +16,7 @@ import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
 export type Settings = {
   currency: CurrencyCode;
   appearance: AppearanceMode;
+  mode: SetupMode;
   reminderOn: boolean;
   reminderTime: string;
   firstName: string;
@@ -26,6 +27,7 @@ export type Settings = {
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'NGN',
   appearance: 'system',
+  mode: 'track',
   reminderOn: true,
   reminderTime: '20:00',
   firstName: '',
@@ -109,7 +111,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     expenses: sampleExpenses(),
     categories: SAMPLE_CATEGORIES,
-    settings: { ...DEFAULT_SETTINGS, firstName: 'Ada', email: 'ada@example.com' },
+    settings: { ...DEFAULT_SETTINGS, firstName: 'Ada', email: 'ada@example.com', mode: 'budgets' },
     signedIn: true,
   }));
   // Latest state for actions that must answer "did it exist?" without stale closures.

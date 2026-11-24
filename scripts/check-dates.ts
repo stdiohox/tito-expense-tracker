@@ -63,4 +63,10 @@ assert.equal(s.cumulative[27], 150);
 assert.deepEqual(s.byCategory.map((b) => [b.category.id, b.total]), [['food', 100], ['other', 50]]); // unknown category counted under Other
 assert.deepEqual(s.otherCurrencies, [{ currency: 'USD', total: 7, count: 1 }]);
 
+// A hidden category (setup step 3) disappears from pickers, but its expenses still count.
+const hiddenFood = [{ ...cats[0], hidden: true }, cats[1]];
+const h = summarise([mk('e', '2026-02-03', 40, 'food')], hiddenFood as never, '2026-02', 'NGN');
+assert.equal(h.total, 40);
+assert.deepEqual(h.byCategory.map((b) => [b.category.id, b.total]), [['food', 40]]);
+
 console.log(`dates, money and summaries OK in ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
