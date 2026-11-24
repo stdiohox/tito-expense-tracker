@@ -113,7 +113,11 @@ export default function Expenses() {
             ...searchFocus.border,
             paddingLeft: space.l - searchFocus.inset,
           }}>
-          <IconSearch size={20} color={c.inkMute} strokeWidth={STROKE} />
+          {/* The icon sits in a centred box and the input has a fixed height with no default
+              padding, so the icon and the placeholder share one centre line on every platform. */}
+          <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+            <IconSearch size={20} color={c.inkMute} strokeWidth={STROKE} />
+          </View>
           <TextInput
             value={query}
             onChangeText={setQuery}
@@ -123,7 +127,7 @@ export default function Expenses() {
             returnKeyType="search"
             {...searchFocus.focusProps}
             maxFontSizeMultiplier={2}
-            style={{ flex: 1, minWidth: 0, minHeight: 48, fontFamily: fonts.regular, fontSize: 16, color: c.ink }}
+            style={{ flex: 1, minWidth: 0, height: 48, paddingVertical: 0, textAlignVertical: 'center', fontFamily: fonts.regular, fontSize: 16, color: c.ink }}
           />
           {query ? (
             <Pressable
