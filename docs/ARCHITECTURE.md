@@ -563,7 +563,7 @@ indigo, and the other tabs follow the colour scheme.
 - **`hidden`:** the button hides while scrolling down, so it never covers the amounts being read,
   and comes back on any scroll up.
 
-Lists reserve `120 + safe-area` bottom padding, so the last row is never hidden.
+It appears on Home and Expenses only. Those two lists reserve `120 + safe-area` bottom padding, so the last row is never hidden.
 
 ---
 

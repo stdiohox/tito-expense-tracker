@@ -35,7 +35,7 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 
 ## What the app does
 
-- **Log a payment fast.** A floating "Add expense" button sits on every tab. The sheet opens with
+- **Log a payment fast.** A floating "Add expense" button sits on the Home and Expenses tabs. The sheet opens with
   the keyboard on the amount. Pick a category, optionally change the date or add a note, and save.
 - **See the month at a glance.** Home shows:
   - the month's total;

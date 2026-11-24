@@ -205,7 +205,7 @@ The world is calm and encouraging. It does not use dashboard tiles, promo cards,
 - Indigo drench on the home header and the auth welcome only; light or deep-indigo ground below.
 - Fraunces for totals and large titles; Manrope for everything else; tabular figures on every amount.
 - Grouped lists with hairline dividers, round tinted icon discs, right-aligned amounts.
-- One full-width pill primary button per task screen; a floating pill "Add expense" on tab screens.
+- One full-width pill primary button per task screen; a floating pill "Add expense" on the Home and Expenses tabs.
 - Light and dark are designed pairs, not inversions; every text colour meets WCAG AA.
 
 ## Colors
@@ -266,7 +266,7 @@ Each category has a light and dark text colour; its disc is the same hue at 12% 
 
 ## Layout
 
-A single phone column with 20px side margins, on a fixed 4/8-based scale (4, 8, 12, 16, 20, 24, 32, 44). Section headers sit 24px above their rows and 4px above the first one; task screens separate form groups by 24px. Home's indigo header runs under the status bar and fills roughly the top 45% (month switcher, total, pace line, chart, legend); the list starts on the ground below it. Tab screens open with a large title; task screens open with a close control and a large title, and end with a fixed bottom bar (top hairline, 12px padding plus safe area) holding the one primary button. Lists reserve 120px plus the safe area at the bottom so the floating Add button never hides the last row. The native tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab.
+A single phone column with 20px side margins, on a fixed 4/8-based scale (4, 8, 12, 16, 20, 24, 32, 44). Section headers sit 24px above their rows and 4px above the first one; task screens separate form groups by 24px. Home's indigo header runs under the status bar and fills roughly the top 45% (month switcher, total, pace line, chart, legend); the list starts on the ground below it. Tab screens open with a large title; task screens open with a close control and a large title, and end with a fixed bottom bar (top hairline, 12px padding plus safe area) holding the one primary button. The Home and Expenses lists reserve 120px plus the safe area at the bottom so the floating Add button never hides the last row. The native tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab.
 
 ## Elevation & Depth
 
@@ -294,7 +294,7 @@ Calm, wide and unmistakable.
 - **Welcome variant:** white pill with indigo label on the indigo ground, with a text-only second action below.
 
 ### Add expense (floating)
-The one primary action on tab screens. A 56px indigo pill 16px from the right edge, above the tab bar: "+ Add expense" at rest, collapsing to a round "+" once the list scrolls and hiding while scrolling down. Fades in over 160ms and out over 120ms, honouring Reduce Motion.
+The one primary action on the Home and Expenses tabs (not on Reports or Settings). A 56px indigo pill 16px from the right edge, above the tab bar: "+ Add expense" at rest, collapsing to a round "+" once the list scrolls and hiding while scrolling down. Fades in over 160ms and out over 120ms, honouring Reduce Motion.
 
 ### Chips (segmented control)
 - **Style:** a pill track in the ground tone with 2px padding; options are caption text in Ink Mute.
