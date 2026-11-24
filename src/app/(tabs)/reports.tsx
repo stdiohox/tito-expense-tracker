@@ -7,10 +7,12 @@ import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
+import { Reveal } from '@/components/reveal';
 import { ScreenHero } from '@/components/screen-hero';
 import { StatCard, StatRow } from '@/components/stat-card';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
+import { useCountUp } from '@/components/use-count-up';
 import { useToast } from '@/components/toast';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
@@ -29,6 +31,7 @@ export default function Reports() {
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
   const toast = useToast();
+  const shownTotal = useCountUp(now.total);
   const cur = settings.currency;
   const lastName = monthName(addMonths(month, -1));
   const lastShort = shortMonth(addMonths(month, -1));
@@ -76,7 +79,7 @@ export default function Reports() {
             numberOfLines={1}
             minimumFontScale={0.6}
             accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${monthName(month)}`}>
-            {formatMoney(now.total, cur)}
+            {formatMoney(shownTotal, cur)}
           </T>
           <T variant="body" tone="onBrandSoft">
             {headline}
@@ -85,6 +88,7 @@ export default function Reports() {
 
         <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
 
+        <Reveal order={1}>
         <StatRow>
           <StatCard
             label={`Compared with ${lastShort}`}
@@ -97,7 +101,9 @@ export default function Reports() {
             note={past.length ? `Over ${past.length} ${past.length === 1 ? 'month' : 'months'} before ${monthName(month)}` : 'Builds up month by month'}
           />
         </StatRow>
+        </Reveal>
 
+        <Reveal order={2}>
         <Panel title="By category">
           {now.byCategory.length === 0 ? (
             <T variant="sub" tone="inkMute" style={{ paddingVertical: space.m }}>
@@ -129,8 +135,10 @@ export default function Reports() {
             })
           )}
         </Panel>
+        </Reveal>
 
         {history.length > 1 ? (
+          <Reveal order={3}>
           <Panel title="Month by month">
             <T variant="sub" tone="inkSoft" style={{ marginTop: space.xs }}>
               {past.length
@@ -175,16 +183,17 @@ export default function Reports() {
               })}
             </View>
           </Panel>
+          </Reveal>
         ) : null}
 
-        <View style={{ marginTop: space.s }}>
+        <Reveal order={4} style={{ marginTop: space.s }}>
           <Button
             label={`Share ${monthName(month)} as PDF`}
             variant="secondary"
             icon={<IconShare size={20} color={c.accent} strokeWidth={1.75} />}
             onPress={() => toast({ message: 'PDF sharing arrives in the next build' })}
           />
-        </View>
+        </Reveal>
         </View>
       </ScrollView>
     </View>

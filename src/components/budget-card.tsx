@@ -36,7 +36,7 @@ export function BudgetCard({
         over ? `${formatMoney(spent - budget, currency)} over budget` : `${formatMoney(budget - spent, currency)} left`
       }`}
       accessibilityHint="Opens this category"
-      style={({ pressed }) => ({ flex: 1, flexBasis: 0, minWidth: 0, backgroundColor: c.surface, borderRadius: radius.xl, padding: space.l, gap: space.s, opacity: pressed ? 0.7 : 1 })}>
+      style={({ pressed }) => ({ flex: 1, flexBasis: 0, minWidth: 0, backgroundColor: c.surface, borderRadius: radius.xl, padding: space.l, gap: space.s, opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] })}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <IconDisc icon={category.icon} size={36} />
         <Badge label={`${pct}%`} over={over} />

@@ -6,6 +6,7 @@ import { Pressable, ScrollView, Switch, View } from 'react-native';
 import { STROKE } from '@/components/icons';
 import { Segmented } from '@/components/segmented';
 import { ScreenHero } from '@/components/screen-hero';
+import { Reveal } from '@/components/reveal';
 import { switchColors } from '@/components/switch-colors';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
@@ -37,7 +38,7 @@ export default function Settings() {
           {settings.email || 'No email yet'}
         </T>
       </ScreenHero>
-      <View style={{ paddingHorizontal: space.l }}>
+      <Reveal order={1} style={{ paddingHorizontal: space.l }}>
 
       <Group title="Account">
         <Item label="Name" value={settings.firstName} />
@@ -127,7 +128,7 @@ export default function Settings() {
           Preview build · your data stays until the app reloads
         </T>
       </View>
-      </View>
+      </Reveal>
     </ScrollView>
   );
 }

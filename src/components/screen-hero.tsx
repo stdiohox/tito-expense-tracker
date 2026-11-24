@@ -7,6 +7,7 @@ import { AppearanceProvider, useTheme } from '@/theme/use-theme';
 
 import { BrandGradient } from './brand-gradient';
 import { FocusStatusBar } from './focus-status-bar';
+import { Reveal } from './reveal';
 import { T } from './text';
 
 /**
@@ -26,6 +27,7 @@ export function ScreenHero({ title, children, bleed }: { title: string; children
       {/* The status bar now sits on the page's ground, not on the gradient. */}
       <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <AppearanceProvider mode="light">
+        <Reveal>
         <BrandGradient flare style={{ borderRadius: radius.xxl, paddingVertical: space.l }}>
           <View style={{ paddingHorizontal: space.l, gap: space.xs }}>
             <T variant="title" tone="onBrand" accessibilityRole="header">
@@ -35,6 +37,7 @@ export function ScreenHero({ title, children, bleed }: { title: string; children
           </View>
           {bleed}
         </BrandGradient>
+        </Reveal>
       </AppearanceProvider>
     </View>
   );

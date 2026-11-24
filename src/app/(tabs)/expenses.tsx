@@ -8,9 +8,11 @@ import { STROKE } from '@/components/icons';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
+import { Reveal } from '@/components/reveal';
 import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
+import { useCountUp } from '@/components/use-count-up';
 import { useFocusBorder } from '@/components/use-focus-border';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
@@ -34,6 +36,7 @@ export default function Expenses() {
   // Days so far: a month in progress is averaged over the days it has had, not its full length.
   const days = isCurrent ? dayOfMonth(today) : now.cumulative.length;
   const foreign = now.otherCurrencies.reduce((s, o) => s + o.count, 0);
+  const shownTotal = useCountUp(now.total);
 
   const { sections, matches } = useMemo(() => {
     const byDay = new Map<DayKey, Expense[]>();
@@ -88,7 +91,7 @@ export default function Expenses() {
             numberOfLines={1}
             minimumFontScale={0.6}
             accessibilityLabel={`${formatMoney(now.total, settings.currency)} spent in ${monthName(month)}`}>
-            {formatMoney(now.total, settings.currency)}
+            {formatMoney(shownTotal, settings.currency)}
           </T>
           <T variant="sub" tone="onBrandSoft" numeric>
             {now.count + foreign} {now.count + foreign === 1 ? 'payment' : 'payments'} · about {formatMoney(Math.round(now.total / days), settings.currency, { compact: true })} a day
@@ -98,6 +101,7 @@ export default function Expenses() {
 
         <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
 
+        <Reveal order={1}>
         <View
           style={{
             flexDirection: 'row',
@@ -134,8 +138,10 @@ export default function Expenses() {
             </Pressable>
           ) : null}
         </View>
+        </Reveal>
 
         {sections.length === 0 ? (
+          <Reveal order={2}>
           <Panel>
             <View style={{ paddingVertical: space.l, gap: space.s }} accessibilityLiveRegion="polite">
               <T variant="title">{query ? 'No matches' : `No expenses in ${monthName(month)}`}</T>
@@ -146,9 +152,11 @@ export default function Expenses() {
               </T>
             </View>
           </Panel>
+          </Reveal>
         ) : (
-          sections.map((section) => (
-            <Panel key={section.day}>
+          sections.map((section, si) => (
+            <Reveal key={section.day} order={si + 2}>
+            <Panel>
               <View
                 accessibilityRole="header"
                 style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: space.m, gap: space.m }}>
@@ -174,6 +182,7 @@ export default function Expenses() {
                 );
               })}
             </Panel>
+            </Reveal>
           ))
         )}
         </View>

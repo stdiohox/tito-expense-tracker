@@ -13,7 +13,9 @@ import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
 import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
+import { Reveal } from '@/components/reveal';
 import { T } from '@/components/text';
+import { useCountUp } from '@/components/use-count-up';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
@@ -48,6 +50,7 @@ export default function Home() {
   const allCount = now.count + foreignCount;
   const catById = useMemo(() => new Map(categories.map((k) => [k.id, k])), [categories]);
   const quick = visibleCategories(categories);
+  const shownTotal = useCountUp(now.total);
 
   let paceLine = '';
   let paceBadge = '';
@@ -142,7 +145,7 @@ export default function Home() {
                 numberOfLines={1}
                 minimumFontScale={0.6}
                 accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${thisName}`}>
-                {formatMoney(now.total, cur)}
+                {formatMoney(shownTotal, cur)}
               </T>
               <T variant="body" tone="onBrandSoft">
                 {isCurrent ? `Spent so far in ${thisName}` : `Spent in ${thisName}`}
@@ -175,6 +178,7 @@ export default function Home() {
         </ScreenHero>
 
         <View style={{ paddingHorizontal: space.l, gap: space.l, marginTop: space.l }}>
+          <Reveal order={1}>
           <Panel dark title="Quick add">
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -space.xs, marginTop: space.s, marginBottom: space.s }}>
               {quick.map((cat) => (
@@ -183,14 +187,16 @@ export default function Home() {
                   onPress={() => router.push({ pathname: '/expense/new', params: { category: cat.id } })}
                   accessibilityRole="button"
                   accessibilityLabel={`Add to ${cat.name}`}
-                  style={({ pressed }) => ({ width: '25%', alignItems: 'center', gap: 6, paddingVertical: space.s, paddingHorizontal: 2, minHeight: 84, opacity: pressed ? 0.6 : 1 })}>
+                  style={({ pressed }) => ({ width: '25%', alignItems: 'center', gap: 6, paddingVertical: space.s, paddingHorizontal: 2, minHeight: 84, opacity: pressed ? 0.75 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] })}>
                   <QuickFace icon={cat.icon} name={shortLabel(cat)} />
                 </Pressable>
               ))}
             </View>
           </Panel>
+          </Reveal>
 
           {allCount === 0 ? (
+            <Reveal order={2}>
             <Panel>
               <View style={{ paddingVertical: space.l, gap: space.s }}>
                 <T variant="title">Nothing logged in {thisName} yet</T>
@@ -199,10 +205,11 @@ export default function Home() {
                 </T>
               </View>
             </Panel>
+            </Reveal>
           ) : (
             <>
               {budgets.length > 0 ? (
-                <View style={{ gap: space.s }}>
+                <Reveal order={2} style={{ gap: space.s }}>
                   <T variant="title" accessibilityRole="header" style={{ paddingHorizontal: space.xs }}>
                     Budgets
                   </T>
@@ -222,10 +229,11 @@ export default function Home() {
                       {row.length === 1 ? <View style={{ flex: 1, flexBasis: 0, padding: space.l }} /> : null}
                     </View>
                   ))}
-                </View>
+                </Reveal>
               ) : null}
 
               {now.byCategory.length > 0 ? (
+                <Reveal order={3}>
                 <Panel title="Where it went" action={<T variant="headline" numeric>{formatMoney(now.total, cur)}</T>}>
                   {now.byCategory.slice(0, 5).map(({ category, total, count }, i, list) => {
                     const share = Math.round((total / now.total) * 100);
@@ -249,8 +257,10 @@ export default function Home() {
                     </View>
                   ) : null}
                 </Panel>
+                </Reveal>
               ) : null}
 
+              <Reveal order={4}>
               <Panel
                 title="Latest"
                 action={<LinkButton role="link" label="View all" accessibilityHint={`Shows all ${allCount} expenses`} onPress={() => router.navigate('/expenses')} />}>
@@ -270,6 +280,7 @@ export default function Home() {
                   );
                 })}
               </Panel>
+              </Reveal>
             </>
           )}
         </View>
