@@ -35,7 +35,7 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 
 ## What the app does
 
-- **Log a payment fast.** A floating "Add expense" button sits on the Home and Expenses tabs. The sheet opens with
+- **Log a payment fast.** The raised **+** in the middle of the dock opens Add expense from any tab (Quick add on Home presets a category). The sheet opens with
   the keyboard on the amount. Pick a category, optionally change the date or add a note, and save.
 - **See the month at a glance.** Home shows:
   - the month's total;
@@ -148,7 +148,7 @@ There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test su
     ├── app/                 Routes (Expo Router). Every file is a screen; _layout files are navigators.
     │   ├── _layout.tsx      Root: fonts, splash, providers, signed-in / signed-out stacks
     │   ├── (tabs)/          Home (index), Expenses, Reports, Settings
-    │   │   └── _layout.tsx      Docked dark tab bar (expo-router/ui), every platform
+    │   │   └── _layout.tsx      Floating finance dock with a raised + (expo-router/ui), every platform
     │   ├── expense/         new.tsx (add sheet), [id].tsx (edit sheet)
     │   ├── category/        [id].tsx (detail), edit.tsx (create/edit sheet)
     │   ├── categories.tsx   Categories and budgets list
@@ -268,7 +268,7 @@ There is no iOS Simulator or Android SDK on the build Mac, so on-device checks u
 2. Work through the device checklist in
    [tasks/todo.md](tasks/todo.md#check-on-real-devices-no-simulator-on-this-mac):
    - safe areas;
-   - the Add button and toast clearing the tab bar;
+   - the dock and toast clearing the home indicator and Android navigation bar;
    - the keyboard not covering Save on Android;
    - VoiceOver and TalkBack;
    - 200% text.

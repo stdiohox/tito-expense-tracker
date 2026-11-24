@@ -143,11 +143,11 @@ components:
     textColor: "{colors.royal}"
     rounded: "{rounded.pill}"
     height: "56px"
-  add-button:
-    backgroundColor: "{colors.brand}"
-    textColor: "{colors.on-brand}"
+  dock-add-button:
+    backgroundColor: "{colors.button-dark}"
+    textColor: "{colors.white}"
     rounded: "{rounded.pill}"
-    height: "56px"
+    size: "56px"
   panel:
     backgroundColor: "{colors.surface}"
     rounded: "{rounded.xxl}"
@@ -169,10 +169,11 @@ components:
     textColor: "{colors.on-badge}"
     typography: "{typography.caption}"
     rounded: "{rounded.pill}"
-  tab-bar:
+  dock:
     backgroundColor: "{colors.surface-dark}"
     rounded: "{rounded.xxl}"
     height: "64px"
+    float: "12px above the safe area, 16px in from each side"
   field:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
@@ -191,7 +192,7 @@ components:
 
 **Creative North Star: "Your month as a pace, in deep blue"**
 
-The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue gradient header holds the one number that matters (what you have spent so far), a soft icy pace line against last month, and glass cards for each currency. Below it the app is calm and orderly: rounded panels, a dark Quick add panel for logging in one tap, budget cards in two columns, and a dark tab bar docked to the bottom edge. The look borrows the general language of premium blue finance apps (gradients, glass, dark panels) and builds it from our own components and SVG shapes; it copies no specific design or artwork.
+The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue gradient header holds the one number that matters (what you have spent so far), a soft icy pace line against last month, and glass cards for each currency. Below it the app is calm and orderly: rounded panels, a dark Quick add panel for logging in one tap, budget cards in two columns, and a floating dark finance dock with the Add expense button at its centre. The look borrows the general language of premium blue finance apps (gradients, glass, dark panels) and builds it from our own components and SVG shapes; it copies no specific design or artwork.
 
 Colour is rationed. Royal blue is the brand and the primary action; electric blue marks links, the active tab and progress; icy blue lightens; aqua mint is the one pop, used sparingly and only on dark or blue surfaces; burgundy marks a passed budget or an error, always with words. Type is Outfit throughout, with tabular figures on every amount. One look ships on iOS, Android and the web build.
 
@@ -199,14 +200,14 @@ Colour is rationed. Royal blue is the brand and the primary action; electric blu
 - A static navy → royal → electric gradient in the hero at the top of every tab (with a white flare in its top-right corner) and on the onboarding slides, and nowhere else.
 - Every tab opens with the same hero: the title in the same place and style, then the month switcher and headline figure. Below it, rounded panels on the icy-white ground (light) or deep navy (dark), following the Appearance setting; Quick add stays a dark panel in both modes.
 - Frosted glass cards on the gradient: a navy tint with a white frost, a light edge and a top highlight, no blur.
-- One full-width primary button per task screen; the floating "Add expense" pill on Home and Expenses.
+- One full-width primary button per task screen; on the tabs, the one primary action is the raised + in the middle of the dock.
 - Light and dark are designed pairs; every text pair meets WCAG AA and every indicator 3:1.
 
 ## Colors
 
 ### Primary
 - **Brand gradient** (tab heroes and onboarding): a static diagonal from **Deep Navy** (#141033, top left) through **Royal Blue** (#2631AD) to **Electric Blue** (#2F5BE7, bottom right), with an **Icy Blue** (#CBE9FD) glow at 22% in the text-free top-right corner and a faint white sheen bottom-left. Heroes add a white **flare** (55% at the corner, fading to 0 within 32% of the box) in the same corner for the brighter, whiter look; no text sits there. On the Home header a 28px band at the bottom fades to icy blue in light mode (to the navy ground in dark mode); no content ever sits in that band. Dark mode runs through a deeper royal (#1F2690) to a deeper electric (#2A50CF). Drawn by `BrandGradient` with react-native-svg; never animated.
-- **Royal Blue** (brand / button): the primary button and the Add button in light mode; pressed deepens to #1C2589.
+- **Royal Blue** (brand / button): the primary button in light mode; pressed deepens to #1C2589.
 - **Electric Blue** (accent): links, the active tab, progress fills, the focused field border and selection outlines, on the light ground. In dark mode text needs more light, so the accent lifts to **#7693EF**; the dark primary button is **#3560E8**, the lightest electric that keeps its white label at 4.5:1 and still stands 3:1 off the sheet surface.
 - **Icy Blue**: the gradient's glow and light-mode end, the pace line, the toast's Undo, and the light tint (**Blue Mist** #E2EEFD) behind selected items.
 
@@ -260,15 +261,15 @@ Sizes scale with the OS text size up to 2× (1.5× for the amount input, 1.6× f
 
 ## Layout
 
-A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Every tab starts with the shared hero (`ScreenHero`): the title ("Hello, Ada" on Home, the tab name elsewhere) at the same position and size, then the month switcher and the month total (Home adds the pace line, chart and glass currency cards; Settings shows the account). Home continues with Quick add, Budgets (two columns), Where it went (top five) and Latest; its body follows the Appearance setting. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The docked tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
+A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Every tab starts with the shared hero (`ScreenHero`): the title ("Hello, Ada" on Home, the tab name elsewhere) at the same position and size, then the month switcher and the month total (Home adds the pace line, chart and glass currency cards; Settings shows the account). Home continues with Quick add, Budgets (two columns), Where it went (top five) and Latest; its body follows the Appearance setting. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The floating dock (Home, Expenses, the raised +, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
 
 ## Elevation & Depth
 
-Flat by default, separated by tone: panels and cards (surface) on the ground; in dark mode ground, surface and raised step up in light. Shadows only on things that float: the tab bar (navy at 25%, 12px blur), the Add button (navy at 22%, 8px blur) and the toast (black at 18%).
+Flat by default, separated by tone: panels and cards (surface) on the ground; in dark mode ground, surface and raised step up in light. Shadows only on things that float: the dock (navy at 30%, 16px blur) and the toast (black at 18%).
 
 ## Shapes
 
-Round and soft. Panels 28px; cards, glass cards and budget cards 20px; fields, toasts and tiles 12px; chart bars 8px; every button, the Add button, segmented controls, badges and the onboarding indicator are full pills. Icons are Tabler outline glyphs at 1.75 stroke.
+Round and soft. Panels 28px; cards, glass cards and budget cards 20px; fields, toasts and tiles 12px; chart bars 8px; every button, the dock's + button, segmented controls, badges and the onboarding indicator are full pills. Icons are Tabler outline glyphs at 1.75 stroke.
 
 ## Components
 
@@ -277,8 +278,8 @@ Round and soft. Panels 28px; cards, glass cards and budget cards 20px; fields, t
 - **Secondary:** Blue Mist with electric label. **Danger:** burgundy tint with burgundy label. **Plain:** transparent, electric label.
 - **Onboarding:** a white pill with a royal label on the gradient; Next, then Create an account.
 
-### Tab bar
-A dark bar docked to the bottom edge in both modes: full width, 64px tall plus the bottom safe area, with 28px rounded top corners. Icon over label; the active tab in electric (#7693EF on the dark bar), the others in Ink Mute. It steps aside while the keyboard is open. Built with expo-router/ui on every platform.
+### Finance dock
+A rounded (28px) dark bar 64px tall, floating 12px above the bottom safe area and 16px in from each side, in both modes. Home and Expenses on the left, Reports and Settings on the right, icon over label; the active tab in electric (#7693EF on the dark bar), the others in Ink Mute. In the middle, a raised 56px round **+** (electric #3560E8 with a white plus, set 14px above the bar in a ring of the bar's colour) opens Add expense from any tab: the app's one primary action, one tap away. The dock steps aside while the keyboard is open. Built with expo-router/ui on every platform.
 
 ### Panels and cards
 - **Panel:** 28px corners, surface fill, an optional title row with an action on the right. A **dark panel** renders its contents in the dark palette in both modes (Quick add, Latest).
@@ -290,8 +291,6 @@ A dark bar docked to the bottom edge in both modes: full width, 64px tall plus t
 ### Quick add
 A dark panel with a 4-column grid of the visible categories: icon disc and a short label (the full name for screen readers). A tap opens Add expense with that category chosen.
 
-### Add expense (floating)
-A 56px royal pill 16px above the tab bar on Home and Expenses: "+ Add expense" at rest, a round "+" once the list scrolls, hidden while scrolling down. Fades in 160ms and out 120ms, honouring Reduce Motion.
 
 ### Pace chart
 On the gradient: this month as a 2.5px icy-blue line with a soft fill, last month dashed in white at 40–45%, and the mint today dot.
@@ -322,4 +321,4 @@ Fields: surface fill, 1px Field Border, 2px electric on focus, burgundy on error
 
 ## Change note (redesign, 2026-11-24)
 
-This version replaces the earlier navy-ivory-gold palette and the Manrope + Fraunces type with the palette and Outfit type above, and adds the docked dark tab bar, panels, frosted glass cards, Quick add, budget cards and onboarding. PRODUCT.md's brief is unchanged on purpose: its Brand Commitments still name Tito indigo, clay and gold, and the fonts of the old web tracker, as the client's original brief. The palette here supersedes them for the app's look; confirm with the client before updating the brief itself.
+This version replaces the earlier navy-ivory-gold palette and the Manrope + Fraunces type with the palette and Outfit type above, and adds the floating finance dock, panels, frosted glass cards, Quick add, budget cards and onboarding. PRODUCT.md's brief is unchanged on purpose: its Brand Commitments still name Tito indigo, clay and gold, and the fonts of the old web tracker, as the client's original brief. The palette here supersedes them for the app's look; confirm with the client before updating the brief itself.
