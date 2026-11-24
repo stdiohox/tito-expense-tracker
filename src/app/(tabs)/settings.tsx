@@ -38,7 +38,8 @@ export default function Settings() {
 
       <Group title="Account">
         <Item label="Name" value={settings.firstName} />
-        <Item label="Email" value={settings.email} last />
+        <Item label="Email" value={settings.email} />
+        <Item label="Redo setup" onPress={() => router.push('/setup')} last />
       </Group>
 
       <Group title="Money">

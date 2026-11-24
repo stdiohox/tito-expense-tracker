@@ -115,6 +115,7 @@ function Routes({ screenOptions, sheet }: { screenOptions: object; sheet: object
         <Stack.Screen name="category/edit" options={{ ...sheet, title: 'Category' }} />
         <Stack.Screen name="categories" options={{ title: 'Categories and budgets' }} />
         <Stack.Screen name="account/delete" options={{ title: 'Delete account', ...quiet }} />
+        <Stack.Screen name="setup" options={{ title: 'Set up', headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="welcome" options={{ headerShown: false, title: 'Welcome', animation: 'fade' }} />

@@ -47,7 +47,8 @@ export default function SignUp() {
     timer.current = setTimeout(() => {
       updateSettings({ firstName: name.trim(), email: email.trim() });
       signIn();
-      router.replace('/');
+      // New accounts go through the three-step setup, which ends on Home.
+      router.replace('/setup');
     }, 500);
   };
 
