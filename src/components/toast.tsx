@@ -15,8 +15,8 @@ type Toast = { message: string; success?: boolean; actionLabel?: string; actionA
 
 const Ctx = createContext<(t: Toast) => void>(() => {});
 
-/** Room above the floating tab bar for the Add expense button (56 tall, 16 above the bar). */
-const ABOVE_ADD_BUTTON = space.l + 56 + space.s;
+/** The toast sits just above the dock (whose clearance already includes its raised Add button). */
+const ABOVE_DOCK = space.s;
 
 /**
  * Snackbar with an optional action (used for "Undo" after a delete).
@@ -58,7 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           entering={FadeInDown.duration(220).reduceMotion(ReduceMotion.System)}
           exiting={FadeOutDown.duration(180).reduceMotion(ReduceMotion.System)}
           pointerEvents="box-none"
-          style={{ position: 'absolute', left: space.l, right: space.l, bottom: clearance + ABOVE_ADD_BUTTON }}>
+          style={{ position: 'absolute', left: space.l, right: space.l, bottom: clearance + ABOVE_DOCK }}>
           <View
             accessibilityLiveRegion="polite"
             aria-live="polite"

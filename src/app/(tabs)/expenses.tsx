@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
-import { AddButton } from '@/components/add-button';
 import { IconDisc } from '@/components/icon-disc';
 import { STROKE } from '@/components/icons';
 import { MonthSwitcher } from '@/components/month-switcher';
@@ -12,7 +11,6 @@ import { Row } from '@/components/row';
 import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
-import { useFabScroll } from '@/components/use-fab-scroll';
 import { useFocusBorder } from '@/components/use-focus-border';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
@@ -30,7 +28,6 @@ export default function Expenses() {
   const { expenses, categories, settings } = useStore();
   const { now } = useSummary(month);
   const [query, setQuery] = useState('');
-  const fab = useFabScroll();
   const searchFocus = useFocusBorder();
   const q = useDeferredValue(query.trim().toLowerCase());
   const catById = useMemo(() => new Map(categories.map((k) => [k.id, k])), [categories]);
@@ -79,10 +76,8 @@ export default function Expenses() {
     <View style={{ flex: 1, backgroundColor: c.ground }}>
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        onScroll={fab.onScroll}
-        scrollEventThrottle={64}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: clearance + 88 }}>
+        contentContainerStyle={{ paddingBottom: clearance + space.l }}>
         <ScreenHero title="Expenses">
           <MonthSwitcher onBrand />
           <T
@@ -183,7 +178,6 @@ export default function Expenses() {
         )}
         </View>
       </ScrollView>
-      <AddButton compact={fab.compact} hidden={fab.hidden} />
     </View>
   );
 }

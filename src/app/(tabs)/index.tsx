@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 
-import { AddButton } from '@/components/add-button';
 import { BudgetCard } from '@/components/budget-card';
 import { GlassCard } from '@/components/glass-card';
 import { IconDisc } from '@/components/icon-disc';
@@ -15,7 +14,6 @@ import { Row } from '@/components/row';
 import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
-import { useFabScroll } from '@/components/use-fab-scroll';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
@@ -40,7 +38,6 @@ export default function Home() {
   const { month, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
-  const fab = useFabScroll();
   const cur = settings.currency;
   const p = pace(now, before, today);
   const lastName = monthName(addMonths(month, -1));
@@ -95,9 +92,7 @@ export default function Home() {
     <View style={{ flex: 1, backgroundColor: c.ground }}>
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        onScroll={fab.onScroll}
-        scrollEventThrottle={64}
-        contentContainerStyle={{ paddingBottom: clearance + 88 }}>
+        contentContainerStyle={{ paddingBottom: clearance + space.l }}>
         <ScreenHero
           title={settings.firstName ? `Hello, ${settings.firstName}` : 'Hello'}
           bleed={
@@ -279,7 +274,6 @@ export default function Home() {
           )}
         </View>
       </ScrollView>
-      <AddButton compact={fab.compact} hidden={fab.hidden} />
     </View>
   );
 }
