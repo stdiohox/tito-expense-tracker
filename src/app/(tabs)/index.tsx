@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 
 import { AddButton } from '@/components/add-button';
+import { BrandGradient } from '@/components/brand-gradient';
 import { BudgetBar } from '@/components/budget-bar';
 import { FocusStatusBar } from '@/components/focus-status-bar';
 import { IconDisc } from '@/components/icon-disc';
@@ -68,7 +69,7 @@ export default function Home() {
         onScroll={fab.onScroll}
         scrollEventThrottle={64}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}>
-        <View style={{ backgroundColor: c.brand, paddingTop: insets.top + space.s, paddingHorizontal: space.xl, paddingBottom: space.xxl }}>
+        <BrandGradient style={{ paddingTop: insets.top + space.s, paddingHorizontal: space.xl, paddingBottom: space.xxl }}>
           <MonthSwitcher onBrand />
           <View style={{ marginTop: space.l, gap: space.xs }}>
             <T
@@ -113,7 +114,7 @@ export default function Home() {
               </View>
             </View>
           ) : null}
-        </View>
+        </BrandGradient>
 
         <View style={{ paddingHorizontal: space.xl }}>
           {allCount === 0 ? (

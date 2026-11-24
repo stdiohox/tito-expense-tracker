@@ -22,8 +22,12 @@ export type Palette = {
   fieldBorder: string;
   /** Switch track when off: 3:1 against surface, and the white thumb 3:1 against it. */
   switchOff: string;
-  /** Brand header and auth welcome. */
+  /** Brand header and auth welcome: solid fallback, and the gradient drawn by BrandGradient. */
   brand: string;
+  brandStart: string;
+  brandMid: string;
+  brandEnd: string;
+  brandGlow: string;
   onBrand: string;
   onBrandSoft: string;
   /** Interactive accent on ground/surface: links, icons, selection. */
@@ -72,6 +76,10 @@ export const light: Palette = {
   fieldBorder: '#838796',
   switchOff: '#838796',
   brand: '#272C77',
+  brandStart: '#0B1B3F',
+  brandMid: '#272C77',
+  brandEnd: '#2F5DA8',
+  brandGlow: '#8EC9F0',
   onBrand: '#FFFFFF',
   onBrandSoft: '#C4E0F5',
   accent: '#2F5DA8',
@@ -109,6 +117,10 @@ export const dark: Palette = {
   fieldBorder: '#667599',
   switchOff: '#667599',
   brand: '#1E2263',
+  brandStart: '#0B1B3F',
+  brandMid: '#1E2263',
+  brandEnd: '#244A86',
+  brandGlow: '#8EC9F0',
   onBrand: '#FFFFFF',
   onBrandSoft: '#B4D3EE',
   accent: '#8EC9F0',
@@ -134,6 +146,9 @@ export const dark: Palette = {
   toastShadow: '#000000',
   focusRing: '#8EC9F0',
 };
+
+/** Peak opacity of the sky glow on the brand gradient (fades to 0 at 60% of the box). */
+export const brandGlowOpacity = { light: 0.28, dark: 0.2 } as const;
 
 /** Category icon colour per scheme; the disc behind it is the same hue at low alpha. */
 export const categoryColors: Record<CategoryIcon, { light: string; dark: string }> = {

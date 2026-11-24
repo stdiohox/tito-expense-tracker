@@ -12,12 +12,35 @@ const lum = (hex) => {
 const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 const mix = (fg, bg, a) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(fg.slice(i, i + 2), 16) * a + parseInt(bg.slice(i, i + 2), 16) * (1 - a)).toString(16).padStart(2, '0')).join('');
 
+// The brand gradient as BrandGradient draws it, in bounding-box units: linear (0,0) -> (1,1) with
+// stops at 0, 0.5 and 1, plus a radial sky glow centred at (1,0), radius 0.6, fading linearly to 0.
+// Sampled on a 21 x 21 grid; text on the header must pass against the worst sample.
+const glowOpacity = Object.fromEntries([...src.split('export const brandGlowOpacity')[1].split('}')[0].matchAll(/(light|dark): ([\d.]+)/g)].map((m) => [m[1], Number(m[2])]));
+const gradient = (p, a) => {
+  const pts = [];
+  for (let i = 0; i <= 20; i++) for (let j = 0; j <= 20; j++) {
+    const x = i / 20, y = j / 20, t = (x + y) / 2;
+    let col = t <= 0.5 ? mix(p.brandMid, p.brandStart, t / 0.5) : mix(p.brandEnd, p.brandMid, (t - 0.5) / 0.5);
+    const d = Math.hypot(x - 1, y) / 0.6;
+    if (d < 1) col = mix(p.brandGlow, col, a * (1 - d));
+    pts.push(col);
+  }
+  return pts;
+};
+
 let fail = 0;
-const check = (label, fg, bg, min) => { const r = ratio(fg, bg); const ok = r >= min; if (!ok) fail++; console.log(`${ok ? 'ok  ' : 'FAIL'} ${r.toFixed(2).padStart(5)} ≥ ${min}  ${label}`); };
+const report = (label, r, min) => { const ok = r >= min; if (!ok) fail++; console.log(`${ok ? 'ok  ' : 'FAIL'} ${r.toFixed(2).padStart(5)} ≥ ${min}  ${label}`); };
+const check = (label, fg, bg, min) => report(label, ratio(fg, bg), min);
+const checkGradient = (label, fg, pts, min) => report(`${label} (worst point of the gradient)`, Math.min(...pts.map((bg) => ratio(fg, bg))), min);
 
 for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) {
   for (const bg of ['ground', 'surface']) for (const fg of ['ink', 'inkSoft', 'inkMute', 'accent', 'burgundy', 'danger', 'positive']) check(`${scheme} ${fg} on ${bg}`, p[fg], p[bg], 4.5);
+  const pts = gradient(p, glowOpacity[scheme]);
   check(`${scheme} onBrand on brand`, p.onBrand, p.brand, 4.5);
+  checkGradient(`${scheme} onBrand on brand gradient`, p.onBrand, pts, 4.5);
+  checkGradient(`${scheme} onBrandSoft on brand gradient`, p.onBrandSoft, pts, 4.5);
+  checkGradient(`${scheme} pace line (chartLine) on brand gradient (non-text)`, p.chartLine, pts, 3);
+  checkGradient(`${scheme} gold today dot on brand gradient (non-text)`, p.goldOnBrand, pts, 3);
   check(`${scheme} onBrandSoft on brand`, p.onBrandSoft, p.brand, 4.5);
   check(`${scheme} onButton on button`, p.onButton, p.button, 4.5);
   check(`${scheme} accent on accentTint`, p.accent, p.accentTint, 4.5);

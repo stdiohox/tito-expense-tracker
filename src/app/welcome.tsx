@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BrandGradient } from '@/components/brand-gradient';
 import { T } from '@/components/text';
 import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -11,7 +12,7 @@ export default function Welcome() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
-    <View style={{ flex: 1, backgroundColor: c.brand, paddingTop: insets.top + space.xxl, paddingBottom: insets.bottom + space.xl, paddingHorizontal: space.xl }}>
+    <BrandGradient style={{ flex: 1, paddingTop: insets.top + space.xxl, paddingBottom: insets.bottom + space.xl, paddingHorizontal: space.xl }}>
       <StatusBar style="light" />
       <T variant="headline" tone="onBrand">
         Tito Finance
@@ -42,6 +43,6 @@ export default function Welcome() {
           </T>
         </Pressable>
       </View>
-    </View>
+    </BrandGradient>
   );
 }
