@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AddButton } from '@/components/add-button';
 import { Button } from '@/components/button';
 import { FocusStatusBar } from '@/components/focus-status-bar';
 import { IconDisc } from '@/components/icon-disc';
@@ -12,7 +11,6 @@ import { Row, SectionHeader } from '@/components/row';
 import { TabTitle } from '@/components/tab-title';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
-import { useFabScroll } from '@/components/use-fab-scroll';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
@@ -30,7 +28,6 @@ export default function Reports() {
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
   const toast = useToast();
-  const fab = useFabScroll();
   const cur = settings.currency;
   const lastName = monthName(addMonths(month, -1));
   const lastShort = shortMonth(addMonths(month, -1));
@@ -66,9 +63,7 @@ export default function Reports() {
       <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        onScroll={fab.onScroll}
-        scrollEventThrottle={64}
-        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + 120 }}>
+        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + space.xxxl }}>
         <TabTitle title="Reports">
           <MonthSwitcher />
         </TabTitle>
@@ -162,7 +157,6 @@ export default function Reports() {
           />
         </View>
       </ScrollView>
-      <AddButton compact={fab.compact} hidden={fab.hidden} />
     </View>
   );
 }
