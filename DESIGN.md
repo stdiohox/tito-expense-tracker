@@ -322,4 +322,4 @@ Fields: surface fill, 1px Field Border, 2px electric on focus, burgundy on error
 
 ## Change note (redesign, 2026-11-24)
 
-This version replaces the earlier navy-ivory-gold palette and the Manrope + Fraunces type with the palette and Outfit type above, and adds the floating tab bar, panels, glass cards, Quick add, budget cards and onboarding. PRODUCT.md's brief is unchanged on purpose: its Brand Commitments still name Tito indigo, clay and gold, and the fonts of the old web tracker, as the client's original brief. The palette here supersedes them for the app's look; confirm with the client before updating the brief itself.
+This version replaces the earlier navy-ivory-gold palette and the Manrope + Fraunces type with the palette and Outfit type above, and adds the docked dark tab bar, panels, frosted glass cards, Quick add, budget cards and onboarding. PRODUCT.md's brief is unchanged on purpose: its Brand Commitments still name Tito indigo, clay and gold, and the fonts of the old web tracker, as the client's original brief. The palette here supersedes them for the app's look; confirm with the client before updating the brief itself.
