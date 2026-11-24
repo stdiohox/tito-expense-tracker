@@ -262,7 +262,17 @@ Sizes scale with the OS text size up to 2× (1.5× for the amount input, 1.6× f
 
 ## Layout
 
-A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Every tab starts with the shared hero (`ScreenHero`): the title ("Hello, Ada" on Home, the tab name elsewhere) at the same position and size, then the month switcher and the month total (Home adds the pace line, chart and glass currency cards; Settings shows the account). Home continues with Quick add, Budgets (two columns), Where it went (top five) and Latest; its body follows the Appearance setting. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The floating dock (Home, Expenses, the raised +, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
+A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Every tab starts with the shared hero card (`ScreenHero`): a rounded (28px) gradient card set 16px in from the screen edges, so the page's ground shows around it, with the title ("Hello, Ada" on Home, the tab name elsewhere) at the same position and size, then the month switcher and the month total (Home adds the pace line, chart and glass currency cards; Settings shows the account). Home continues with Quick add, Budgets (two columns), Where it went (top five) and Latest; its body follows the Appearance setting. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The floating dock (Home, Expenses, the raised +, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
+
+## Motion
+
+Calm and brief, never decorative for its own sake, and always off with Reduce Motion (the end state appears at once):
+- **Reveal:** when a tab first appears, the hero card and then each section fade in and lift 12px, 70ms apart (380ms each).
+- **Counting totals:** hero totals count up to their value (650ms ease-out) and again when the month changes; screen readers hear the final figure.
+- **Budget bars** grow to their level (700ms ease-out).
+- **Press:** Quick add tiles and budget cards press in slightly (to 94–97%).
+- **Toast** slides up over 220ms and out over 180ms.
+The brand gradient never moves.
 
 ## Elevation & Depth
 
@@ -295,6 +305,9 @@ A dark panel with a 4-column grid of the visible categories: icon disc and a sho
 
 ### Pace chart
 On the gradient: this month as a 2.5px icy-blue line with a soft fill, last month dashed in white at 40–45%, and the mint today dot.
+
+### Name and wordmark
+The app is **TET**, short for **Tito Finance Expense Tracker**. TET is the name under the app icon. In the app, the wordmark shows "TET" in spaced SemiBold with a small mint dot (teal on light grounds) and the full name beneath it in Caption: at the top of the onboarding slides and in the Settings footer. Screen readers hear "TET, Tito Finance Expense Tracker".
 
 ### Onboarding
 Three full-bleed gradient slides, each with our own decorative SVG shapes in the palette (hidden from screen readers), a hero headline bottom-left and supporting text. "01 / 03" and Skip at the top; a pill indicator whose active segment is mint and wider; one white pill. The setup after sign-up (currency, how hands-on, categories and up to two budgets) uses the light panels, a 3-segment electric progress bar, Skip on every step and one primary button.
