@@ -196,8 +196,8 @@ The app reads a month as a pace, not a ledger. A deep navy-to-electric-blue grad
 Colour is rationed. Royal blue is the brand and the primary action; electric blue marks links, the active tab and progress; icy blue lightens; aqua mint is the one pop, used sparingly and only on dark or blue surfaces; burgundy marks a passed budget or an error, always with words. Type is Outfit throughout, with tabular figures on every amount. One look ships on iOS, Android and the web build.
 
 **Key Characteristics:**
-- A static navy → royal → electric gradient on the Home header and the onboarding slides only.
-- Home is the brand scene in both modes: the bright gradient header flows into a deep navy body of dark panels. Other screens use rounded panels on the icy-white ground (light) or deep navy (dark), following the Appearance setting.
+- A static navy → royal → electric gradient in the hero at the top of every tab (with a white flare in its top-right corner) and on the onboarding slides, and nowhere else.
+- Every tab opens with the same hero: the title in the same place and style, then the month switcher and headline figure. Below it, rounded panels on the icy-white ground (light) or deep navy (dark), following the Appearance setting; Quick add stays a dark panel in both modes.
 - Frosted glass cards on the gradient: a navy tint with a white frost, a light edge and a top highlight, no blur.
 - One full-width primary button per task screen; the floating "Add expense" pill on Home and Expenses.
 - Light and dark are designed pairs; every text pair meets WCAG AA and every indicator 3:1.
@@ -205,7 +205,7 @@ Colour is rationed. Royal blue is the brand and the primary action; electric blu
 ## Colors
 
 ### Primary
-- **Brand gradient**: a static diagonal from **Deep Navy** (#141033, top left) through **Royal Blue** (#2631AD) to **Electric Blue** (#2F5BE7, bottom right), with an **Icy Blue** (#CBE9FD) glow at 22% in the text-free top-right corner and a faint white sheen bottom-left. On the Home header a 28px band at the bottom fades to icy blue in light mode (to the navy ground in dark mode); no content ever sits in that band. Dark mode runs through a deeper royal (#1F2690) to a deeper electric (#2A50CF). Drawn by `BrandGradient` with react-native-svg; never animated.
+- **Brand gradient** (tab heroes and onboarding): a static diagonal from **Deep Navy** (#141033, top left) through **Royal Blue** (#2631AD) to **Electric Blue** (#2F5BE7, bottom right), with an **Icy Blue** (#CBE9FD) glow at 22% in the text-free top-right corner and a faint white sheen bottom-left. Heroes add a white **flare** (55% at the corner, fading to 0 within 32% of the box) in the same corner for the brighter, whiter look; no text sits there. On the Home header a 28px band at the bottom fades to icy blue in light mode (to the navy ground in dark mode); no content ever sits in that band. Dark mode runs through a deeper royal (#1F2690) to a deeper electric (#2A50CF). Drawn by `BrandGradient` with react-native-svg; never animated.
 - **Royal Blue** (brand / button): the primary button and the Add button in light mode; pressed deepens to #1C2589.
 - **Electric Blue** (accent): links, the active tab, progress fills, the focused field border and selection outlines, on the light ground. In dark mode text needs more light, so the accent lifts to **#7693EF**; the dark primary button is **#3560E8**, the lightest electric that keeps its white label at 4.5:1 and still stands 3:1 off the sheet surface.
 - **Icy Blue**: the gradient's glow and light-mode end, the pace line, the toast's Undo, and the light tint (**Blue Mist** #E2EEFD) behind selected items.
@@ -237,7 +237,7 @@ Each category has a light and a dark icon colour; its disc is the same hue at 12
 
 **The Disc-Only Rule.** Category colour lives inside the small tinted icon disc and nowhere else: not in bars, legends or charts.
 
-**The One Gradient Rule.** The brand gradient appears only on the Home header and the onboarding slides, and it never moves.
+**The One Gradient Rule.** The brand gradient appears only in the tab heroes and on the onboarding slides, and it never moves.
 
 ## Typography
 
@@ -260,7 +260,7 @@ Sizes scale with the OS text size up to 2× (1.5× for the amount input, 1.6× f
 
 ## Layout
 
-A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Home: the gradient header (greeting, month switcher, total, pace line, chart, glass currency cards) fading into a deep navy body, then Quick add, Budgets (two columns), Where it went (top five) and Latest, all as dark panels and cards in both modes. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The docked tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
+A single phone column. Screens use 16px side margins with panels edge to edge inside them; titles inset 4px more. A 4/8 scale (4, 8, 12, 16, 20, 24, 32, 44). Every tab starts with the shared hero (`ScreenHero`): the title ("Hello, Ada" on Home, the tab name elsewhere) at the same position and size, then the month switcher and the month total (Home adds the pace line, chart and glass currency cards; Settings shows the account). Home continues with Quick add, Budgets (two columns), Where it went (top five) and Latest; its body follows the Appearance setting. Expenses, Reports and Category detail open with two stat cards where it helps, then panels. The docked tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab. Tab screens reserve the tab bar's height plus room for the Add button at the bottom, so nothing hides behind them.
 
 ## Elevation & Depth
 
@@ -305,7 +305,7 @@ Fields: surface fill, 1px Field Border, 2px electric on focus, burgundy on error
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the gradient to the Home header and onboarding, and keep it still.
+- **Do** keep the gradient to the tab heroes and onboarding, and keep it still; keep text out of the hero's top-right corner, where the flare is.
 - **Do** keep aqua mint to dark or blue surfaces, and use teal for the pop on light ones.
 - **Do** give each task screen exactly one primary button.
 - **Do** set every amount in tabular figures and right-align it.

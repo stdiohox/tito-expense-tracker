@@ -192,8 +192,9 @@ Stack (root)
 - **Docked tab bar.** `(tabs)/_layout.tsx` uses `expo-router/ui` (`Tabs`, `TabList`,
   `TabTrigger`, `TabSlot`) to draw one dark bar, docked to the bottom edge with rounded top corners,
   on iOS, Android and the web. The system tab bar can't take this look, so `NativeTabs` was dropped
-  in the redesign. Home renders as the dark brand scene in both modes (`AppearanceProvider
-  mode="dark"`, with the header in the light palette). The bar overlays the
+  in the redesign. Every tab opens with `ScreenHero` (`components/screen-hero.tsx`): the brand
+  gradient with its top-right flare, rendered in the light palette in both modes, and fading into
+  the current mode's ground. The rest of each screen follows the Appearance setting. The bar overlays the
   content: `useTabBarClearance()` (`components/tab-bar.ts`) tells screens, the Add button and the
   toast how much room to leave, and the bar steps aside while the keyboard is open.
 - **Appearance.** `settings.appearance` (System, Light, Dark) reaches `useTheme()` through
