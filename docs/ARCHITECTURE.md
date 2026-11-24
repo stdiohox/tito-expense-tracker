@@ -71,12 +71,12 @@ owner of that backend provides an export (PLAN.md §7.2, Track B).
 | Framework | Expo SDK 58, React Native 0.88, React 19.3 | Built |
 | Language | TypeScript 6, `strict: true`, path alias `@/*` → `src/*` | Built |
 | Compiler | React Compiler (`experiments.reactCompiler` in `app.json`) | Built |
-| Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `NativeTabs` | Built |
+| Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `expo-router/ui` tabs with a floating bar | Built |
 | State | React Context + `useReducer` (in memory) | Built; replaced in phase 2 |
 | Charts | `react-native-svg`, hand-drawn (pace line, bars) | Built |
 | Animation | `react-native-reanimated` 4 (toast, Add button), honours Reduce Motion | Built |
-| Icons | Tabler (`@tabler/icons-react-native`), stroke 1.75; SF Symbols / Material in the native tab bar | Built |
-| Fonts | Manrope (400–800), Fraunces 600, via `@expo-google-fonts` | Built |
+| Icons | Tabler (`@tabler/icons-react-native`), stroke 1.75, including the tab bar | Built |
+| Fonts | Outfit 400, 500, 600 via `@expo-google-fonts/outfit`; tabular figures through its `tnum` feature | Built |
 | IDs | `expo-crypto` `randomUUID()` (client-generated) | Built |
 | Haptics | `expo-haptics` | Built |
 | Local database | `expo-sqlite`, with versioned migrations | Planned |
@@ -161,7 +161,7 @@ somewhere sensible.
 ```
 Stack (root)
 ├─ Protected guard = signedIn
-│  ├─ (tabs)                 NativeTabs on iOS/Android · custom TabList on web
+│  ├─ (tabs)                 expo-router/ui tabs, floating dark bar on every platform
 │  │  ├─ index      Home
 │  │  ├─ expenses   Expenses
 │  │  ├─ reports    Reports
@@ -171,9 +171,10 @@ Stack (root)
 │  ├─ category/[id]          push (header "Edit" button)
 │  ├─ category/edit          sheet
 │  ├─ categories             push
-│  └─ account/delete         push
+│  ├─ account/delete         push
+│  └─ setup                  full screen (after sign-up; Settings → Redo setup)
 └─ Protected guard = !signedIn
-   ├─ welcome                fade
+   ├─ welcome                fade (three intro slides)
    ├─ sign-in
    ├─ sign-up
    └─ reset
@@ -188,11 +189,17 @@ Stack (root)
   The web stack has no form sheet, so the same options choose `card` when `Platform.OS === 'web'`.
 - **Tabs are sections, not actions.** Adding an expense is the floating `AddButton`, not a tab
   (DESIGN.md, Layout).
-- **Native tab bar vs web.** `(tabs)/_layout.tsx` uses `NativeTabs` (the system tab bar, with SF
-  Symbols and Material icons). Automatic content insets are off, because Home's gradient header must
-  run under the status bar. Each screen applies its own safe-area padding instead.
-  `(tabs)/_layout.web.tsx` is picked automatically for web builds and draws a matching bar with
-  `expo-router/ui`.
+- **Floating tab bar.** `(tabs)/_layout.tsx` uses `expo-router/ui` (`Tabs`, `TabList`,
+  `TabTrigger`, `TabSlot`) to draw one floating, rounded dark bar on iOS, Android and the web. The
+  system tab bar can't float, so `NativeTabs` was dropped in the redesign. The bar overlays the
+  content: `useTabBarClearance()` (`components/tab-bar.ts`) tells screens, the Add button and the
+  toast how much room to leave, and the bar steps aside while the keyboard is open.
+- **Appearance.** `settings.appearance` (System, Light, Dark) reaches `useTheme()` through
+  `AppearanceProvider`; on iOS and Android `Appearance.setColorScheme` also switches native UI.
+  `AppearanceProvider mode="dark"` is also how dark panels (Quick add, Latest, the tab bar) render
+  their contents in the dark palette in light mode.
+- **Setup.** Sign-up replaces to `/setup`; its Finish calls `router.dismissTo('/')`. Hidden
+  categories (`Category.hidden`) leave pickers but still count in every total.
 - **`safeBack()`** (`components/nav.ts`) goes back if it can, and otherwise replaces to `/`. It
   covers a sheet opened from a cold deep link, where there is nothing to go back to.
 - **Typed routes** are on, so `router.push({ pathname: '/expense/[id]', params: { id } })` is
@@ -512,8 +519,8 @@ sequenceDiagram
 
 - **`PaceChart`** (`components/pace-chart.tsx`) is drawn with `react-native-svg`. This month is a
   monotone cubic line (no overshoot below zero or past the real values) with a gradient fill. Last
-  month is a dashed ghost line. A gold dot marks today. It sits on `BrandGradient`, a static
-  navy → indigo → French blue SVG gradient with a sky glow, shared with the Welcome screen. The whole chart has one
+  month is a dashed ghost line. A mint dot marks today. It sits on `BrandGradient`, a static
+  navy → royal → electric SVG gradient with an icy glow, shared with the onboarding slides. The whole chart has one
   `accessibilityLabel` that states the numbers in words.
 - **Reports month-by-month bars** are plain `View`s sized as a percentage of the largest month. Each
   bar is a button that selects its month.
@@ -523,13 +530,13 @@ sequenceDiagram
 
 | Area | iOS | Android | Web |
 |---|---|---|---|
-| Tab bar | `NativeTabs`, SF Symbols | `NativeTabs`, Material icons | `_layout.web.tsx`, Tabler icons |
+| Tab bar | Floating `expo-router/ui` bar, Tabler icons | Same | Same |
 | Sheets | `formSheet` with grabber | `formSheet` | Full-screen `card` |
 | Touch target | 44 pt | 48 dp | 44 px |
 | Announcements | `announceForAccessibility` (no live regions) | Live regions | `aria-live`, and focus moves to the field |
 | Focus ring | System | System | `theme/web-focus.ts` adds a `:focus-visible` outline (WCAG 2.4.7) |
 | Switch colours | `trackColor` | `trackColor` | Also needs `activeTrackColor`/`activeThumbColor` |
-| Toast offset | Tab bar 49 | Tab bar 80 | Tab bar 62 |
+| Toast offset | `useTabBarClearance()` | Same | Same |
 | Back | Swipe | Predictive back (`predictiveBackGestureEnabled`) | Browser back |
 
 Tab screens stay mounted, so a plain `<StatusBar>` would leave whichever tab mounted last in charge.
@@ -553,7 +560,7 @@ indigo, and the other tabs follow the colour scheme.
 - **Text scaling** follows the OS. `maxFontSizeMultiplier` caps it at 2× for all text and fields,
   1.6× for category tile names and 1.5× for the amount input. Totals shrink to fit, down to 60%.
 - **Motion:** Reanimated animations use `ReduceMotion.System`.
-- **Contrast:** `npm run check:contrast` checks 140 pairs in light and dark (text at 4.5:1,
+- **Contrast:** `npm run check:contrast` checks 174 pairs in light and dark (text at 4.5:1,
   non-text at 3:1).
 
 ### 9.5 Floating Add button
@@ -748,7 +755,7 @@ create index on expenses (user_id, day) where deleted_at is null;
 | Types | `npm run typecheck` | Strict TS, typed routes |
 | Lint | `npm run lint` | Expo ESLint rules, hooks rules |
 | Domain | `npm run check:dates` | Local-calendar month/day maths in `Africa/Lagos`; DST; money format and parse; summaries (unknown category, malformed day, other currency) |
-| Contrast | `npm run check:contrast` | WCAG AA for 140 text and non-text pairs (header text against the worst point of the sampled brand gradient) in light and dark |
+| Contrast | `npm run check:contrast` | WCAG AA for 174 text and non-text pairs (header text against the worst point of the sampled brand gradient, and on glass cards over it) in light and dark |
 | Dependencies | `npx expo-doctor` | SDK 58 compatibility |
 | Visual | Web build at 390 × 844, light and dark | Layout and states |
 | Devices | Expo Go on a real iPhone and Android phone | Safe areas, keyboard, VoiceOver/TalkBack, 200% text (checklist in `tasks/todo.md`) |
@@ -776,8 +783,8 @@ So nothing is compiled or mocked.
 | AD7 | **Charts with `react-native-svg`**, not Victory Native/Skia | Two simple charts; Skia needs extra WebAssembly setup for the web build | Victory Native (Skia), suggested in PLAN.md §7.1 |
 | AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for sample data; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
 | AD9 | **`Stack.Protected`** for auth gating | No back gesture into signed-out data | Redirects in `useEffect` |
-| AD10 | **System tab bar (`NativeTabs`)** on iOS and Android, custom bar on the web | Native look, feel and behaviour; the native tab view has no web form | A JS tab bar everywhere |
-| AD11 | **Brand: Tito indigo `#272c77`**, Manrope + Fraunces; JetBrains Mono dropped | PRODUCT.md brand commitments; amounts use Manrope's tabular figures | The web tracker's monospace amounts |
+| AD10 | **Floating tab bar with `expo-router/ui`** on every platform (redesign, 2026-11-24) | The design calls for a floating dark bar, which the system tab bar can't do; one layout for all platforms | The system tab bar (`NativeTabs`), used until the redesign |
+| AD11 | **Redesign palette** (navy, royal, electric, icy, one mint pop) and **Outfit** | The redesign brief; Outfit's `tnum` gives tabular amounts | The earlier Tito indigo + Manrope/Fraunces look; the web tracker's monospace amounts |
 | AD12 | **SQLite as the only read source in phase 2**, with an outbox | Offline first, instant screens, one cache | Reading straight from the network; two caches |
 
 ---
@@ -794,7 +801,7 @@ So nothing is compiled or mocked.
 - Only NGN and USD exist. PLAN.md §5.5 lists NGN, USD, EUR, GBP and CAD for settings.
 - Forms use local state and inline checks. PLAN.md §7.1 suggests react-hook-form + Zod. Decide
   before phase 2 whether the extra forms justify it.
-- Toast offsets assume the system's default tab bar heights. Confirm them on devices.
+- The floating tab bar and toast offsets come from `useTabBarClearance()`; confirm them on devices.
 - There is no unit-test runner. Domain checks are assertions in a script.
 
 **Open questions**

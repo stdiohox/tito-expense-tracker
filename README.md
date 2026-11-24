@@ -54,7 +54,8 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 - **Two currencies (NGN and USD).** Each expense keeps the currency it was entered in. Changing the
   main currency never relabels saved amounts. Other-currency spending is counted separately and
   never converted.
-- **Light and dark mode**, following the system setting. Both are designed as a pair.
+- **Light and dark mode**, following the phone or forced in **Settings → Appearance**. Both are designed as a pair.
+- **Onboarding.** Three intro slides, then a three-step setup after sign-up (main currency, how hands-on, categories and budgets); **Settings → Redo setup** reopens it.
 - **Accessible.** The app has:
   - WCAG 2.2 AA contrast, checked by a script;
   - 44 pt / 48 dp touch targets;
@@ -147,13 +148,13 @@ There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test su
     ├── app/                 Routes (Expo Router). Every file is a screen; _layout files are navigators.
     │   ├── _layout.tsx      Root: fonts, splash, providers, signed-in / signed-out stacks
     │   ├── (tabs)/          Home (index), Expenses, Reports, Settings
-    │   │   ├── _layout.tsx      Native system tab bar (iOS and Android)
-    │   │   └── _layout.web.tsx  Custom bottom tab bar for the web build
+    │   │   └── _layout.tsx      Floating dark tab bar (expo-router/ui), every platform
     │   ├── expense/         new.tsx (add sheet), [id].tsx (edit sheet)
     │   ├── category/        [id].tsx (detail), edit.tsx (create/edit sheet)
     │   ├── categories.tsx   Categories and budgets list
     │   ├── account/delete.tsx
-    │   └── welcome.tsx, sign-in.tsx, sign-up.tsx, reset.tsx
+    │   ├── setup.tsx        Three-step setup after sign-up (and Settings → Redo setup)
+    │   └── welcome.tsx, sign-in.tsx, sign-up.tsx, reset.tsx   (welcome = three intro slides)
     ├── components/          Shared UI: Row, Button, Field, T (text), PaceChart, Toast, ExpenseForm, …
     ├── data/                State: store (phase 1: in memory), month/today provider, summary hook, sample data
     ├── domain/              Pure TypeScript, no React: types, dates, money, summaries, starter categories
@@ -171,17 +172,18 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Route | File | Shown as | Purpose |
 |---|---|---|---|
-| `/` | `(tabs)/index.tsx` | Tab | Home: month total, pace line and chart, where it went, latest four expenses |
-| `/expenses` | `(tabs)/expenses.tsx` | Tab | The month grouped by day, with daily totals and search |
-| `/reports` | `(tabs)/reports.tsx` | Tab | Total vs last month, by category, month-by-month bars, share as PDF (stub) |
-| `/settings` | `(tabs)/settings.tsx` | Tab | Account, main currency, categories, reminder, export, sign out, delete |
+| `/` | `(tabs)/index.tsx` | Tab | Home: greeting, month total, pace line and chart, glass currency cards, Quick add, budget cards, where it went, latest |
+| `/expenses` | `(tabs)/expenses.tsx` | Tab | Stat cards, search, and the month grouped by day in panels |
+| `/reports` | `(tabs)/reports.tsx` | Tab | Total, comparison cards, by category, month-by-month bars, share as PDF (stub) |
+| `/settings` | `(tabs)/settings.tsx` | Tab | Account, Redo setup, main currency, appearance, categories, reminder, export, sign out, delete |
 | `/expense/new?category=` | `expense/new.tsx` | Sheet | Add an expense (the category can be preset) |
 | `/expense/[id]` | `expense/[id].tsx` | Sheet | Edit or delete an expense |
 | `/category/[id]` | `category/[id].tsx` | Push | Category total, budget, activity, "Add to …" |
 | `/category/edit?id=` | `category/edit.tsx` | Sheet | Create a category (no `id`) or edit one |
 | `/categories` | `categories.tsx` | Push | All categories with their budgets |
 | `/account/delete` | `account/delete.tsx` | Push | Type DELETE to confirm account deletion |
-| `/welcome` · `/sign-in` · `/sign-up` · `/reset` | root files | Stack | Signed-out screens |
+| `/setup` | `setup.tsx` | Full screen | After sign-up: main currency, how hands-on, categories and up to two budgets |
+| `/welcome` · `/sign-in` · `/sign-up` · `/reset` | root files | Stack | Signed-out screens; `/welcome` is three intro slides |
 
 **Sheet** means a native form sheet on iOS and Android, and a full-screen card on the web.
 Signed-in and signed-out screens sit in separate `Stack.Protected` groups, so after sign-out, Back
@@ -210,12 +212,11 @@ The web tracker's bugs come back if these rules are broken.
    Before using an Expo API, read the SDK 58 docs at `https://docs.expo.dev/versions/v58.0.0/`.
 6. **Design rules.** The full list is in [DESIGN.md](DESIGN.md). The main ones:
    - one primary button per task screen;
-   - gold is the one "crown" pop: the today dot and small marks, never a fill or the only sign of a state;
+   - aqua mint is the one pop, only on dark or blue surfaces (teal on light ones), never a fill;
    - burgundy means a budget passed or an error, always with words, and nothing is ever red;
-   - the navy → indigo → French blue gradient is only on the Home header and Welcome, and never moves;
+   - the navy → royal → electric gradient is only on the Home header and onboarding, and never moves;
    - category colour appears only inside the icon disc;
-   - Fraunces is for totals and large titles only;
-   - every amount uses tabular figures.
+   - Outfit everywhere; every amount uses tabular figures (Outfit's `tnum`).
 7. **Colours come only from `src/theme/tokens.ts`.** After changing one, run `npm run check:contrast`.
 
 ---
