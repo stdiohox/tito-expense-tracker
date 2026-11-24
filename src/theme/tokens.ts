@@ -176,24 +176,23 @@ export const TARGET = Platform.select({ android: 48, default: 44 });
 export const space = { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24, xxxl: 32, huge: 44 } as const;
 export const radius = { s: 8, m: 12, l: 16, pill: 999 } as const;
 
+/** Outfit in three weights. Its `tnum` feature gives every digit the same width (590 units). */
 export const fonts = {
-  regular: 'Manrope_400Regular',
-  medium: 'Manrope_500Medium',
-  semibold: 'Manrope_600SemiBold',
-  bold: 'Manrope_700Bold',
-  extrabold: 'Manrope_800ExtraBold',
-  display: 'Fraunces_600SemiBold',
+  regular: 'Outfit_400Regular',
+  medium: 'Outfit_500Medium',
+  semibold: 'Outfit_600SemiBold',
 } as const;
 
-/** Type roles (sizes in pt; scaled by the OS font-size setting). */
+/** Type roles (sizes in pt; scaled by the OS font-size setting). Amounts add tabular figures. */
 export const type = {
-  total: { fontFamily: fonts.display, fontSize: 44, lineHeight: 50, letterSpacing: -0.6 },
-  largeTitle: { fontFamily: fonts.display, fontSize: 32, lineHeight: 38, letterSpacing: -0.4 },
-  title: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 26 },
-  headline: { fontFamily: fonts.bold, fontSize: 17, lineHeight: 22 },
-  body: { fontFamily: fonts.medium, fontSize: 16, lineHeight: 22 },
-  bodyStrong: { fontFamily: fonts.semibold, fontSize: 16, lineHeight: 22 },
-  sub: { fontFamily: fonts.medium, fontSize: 14, lineHeight: 19 },
-  caption: { fontFamily: fonts.semibold, fontSize: 12, lineHeight: 16 },
-  button: { fontFamily: fonts.bold, fontSize: 17, lineHeight: 22 },
+  hero: { fontFamily: fonts.semibold, fontSize: 40, lineHeight: 46, letterSpacing: -0.8 },
+  total: { fontFamily: fonts.semibold, fontSize: 44, lineHeight: 50, letterSpacing: -1 },
+  largeTitle: { fontFamily: fonts.semibold, fontSize: 32, lineHeight: 38, letterSpacing: -0.5 },
+  title: { fontFamily: fonts.semibold, fontSize: 20, lineHeight: 26, letterSpacing: -0.2 },
+  headline: { fontFamily: fonts.semibold, fontSize: 17, lineHeight: 22 },
+  body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 22 },
+  bodyStrong: { fontFamily: fonts.medium, fontSize: 16, lineHeight: 22 },
+  sub: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 19 },
+  caption: { fontFamily: fonts.medium, fontSize: 12, lineHeight: 16 },
+  button: { fontFamily: fonts.semibold, fontSize: 17, lineHeight: 22 },
 } as const;

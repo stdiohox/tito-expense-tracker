@@ -1,12 +1,4 @@
-import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
-import {
-  Manrope_400Regular,
-  Manrope_500Medium,
-  Manrope_600SemiBold,
-  Manrope_700Bold,
-  Manrope_800ExtraBold,
-  useFonts,
-} from '@expo-google-fonts/manrope';
+import { Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, useFonts } from '@expo-google-fonts/outfit';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -27,14 +19,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 export const unstable_settings = { anchor: '(tabs)' };
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    Manrope_400Regular,
-    Manrope_500Medium,
-    Manrope_600SemiBold,
-    Manrope_700Bold,
-    Manrope_800ExtraBold,
-    Fraunces_600SemiBold,
-  });
+  const [loaded, error] = useFonts({ Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold });
 
   useEffect(() => {
     if (loaded || error) SplashScreen.hideAsync().catch(() => {});
@@ -94,7 +79,7 @@ function Navigation() {
 
   const screenOptions = {
     headerTintColor: c.accent,
-    headerTitleStyle: { fontFamily: fonts.bold, color: c.ink },
+    headerTitleStyle: { fontFamily: fonts.semibold, color: c.ink },
     headerShadowVisible: false,
     headerStyle: { backgroundColor: c.ground },
     headerBackButtonDisplayMode: 'minimal' as const,
