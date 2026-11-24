@@ -50,7 +50,7 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
   - a bar chart of up to six months (tap a bar to jump to that month).
 - **Categories and budgets.** The twelve starter categories come from the web tracker, and users can
   add their own. Any category can have a monthly budget. Budgets inform and never alarm: going over
-  shows in clay with words, never in red.
+  shows in burgundy with words, never in red.
 - **Two currencies (NGN and USD).** Each expense keeps the currency it was entered in. Changing the
   main currency never relabels saved amounts. Other-currency spending is counted separately and
   never converted.
@@ -210,8 +210,9 @@ The web tracker's bugs come back if these rules are broken.
    Before using an Expo API, read the SDK 58 docs at `https://docs.expo.dev/versions/v58.0.0/`.
 6. **Design rules.** The full list is in [DESIGN.md](DESIGN.md). The main ones:
    - one primary button per task screen;
-   - gold means "today" and nothing else;
-   - clay means a budget passed or an error, and nothing is ever red;
+   - gold is the one "crown" pop: the today dot and small marks, never a fill or the only sign of a state;
+   - burgundy means a budget passed or an error, always with words, and nothing is ever red;
+   - the navy → indigo → French blue gradient is only on the Home header and Welcome, and never moves;
    - category colour appears only inside the icon disc;
    - Fraunces is for totals and large titles only;
    - every amount uses tabular figures.

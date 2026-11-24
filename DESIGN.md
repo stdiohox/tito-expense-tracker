@@ -1,45 +1,51 @@
 ---
 name: Tito Expense Tracker
-description: A calm phone app for seeing your month as a pace, in Tito Finance indigo.
+description: A calm phone app for seeing your month as a pace, in Tito Finance navy, indigo and French blue on champagne ivory.
 colors:
+  navy: "#0B1B3F"
   brand: "#272C77"
   brand-pressed: "#1D2160"
-  accent: "#2F359A"
-  accent-tint: "#EBECF8"
+  french-blue: "#2F5DA8"
+  sky: "#8EC9F0"
+  accent: "#2F5DA8"
+  accent-tint: "#E3EBF7"
   on-brand: "#FFFFFF"
-  on-brand-soft: "#C8CBF0"
-  gold: "#E0B04C"
-  clay: "#A4462A"
-  clay-tint: "#F8E7E1"
+  on-brand-soft: "#C4E0F5"
+  gold: "#C89B3C"
+  gold-on-brand: "#D5B36B"
+  burgundy: "#7A1F3D"
+  burgundy-tint: "#F5E3E8"
   positive: "#2B6E47"
-  ground: "#F5F6FB"
-  surface: "#FFFFFF"
-  ink: "#14163A"
-  ink-soft: "#43476A"
-  ink-mute: "#5E6283"
-  line: "#E3E5F0"
-  field-border: "#878BA5"
-  switch-off: "#878BA5"
-  bar-muted: "#8589B8"
+  ground: "#F6EFE2"
+  surface: "#FFFDF8"
+  ink: "#0B1B3F"
+  ink-soft: "#424F70"
+  ink-mute: "#5E6A88"
+  line: "#E7DFD0"
+  field-border: "#838796"
+  switch-off: "#838796"
+  bar-muted: "#6C88BA"
   brand-dark: "#1E2263"
+  brand-end-dark: "#244A86"
   button-dark: "#AEB3FF"
   button-dark-pressed: "#9198F2"
-  accent-tint-dark: "#262A5E"
-  on-brand-soft-dark: "#B9BDEB"
-  gold-dark: "#E7BE62"
-  clay-dark: "#F0947B"
-  clay-tint-dark: "#3A2430"
+  accent-dark: "#8EC9F0"
+  accent-tint-dark: "#1C3A6B"
+  on-brand-soft-dark: "#B4D3EE"
+  gold-dark: "#C89B3C"
+  burgundy-dark: "#E58AA3"
+  burgundy-tint-dark: "#3A1830"
   positive-dark: "#86D0A4"
-  ground-dark: "#0D0E22"
-  surface-dark: "#16183A"
-  raised-dark: "#1E2148"
-  ink-dark: "#F1F2FA"
-  ink-soft-dark: "#BEC1DB"
-  ink-mute-dark: "#9A9EBE"
-  line-dark: "#2A2D58"
-  field-border-dark: "#63678C"
-  switch-off-dark: "#63678C"
-  bar-muted-dark: "#5E63A0"
+  ground-dark: "#0B1B3F"
+  surface-dark: "#122752"
+  raised-dark: "#1A3262"
+  ink-dark: "#F6EFE2"
+  ink-soft-dark: "#ADB4C5"
+  ink-mute-dark: "#8992AD"
+  line-dark: "#1F3363"
+  field-border-dark: "#667599"
+  switch-off-dark: "#667599"
+  bar-muted-dark: "#4A6B99"
 typography:
   total:
     fontFamily: "Fraunces SemiBold, Georgia, serif"
@@ -128,8 +134,8 @@ components:
   button-secondary-pressed:
     backgroundColor: "{colors.line}"
   button-danger:
-    backgroundColor: "{colors.clay-tint}"
-    textColor: "{colors.clay}"
+    backgroundColor: "{colors.burgundy-tint}"
+    textColor: "{colors.burgundy}"
     typography: "{typography.button}"
     rounded: "{rounded.pill}"
     padding: "0 20px"
@@ -179,7 +185,7 @@ components:
     rounded: "{rounded.pill}"
     height: "44px"
   toast:
-    backgroundColor: "{colors.ink}"
+    backgroundColor: "{colors.navy}"
     textColor: "{colors.on-brand}"
     typography: "{typography.sub}"
     rounded: "{rounded.m}"
@@ -195,14 +201,14 @@ components:
 
 **Creative North Star: "The Indigo Pace Line"**
 
-The app reads a month as a pace, not a ledger. A deep Tito indigo header holds the one number that matters (what you have spent so far) and a single soft line tracking this month against last month to the same day. Everything below that header is quiet: a cool near-white ground (deep indigo-black in dark mode), white grouped surfaces, hairline dividers, and rows that put the category on the left and the amount on the right. The structure follows Wealthfront iOS (large totals, grouped lists, one accent, one primary button per screen) carried in Tito Finance's own colours and type.
+The app reads a month as a pace, not a ledger. A navy-to-French-blue gradient header holds the one number that matters (what you have spent so far) and a single sky-blue line tracking this month against last month to the same day. Everything below that header is quiet: a warm champagne-ivory ground (navy in dark mode), warm-white grouped surfaces, hairline dividers, and rows that put the category on the left and the amount on the right. The structure follows Wealthfront iOS (large totals, grouped lists, one accent, one primary button per screen) carried in Tito Finance's own colours and type.
 
-Density is phone-native and generous: 20px side margins, 64px rows, 44pt (iOS) and 48dp (Android) minimum targets everywhere. Colour is rationed. Indigo is the brand voice and the only action colour; gold appears only as the "today" dot; clay marks a passed budget and never reads as an alarm red; category hues live only inside small tinted discs. Type is Manrope for every working word with tabular figures on amounts, and Fraunces only for the big totals and large titles. One look ships on iOS and Android, with native tab bars, pickers, sheets and Back behaviour.
+Density is phone-native and generous: 20px side margins, 64px rows, 44pt (iOS) and 48dp (Android) minimum targets everywhere. Colour is rationed. Indigo is the brand voice and the primary action, with French blue for links; gold is the one crown pop (the "today" dot and small marks); burgundy marks a passed budget, always with words, and never reads as an alarm red; category hues live only inside small tinted discs. Type is Manrope for every working word with tabular figures on amounts, and Fraunces only for the big totals and large titles. One look ships on iOS and Android, with native tab bars, pickers, sheets and Back behaviour.
 
 The world is calm and encouraging. It does not use dashboard tiles, promo cards, multi-colour charts or red warnings.
 
 **Key Characteristics:**
-- Indigo drench on the home header and the auth welcome only; light or deep-indigo ground below.
+- A static navy → indigo → French blue gradient on the home header and the auth welcome only; champagne ivory (or navy) ground below.
 - Fraunces for totals and large titles; Manrope for everything else; tabular figures on every amount.
 - Grouped lists with hairline dividers, round tinted icon discs, right-aligned amounts.
 - One full-width pill primary button per task screen; a floating pill "Add expense" on the Home and Expenses tabs.
@@ -210,37 +216,43 @@ The world is calm and encouraging. It does not use dashboard tiles, promo cards,
 
 ## Colors
 
-One brand indigo plus two warm supporting notes (gold and clay), each rationed to a single meaning, on a cool indigo-tinted neutral ramp.
+Navy, Tito indigo and French blue carry the brand; sky blue adds light to it; a warm champagne ivory is the ground; gold is the one "crown" pop and burgundy the one warning, each rationed. Dark mode is built on the navy.
 
 ### Primary
-- **Tito Indigo** (brand): the home header and welcome screen background, the primary button fill and the floating Add button in light mode. Pressed state deepens to **Night Indigo** (brand-pressed). In dark mode the header uses **Deep Tito Indigo** (brand-dark).
-- **Working Indigo** (accent): links, selected tab tint, focused field border, selected category outline, budget-bar fill and icon actions on the light ground. **Indigo Mist** (accent-tint) is its tinted fill: secondary button, selected category tile, neutral disc.
-- **Periwinkle** (button-dark): in dark mode, the primary button, the Add button and the accent all become this light indigo with ink-coloured labels, because a dark indigo button disappears on an indigo-black ground. Pressed: button-dark-pressed.
+- **Brand gradient** (navy → indigo → French blue, with a sky glow): the Home header and the Welcome screen, and nothing else. A static diagonal gradient from **Navy** (#0B1B3F, top left) through **Tito Indigo** (#272C77) to **French Blue** (#2F5DA8, bottom right), with a soft **Sky Blue** (#8EC9F0) glow at 28% in the text-free top-right corner (20% in dark mode, where the gradient runs through a deeper indigo, #1E2263, to a deeper French blue, #244A86). Drawn by `BrandGradient` with react-native-svg; never animated.
+- **Tito Indigo** (brand / button): the primary button fill and the floating Add button in light mode. Pressed deepens to **Night Indigo** (brand-pressed).
+- **French Blue** (accent): links, selected tab tint, focused field border, selected category outline, budget-bar fill and icon actions on the ivory ground. **Blue Mist** (accent-tint) is its tinted fill: secondary button, selected category tile, neutral disc. In dark mode the accent becomes **Sky Blue**.
+- **Periwinkle** (button-dark): in dark mode, the primary button and the Add button become this light indigo with navy labels, because a dark indigo button disappears on a navy ground.
+- **Sky Blue** (sky): the glow on the brand gradient and this month's pace line; the "Undo" action on the toast.
 
 ### Secondary
-- **Today Gold** (gold / gold-dark): the "today" dot on the pace line (4.5px dot inside a 9px halo at 28% opacity). Nothing else.
-- **Clay** (clay / clay-dark): a budget passed (bar fill and the "over the budget" line), form errors, and the destructive button text on **Clay Tint** (clay-tint / clay-tint-dark). It is the brand clay darkened in light mode and lifted in dark mode for AA contrast.
+- **Crown Gold** (gold, #C89B3C): small marks only, never a fill: the 3px cap above the selected Reports month bar and the short rule under the Welcome wordmark. On the brand gradient the "today" dot uses **Gold on Brand** (gold-on-brand: #D5B36B in light mode, #C89B3C in dark), lifted just enough to reach 3:1 against French blue. Gold never carries meaning on its own: on the ivory ground #C89B3C is only 2.2:1, so it is decoration beside a state that is already shown.
+- **Burgundy** (burgundy / burgundy-dark): a budget passed (bar fill and the "over the budget" line), form errors, and the destructive button text on **Burgundy Tint**. Lifted to a rose (#E58AA3) in dark mode for AA. Always with words.
 - **Steady Green** (positive / positive-dark): reserved for positive status text; also the Food and Savings category hue.
 
 ### Neutral
-- **Cool Ground** (ground / ground-dark): the screen background under lists, and the track of segmented controls and the date stepper.
-- **Surface** (surface / surface-dark) and **Raised** (raised-dark): grouped cards, the add/edit sheet, fields, the selected segment, and the dark toast.
-- **Ink** (ink / ink-dark): titles, row titles, amounts. **Ink Soft** (ink-soft / ink-soft-dark): field labels and supporting body copy. **Ink Mute** (ink-mute / ink-mute-dark): row subtitles, placeholders, unselected tab icons.
+- **Champagne Ivory** (ground, #F6EFE2) / **Navy** (ground-dark, #0B1B3F): the screen background under lists, and the track of segmented controls and the date stepper.
+- **Surface** (surface, a warm white #FFFDF8 / surface-dark) and **Raised** (raised-dark): grouped cards, the add/edit sheet, fields, the selected segment, and the dark toast.
+- **Ink** (ink: navy / ink-dark: ivory): titles, row titles, amounts. **Ink Soft**: field labels and supporting body copy. **Ink Mute**: row subtitles, placeholders, unselected tab icons.
 - **Hairline** (line / line-dark): row dividers, budget-bar track, the top border of the bottom action bar.
 - **Field Border** (field-border / field-border-dark): the resting border of text fields, at 3:1 against surface and ground (WCAG 1.4.11).
 - **Switch Off** (switch-off / switch-off-dark): the track of a switch that is off, at 3:1 against surface, with the white thumb at 3:1 against it.
 - **Muted Bar** (bar-muted / bar-muted-dark): unselected bars in the Reports month-by-month chart (3:1 against ground).
-- **On-brand Soft** (on-brand-soft / on-brand-soft-dark): secondary text, axis labels and legend on the indigo header.
+- **On-brand Soft** (on-brand-soft / on-brand-soft-dark): a pale sky; secondary text, axis labels and legend on the brand gradient (4.5:1 against its brightest point).
 
 ### Category hues
-Each category has a light and dark text colour; its disc is the same hue at 12% alpha (light) or 18% alpha (dark). Light / dark pairs: Rent and Business #3443A0 / #9EA8F6; Food and Savings #2B6E47 / #86D0A4; Transport and Education #1D5C94 / #86BDEB; Bills #87600F / #E7BE62; Airtime #5A3E9E / #BBA6F1; Family #A4462A / #F0947B; Faith #77502F / #DDB591; Personal care and Gift #9C3A67 / #EE9FC4; Health #A53737 / #F29C9C; Entertainment #246868 / #80CFCF; Shopping #843D9C / #DCA3EE; Other #53577A / #B3B6CF.
+Each category has a light and dark icon colour; its disc is the same hue at 12% alpha (light) or 18% alpha (dark), and every icon reaches 3:1 on its disc over both surface and ground. Light / dark pairs: Rent and Business #3443A0 / #9EA8F6; Food and Savings #2B6E47 / #86D0A4; Transport and Education #1D5C94 / #86BDEB; Bills #87600F / #E7BE62; Airtime #5A3E9E / #BBA6F1; Family #A4462A / #F0947B; Faith #77502F / #DDB591; Personal care and Gift #9C3A67 / #EE9FC4; Health #A53737 / #F29C9C; Entertainment #246868 / #80CFCF; Shopping #843D9C / #DCA3EE; Other #53577A / #B3B6CF.
 
 ### Named Rules
-**The One Meaning Rule.** Gold means today. Clay means a budget passed or an error. Neither appears as decoration.
+**The Crown Rule.** Gold is the one pop: the today dot, an active mark, a small highlight. Never a large fill, never text, and never the only sign of a state.
+
+**The One Warning Rule.** Burgundy means a budget passed or an error, and nothing else.
 
 **The Disc-Only Rule.** Category colour lives inside the small tinted icon disc and nowhere else: not in bars, legends, fills or multi-colour charts. Ranked rows carry the comparison.
 
-**The Never-Red Rule.** Overspending is shown in clay with words ("₦4,000 over the ₦90k budget"), never in alarm red and never by colour alone.
+**The Never-Red Rule.** Overspending is shown in burgundy with words ("₦4,000 over the ₦90k budget"), never in alarm red and never by colour alone.
+
+**The One Gradient Rule.** The brand gradient appears only on the Home header and Welcome, and it never moves. Everything else is flat ivory (or navy) and surface.
 
 ## Typography
 
@@ -266,14 +278,14 @@ Each category has a light and dark text colour; its disc is the same hue at 12% 
 
 ## Layout
 
-A single phone column with 20px side margins, on a fixed 4/8-based scale (4, 8, 12, 16, 20, 24, 32, 44). Section headers sit 24px above their rows and 4px above the first one; task screens separate form groups by 24px. Home's indigo header runs under the status bar and fills roughly the top 45% (month switcher, total, pace line, chart, legend); the list starts on the ground below it. Tab screens open with a large title; task screens open with a close control and a large title, and end with a fixed bottom bar (top hairline, 12px padding plus safe area) holding the one primary button. The Home and Expenses lists reserve 120px plus the safe area at the bottom so the floating Add button never hides the last row. The native tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab.
+A single phone column with 20px side margins, on a fixed 4/8-based scale (4, 8, 12, 16, 20, 24, 32, 44). Section headers sit 24px above their rows and 4px above the first one; task screens separate form groups by 24px. Home's gradient header runs under the status bar and fills roughly the top 45% (month switcher, total, pace line, chart, legend); the list starts on the ground below it. Tab screens open with a large title; task screens open with a close control and a large title, and end with a fixed bottom bar (top hairline, 12px padding plus safe area) holding the one primary button. The Home and Expenses lists reserve 120px plus the safe area at the bottom so the floating Add button never hides the last row. The native tab bar (Home, Expenses, Reports, Settings) is the only navigation; adding is a button, not a tab.
 
 ## Elevation & Depth
 
-Flat by default, separated by tone: grouped cards (surface) sit on the cool ground, and in dark mode raised surfaces step up from ground to surface to raised. Inset controls (segmented track, date stepper) drop back to the ground tone. Shadows exist only on the two things that float above content.
+Flat by default, separated by tone: grouped cards (surface) sit on the ivory ground, and in dark mode raised surfaces step up from ground to surface to raised. Inset controls (segmented track, date stepper) drop back to the ground tone. Shadows exist only on the two things that float above content.
 
 ### Shadow Vocabulary
-- **Floating action** (shadow #0D0E22 at 22%, 8px blur, 0 4px offset; Android elevation 6): the Add expense button.
+- **Floating action** (shadow navy #0B1B3F at 22% in light mode, black in dark, 8px blur, 0 4px offset; Android elevation 6): the Add expense button.
 - **Toast** (shadow #000 at 18%, 8px blur, 0 3px offset; Android elevation 4): the undo snackbar.
 
 ### Named Rules
@@ -288,10 +300,10 @@ Round and soft. Every button, the floating Add button and every segmented contro
 ### Buttons
 Calm, wide and unmistakable.
 - **Shape:** full pill (999px), minimum 52px tall, 20px side padding, full width on task screens.
-- **Primary:** Tito Indigo with white label (light); Periwinkle with ink label (dark). Pressed deepens one step. One per task screen, in the bottom bar.
-- **Secondary:** Indigo Mist with Working Indigo label (used for "Share as PDF"). **Danger:** Clay Tint with Clay label ("Delete expense", above the bottom bar). **Plain:** transparent, indigo label, tints on press.
+- **Primary:** Tito Indigo with white label (light); Periwinkle with navy label (dark). Pressed deepens one step. One per task screen, in the bottom bar.
+- **Secondary:** Blue Mist with French Blue label (used for "Share as PDF"). **Danger:** Burgundy Tint with Burgundy label ("Delete expense", above the bottom bar). **Plain:** transparent, indigo label, tints on press.
 - **Disabled / Loading:** 45% opacity; loading swaps the label for a spinner.
-- **Welcome variant:** white pill with indigo label on the indigo ground, with a text-only second action below.
+- **Welcome variant:** white pill with indigo label on the brand gradient, with a text-only second action below.
 
 ### Add expense (floating)
 The one primary action on the Home and Expenses tabs (not on Reports or Settings). A 56px indigo pill 16px from the right edge, above the tab bar: "+ Add expense" at rest, collapsing to a round "+" once the list scrolls and hiding while scrolling down. Fades in over 160ms and out over 120ms, honouring Reduce Motion.
@@ -308,35 +320,36 @@ The one primary action on the Home and Expenses tabs (not on Reports or Settings
 
 ### Inputs / Fields
 - **Style:** surface fill, 1px Field Border, 12px radius, 50px tall, 16px Manrope Medium, label in Sub / Ink Soft above.
-- **Focus:** border becomes 2px Working Indigo. On web, keyboard focus gets a 3px accent outline with 2px offset.
-- **Error:** border turns Clay; the message appears below in Sub / Clay through a polite live region.
+- **Focus:** border becomes 2px French Blue (Sky Blue in dark mode). On web, keyboard focus gets a 3px accent outline with 2px offset.
+- **Error:** border turns Burgundy; the message appears below in Sub / Burgundy through a polite live region.
 - **Amount input:** no box; Total-size Fraunces digits with the currency symbol in Ink Soft, over a 2px accent underline.
 
 ### List rows
-The core of the app. Leading tinted disc, title (Body Strong) and subtitle (Sub / Ink Mute) stacked, amount right-aligned in Body Strong tabular with an optional caption under it. 64px minimum, 12px vertical padding, 12px gap, 1px hairline between rows, last row without. Pressed rows drop to 60% opacity. Budgeted categories replace the subtitle with "left of" / "over the" words and a 6px budget bar (accent fill, clay past budget).
+The core of the app. Leading tinted disc, title (Body Strong) and subtitle (Sub / Ink Mute) stacked, amount right-aligned in Body Strong tabular with an optional caption under it. 64px minimum, 12px vertical padding, 12px gap, 1px hairline between rows, last row without. Pressed rows drop to 60% opacity. Budgeted categories replace the subtitle with "left of" / "over the" words and a 6px budget bar (accent fill, burgundy past budget).
 
 ### Navigation
-The system tab bar on each platform with SF Symbols (iOS) and Material icons (Android); selected tint is Working Indigo, unselected Ink Mute. A month switcher (chevrons in 44pt boxes around a Headline month name; next disabled at 35% in the current month) sits at the top of Home and Reports.
+The system tab bar on each platform with SF Symbols (iOS) and Material icons (Android); selected tint is French Blue (Sky Blue in dark mode), unselected Ink Mute. A month switcher (chevrons in 44pt boxes around a Headline month name; next disabled at 35% in the current month) sits at the top of Home and Reports.
 
 ### Pace Chart (signature)
-On the indigo header: this month as a 2.5px white monotone line with a white gradient fill (22% to 0%), last month as a 1.5px dashed line (4 on, 5 off) at 40 to 45% white, and the gold today dot at the line's end. Three caption labels below (first day, "Today" under the dot, last day) and a two-item legend. 132px tall.
+On the brand gradient: this month as a 2.5px sky-blue monotone line with a sky gradient fill (22% to 0%), last month as a 1.5px dashed line (4 on, 5 off) at 40 to 45% white, and the Gold on Brand today dot at the line's end. Three caption labels below (first day, "Today" under the dot, last day) and a two-item legend. 132px tall.
 
 ### Toast
-A 52px snackbar with 12px corners, ink background (raised in dark), white Sub text and an optional "Undo" action in On-brand Soft. Sits above the floating Add button; slides up over 220ms, out over 180ms; stays 6s, or 20s with a screen reader on when it carries an action.
+A 52px snackbar with 12px corners, navy background (raised in dark), white Sub text and an optional "Undo" action in Sky Blue. Sits above the floating Add button; slides up over 220ms, out over 180ms; stays 6s, or 20s with a screen reader on when it carries an action.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the indigo drench to the home header and the welcome screen; every other screen sits on the cool ground.
+- **Do** keep the brand gradient to the home header and the welcome screen; every other screen sits on the ivory (or navy) ground.
 - **Do** give each task screen exactly one full-width pill primary button, in a bottom bar above a hairline.
 - **Do** set every amount in tabular figures and right-align it in its row.
 - **Do** show category identity only as a tinted disc (12% alpha light, 18% dark) behind a 1.75-stroke outline icon.
-- **Do** design light and dark as pairs: in dark mode the primary action becomes Periwinkle with ink text.
+- **Do** design light and dark as pairs: in dark mode the primary action becomes Periwinkle with navy text.
 - **Do** keep every touch target at least 44pt on iOS and 48dp on Android, and every text colour at WCAG AA.
 
 ### Don't:
-- **Don't** use gold for anything but the today marker.
-- **Don't** signal overspending in red, or by colour alone; use clay plus words.
+- **Don't** use gold as a large fill, as text, or as the only sign of a state; keep it to the today dot and small crown marks.
+- **Don't** signal overspending in red, or by colour alone; use burgundy plus words.
+- **Don't** animate the brand gradient or add it to other screens.
 - **Don't** put category colours into bars, stacked charts or legends; Reports ranks rows instead.
 - **Don't** use Fraunces below the large-title size or for labels and buttons.
 - **Don't** add shadows to in-flow cards, rows or buttons; only floating elements cast one.

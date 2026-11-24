@@ -189,7 +189,7 @@ Stack (root)
 - **Tabs are sections, not actions.** Adding an expense is the floating `AddButton`, not a tab
   (DESIGN.md, Layout).
 - **Native tab bar vs web.** `(tabs)/_layout.tsx` uses `NativeTabs` (the system tab bar, with SF
-  Symbols and Material icons). Automatic content insets are off, because Home's indigo header must
+  Symbols and Material icons). Automatic content insets are off, because Home's gradient header must
   run under the status bar. Each screen applies its own safe-area padding instead.
   `(tabs)/_layout.web.tsx` is picked automatically for web builds and draws a matching bar with
   `expo-router/ui`.
@@ -505,14 +505,15 @@ sequenceDiagram
 - **Text** goes through `T` (`components/text.tsx`), which applies a `variant`, a `tone` and
   optional tabular figures (`numeric`).
 - The design rules behind these tokens are in [DESIGN.md](../DESIGN.md). Light and dark are
-  designed as pairs. In dark mode, for example, the primary button becomes periwinkle with ink text,
-  because a dark indigo button would disappear on the indigo-black ground.
+  designed as pairs. In dark mode, for example, the primary button becomes periwinkle with navy text,
+  because a dark indigo button would disappear on the navy ground.
 
 ### 9.2 Charts
 
 - **`PaceChart`** (`components/pace-chart.tsx`) is drawn with `react-native-svg`. This month is a
   monotone cubic line (no overshoot below zero or past the real values) with a gradient fill. Last
-  month is a dashed ghost line. A gold dot marks today. The whole chart has one
+  month is a dashed ghost line. A gold dot marks today. It sits on `BrandGradient`, a static
+  navy → indigo → French blue SVG gradient with a sky glow, shared with the Welcome screen. The whole chart has one
   `accessibilityLabel` that states the numbers in words.
 - **Reports month-by-month bars** are plain `View`s sized as a percentage of the largest month. Each
   bar is a button that selects its month.
@@ -552,7 +553,7 @@ indigo, and the other tabs follow the colour scheme.
 - **Text scaling** follows the OS. `maxFontSizeMultiplier` caps it at 2× for all text and fields,
   1.6× for category tile names and 1.5× for the amount input. Totals shrink to fit, down to 60%.
 - **Motion:** Reanimated animations use `ReduceMotion.System`.
-- **Contrast:** `npm run check:contrast` checks 98 pairs in light and dark (text at 4.5:1,
+- **Contrast:** `npm run check:contrast` checks 140 pairs in light and dark (text at 4.5:1,
   non-text at 3:1).
 
 ### 9.5 Floating Add button
@@ -747,7 +748,7 @@ create index on expenses (user_id, day) where deleted_at is null;
 | Types | `npm run typecheck` | Strict TS, typed routes |
 | Lint | `npm run lint` | Expo ESLint rules, hooks rules |
 | Domain | `npm run check:dates` | Local-calendar month/day maths in `Africa/Lagos`; DST; money format and parse; summaries (unknown category, malformed day, other currency) |
-| Contrast | `npm run check:contrast` | WCAG AA for 98 text and non-text pairs in light and dark |
+| Contrast | `npm run check:contrast` | WCAG AA for 140 text and non-text pairs (header text against the worst point of the sampled brand gradient) in light and dark |
 | Dependencies | `npx expo-doctor` | SDK 58 compatibility |
 | Visual | Web build at 390 × 844, light and dark | Layout and states |
 | Devices | Expo Go on a real iPhone and Android phone | Safe areas, keyboard, VoiceOver/TalkBack, 200% text (checklist in `tasks/todo.md`) |
