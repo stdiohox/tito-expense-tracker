@@ -100,6 +100,9 @@ function Navigation() {
 /**
  * Signed-in screens and the welcome/auth screens are mutually exclusive, so after sign-out or
  * account deletion no back gesture can return to the old data.
+ * Signed out, any signed-in route (including "/" at launch) redirects to the onboarding slides.
+ * Without `redirectTo` the router falls back to the first unguarded screen, which put people on
+ * Reset password.
  * `title` names each screen for screen readers and the web tab; visible headers stay minimal.
  */
 function Routes({ screenOptions, sheet }: { screenOptions: object; sheet: object }) {
@@ -107,7 +110,7 @@ function Routes({ screenOptions, sheet }: { screenOptions: object; sheet: object
   const quiet = { headerTitle: '' };
   return (
     <Stack screenOptions={screenOptions}>
-      <Stack.Protected guard={signedIn}>
+      <Stack.Protected guard={signedIn} redirectTo="/welcome">
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'TET · Tito Finance Expense Tracker' }} />
         <Stack.Screen name="expense/new" options={{ ...sheet, title: 'Add expense' }} />
         <Stack.Screen name="expense/[id]" options={{ ...sheet, title: 'Edit expense' }} />
