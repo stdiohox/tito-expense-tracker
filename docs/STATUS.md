@@ -19,7 +19,7 @@ Branch `feature/nike-redesign`, 25 November 2026.
 - **Reset password:** asks for an email, then shows "Check your email" and "Back to sign in".
 
 **Signed in**
-- **Setup:** three steps after sign-up: main currency, how hands-on you want to be, and categories with up to two budgets. Every step can be skipped. It can be run again from Settings.
+- **Setup:** three steps after sign-up: main currency, how hands-on you want to be, and categories with up to four budgets. Every step can be skipped. It can be run again from Settings.
 - **Home:** greeting, month switcher and month total, a pace chart against last month, and currency cards. Below that: Quick add (one tap per category), budgets, "Where it went" (top five categories) and the latest expenses.
 - **Expenses:** every expense for the month, grouped by day, with search. Deleting has Undo.
 - **Add expense / Edit expense:** amount, currency, category, date and note. Edit can also delete.

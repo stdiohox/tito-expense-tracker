@@ -24,7 +24,7 @@ const MODES: { key: SetupMode; title: string; text: string }[] = [
   { key: 'full', title: 'Full picture', text: 'Budgets, plus a daily reminder if you haven’t logged anything.' },
 ];
 const STEPS = ['Main currency', 'How hands-on', 'Your categories'] as const;
-const MAX_BUDGETS = 2;
+const MAX_BUDGETS = 4;
 
 /**
  * Three-step setup after sign-up (and from Settings → Redo setup). Each step has Skip, which leaves

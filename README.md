@@ -184,7 +184,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | `/category/edit?id=` | `category/edit.tsx` | Sheet | Create a category (no `id`) or edit one |
 | `/categories` | `categories.tsx` | Push | All categories with their budgets |
 | `/account/delete` | `account/delete.tsx` | Push | Type DELETE to confirm account deletion |
-| `/setup` | `setup.tsx` | Full screen | After sign-up: main currency, how hands-on, categories and up to two budgets |
+| `/setup` | `setup.tsx` | Full screen | After sign-up: main currency, how hands-on, categories and up to four budgets |
 | `/welcome` · `/sign-in` · `/sign-up` · `/reset` | root files | Stack | Signed-out screens; `/welcome` is three intro slides |
 
 **Sheet** means a native form sheet on iOS and Android, and a full-screen card on the web.

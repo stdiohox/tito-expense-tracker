@@ -310,7 +310,7 @@ On the gradient: this month as a 2.5px icy-blue line with a soft fill, last mont
 The app is **TET**, short for **Tito Finance Expense Tracker**. TET is the name under the app icon. In the app, the wordmark shows "TET" in spaced SemiBold with a small mint dot (teal on light grounds) and the full name beneath it in Caption: at the top of the onboarding slides and in the Settings footer. Screen readers hear "TET, Tito Finance Expense Tracker".
 
 ### Onboarding
-Three full-bleed gradient slides, each with our own decorative SVG shapes in the palette (hidden from screen readers), a hero headline bottom-left and supporting text. "01 / 03" and Skip at the top; a pill indicator whose active segment is mint and wider; one white pill. The setup after sign-up (currency, how hands-on, categories and up to two budgets) uses the light panels, a 3-segment electric progress bar, Skip on every step and one primary button.
+Three full-bleed gradient slides, each with our own decorative SVG shapes in the palette (hidden from screen readers), a hero headline bottom-left and supporting text. "01 / 03" and Skip at the top; a pill indicator whose active segment is mint and wider; one white pill. The setup after sign-up (currency, how hands-on, categories and up to four budgets) uses the light panels, a 3-segment electric progress bar, Skip on every step and one primary button.
 
 ### Inputs, rows, toast
 Fields: surface fill, 1px Field Border, 2px electric on focus, burgundy on error with a polite live region. Rows: disc, title and subtitle, right-aligned tabular amount, 64px tall, hairline between. Toast: navy (raised in dark), white text, icy Undo, and a mint check on success.
