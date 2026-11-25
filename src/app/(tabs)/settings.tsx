@@ -12,7 +12,7 @@ import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { Wordmark } from '@/components/wordmark';
 import { useToast } from '@/components/toast';
-import { useActions, useStore } from '@/data/store';
+import { fullName, useActions, useStore } from '@/data/store';
 import { CURRENCIES } from '@/domain/money';
 import type { AppearanceMode, CurrencyCode } from '@/domain/types';
 import { radius, space } from '@/theme/tokens';
@@ -41,7 +41,7 @@ export default function Settings() {
       <Reveal order={1} style={{ paddingHorizontal: space.l }}>
 
       <Group title="Account">
-        <Item label="Name" value={settings.firstName} />
+        <Item label="Name" value={fullName(settings)} />
         <Item label="Email" value={settings.email} />
         <Item label="Redo setup" onPress={() => router.push('/setup')} last />
       </Group>

@@ -21,17 +21,20 @@ export default function SignUp() {
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
   }, []);
-  const [name, setName] = useState('');
+  const [first, setFirst] = useState('');
+  const [last, setLast] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
-  const nameRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const firstRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const lastRef = useRef<ComponentRef<typeof TextInput>>(null);
   const emailRef = useRef<ComponentRef<typeof TextInput>>(null);
   const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   const errors = {
-    name: tried && !name.trim() ? 'Tell us what to call you' : null,
+    first: tried && !first.trim() ? 'Enter your first name' : null,
+    last: tried && !last.trim() ? 'Enter your last name' : null,
     email: tried && !EMAIL.test(email.trim()) ? 'Enter a valid email, like ada@gmail.com' : null,
     password: tried && password.length < 8 ? 'Use at least 8 characters' : null,
   };
@@ -39,13 +42,14 @@ export default function SignUp() {
   const submit = () => {
     if (busy) return;
     setTried(true);
-    if (!name.trim()) return announceError('Tell us what to call you', nameRef);
+    if (!first.trim()) return announceError('Enter your first name', firstRef);
+    if (!last.trim()) return announceError('Enter your last name', lastRef);
     if (!EMAIL.test(email.trim())) return announceError('Enter a valid email', emailRef);
     if (password.length < 8) return announceError('Use at least 8 characters for the password', passwordRef);
     setBusy(true);
     // Phase 2: Supabase Auth sign-up + email confirmation.
     timer.current = setTimeout(() => {
-      updateSettings({ firstName: name.trim(), email: email.trim() });
+      updateSettings({ firstName: first.trim(), lastName: last.trim(), email: email.trim() });
       signIn();
       // New accounts go through the three-step setup, which ends on Home.
       router.replace('/setup');
@@ -61,7 +65,8 @@ export default function SignUp() {
         <T variant="body" tone="inkSoft" style={{ marginTop: -space.s }}>
           Your expenses are saved to your account, so they’re safe if you change phones.
         </T>
-        <Field ref={nameRef} label="First name" value={name} onChangeText={setName} autoComplete="given-name" textContentType="givenName" error={errors.name} />
+        <Field ref={firstRef} label="First name" value={first} onChangeText={setFirst} autoComplete="given-name" textContentType="givenName" error={errors.first} />
+        <Field ref={lastRef} label="Last name" value={last} onChangeText={setLast} autoComplete="family-name" textContentType="familyName" error={errors.last} />
         <Field ref={emailRef} label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" error={errors.email} />
         <Field ref={passwordRef} label="Password" value={password} onChangeText={setPassword} secure autoComplete="new-password" textContentType="newPassword" error={errors.password} hint="At least 8 characters" />
         <T variant="sub" tone="inkMute">

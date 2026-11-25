@@ -13,6 +13,11 @@ import type { AppearanceMode, Category, CurrencyCode, Expense, SetupMode } from 
  * a ready/error state, soft deletes with tombstones, and aggregates computed in SQL.
  */
 
+/** "Ada Obi", or whichever part is set; empty when neither is. */
+export function fullName(s: Pick<Settings, 'firstName' | 'lastName'>): string {
+  return [s.firstName, s.lastName].map((x) => x.trim()).filter(Boolean).join(' ');
+}
+
 export type Settings = {
   currency: CurrencyCode;
   appearance: AppearanceMode;
@@ -20,6 +25,7 @@ export type Settings = {
   reminderOn: boolean;
   reminderTime: string;
   firstName: string;
+  lastName: string;
   email: string;
 };
 
@@ -31,6 +37,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reminderOn: true,
   reminderTime: '20:00',
   firstName: '',
+  lastName: '',
   email: '',
 };
 
