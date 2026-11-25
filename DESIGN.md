@@ -306,6 +306,15 @@ A frosted white-glass bar floating over the page in both modes: 88% of the scree
 A dark panel with a 4-column grid of the visible categories: icon disc and a short label (the full name for screen readers). A tap opens Add expense with that category chosen.
 
 
+### Bottom sheet
+Add expense, Edit expense and Edit category open as a sheet drawn by the app (the same on iOS, Android and web), over the dimmed page (scrim: navy at 40%, black in dark mode). It opens just tall enough for the essentials and Save (never under 45% of the screen), with a handle, the title and a ✕ on top and Save pinned at the bottom. Drag the header up for full height or down to close; the handle is also a button. It goes full height while the keyboard is open. Surface fill, 28px top corners.
+
+### Avatar
+Initials (first + last name) on an icy disc (#CBE9FD) in navy, with a white 2px ring: 32px next to the Home greeting, 56px at the top of Settings beside the name and email. No photos. Hidden from screen readers, since the name is said beside it.
+
+### Reports charts
+**Day by day:** a bar per day (Muted Bar; the picked day in electric with a small teal mark above it), last month as a dashed Ink Mute line, on a light panel. Tap for the nearest day or use the arrows; the line below gives that day and the same day last month. **Budgets:** a horizontal bar per budgeted category with the % and "₦X left", or a burgundy bar with "₦X over" in words.
+
 ### Pace chart
 On the gradient: this month as a 2.5px icy-blue line with a soft fill, last month dashed in white at 40–45%, and the mint today dot.
 

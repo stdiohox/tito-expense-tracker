@@ -1,6 +1,6 @@
 # TET: project status
 
-Branch `feature/nike-redesign`, 25 November 2026.
+Branch `feature/nike-polish` (from `feature/nike-redesign`), 25 November 2026.
 
 ## 1. What the app is
 
@@ -129,6 +129,16 @@ Everything after commit `3529e3d` (README and architecture docs).
 **Flow fix**
 - `7090741` Signed out, the app opens on the onboarding slides, not Reset password, and Reset's "Back to sign in" no longer loops.
 
+**Polish pass** (branch `feature/nike-polish`)
+- `6ac37bc` Sign-up asks for first and last name; Settings shows the full name.
+- `8d3e944` Round initials avatar: small next to the Home greeting, large at the top of Settings.
+- `970a864` Budgets show on Home as soon as they are set, at ₦0 spent.
+- `0757b60` Setup allows up to four budgets (was two).
+- `fc8aaa8` Add expense is a half-height bottom sheet you can drag up or down; ✕ now closes it (also Edit expense and Edit category).
+- `bf1d8f9` Reports: a Day by day chart and a Budgets chart.
+- `19fffe5` Onboarding slides have live illustrations with sample numbers.
+- `4377254` Web: sections no longer overlap after the reveal animation.
+
 ## 4. What works fully vs. what is a placeholder
 
 "Works" means it works on the device. Until Phase 2, everything is lost when the app restarts.
@@ -136,10 +146,13 @@ Everything after commit `3529e3d` (README and architecture docs).
 | Feature | Status |
 |---|---|
 | Onboarding slides, sign-up → setup → Home, sign-in → Home | Works (any email and password are accepted) |
-| Add, edit and delete expenses, with Undo | Works |
+| First and last name, initials avatar | Works |
+| Add, edit and delete expenses, with Undo, in a half-height sheet | Works (tested on web; check dragging and the keyboard on real phones) |
 | Home, Expenses (with search), Reports, Category detail | Works |
-| Categories, hiding categories and monthly budgets | Works |
+| Categories, hiding categories and monthly budgets (up to four in setup) | Works |
 | Month switcher, pace chart, budget bars | Works |
+| Reports: Day by day and Budgets charts | Works |
+| Onboarding illustrations (sample numbers only) | Works |
 | Appearance (System, Light, Dark) | Works |
 | Naira and US dollar, kept separate | Works |
 | Saving data between launches | Placeholder: in memory only |
@@ -192,8 +205,8 @@ What's needed before launch:
 
 ## 8. Recommended next 5 steps
 
-1. Push this branch, open the pull request, and get client sign-off on the redesign in Expo Go.
-2. Set up Supabase: schema, access rules, and real sign-up, sign-in, reset and delete.
+1. Test `feature/nike-polish` in Expo Go on an iPhone and an Android phone (sheet drag and keyboard, onboarding motion, Reduce Motion, VoiceOver/TalkBack on the new charts), then push both branches, open the pull requests and get client sign-off.
+2. Set up Supabase: schema, access rules, and real sign-up (with first and last name), sign-in, reset and delete.
 3. Add SQLite storage with the sync queue, and make the store wait for each save.
 4. Add crash reporting, tests and CI.
 5. Finish the app icon, CSV and PDF export and the daily reminder, then send the first TestFlight and Play internal test builds.
