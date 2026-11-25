@@ -197,8 +197,33 @@ export default function Home() {
           </Panel>
           </Reveal>
 
+          {/* Budgets show as soon as they are set, before anything is spent. */}
+          {budgets.length > 0 ? (
+            <Reveal order={2} style={{ gap: space.s }}>
+              <T variant="title" accessibilityRole="header" style={{ paddingHorizontal: space.xs }}>
+                Budgets
+              </T>
+              {pairs(budgets).map((row) => (
+                <View key={row[0].category.id} style={{ flexDirection: 'row', gap: space.m }}>
+                  {row.map((b) => (
+                    <BudgetCard
+                      key={b.category.id}
+                      category={b.category}
+                      spent={b.total}
+                      budget={b.budget}
+                      currency={cur}
+                      onPress={() => router.push({ pathname: '/category/[id]', params: { id: b.category.id } })}
+                    />
+                  ))}
+                  {/* Same padding as a card, so a lone card stays exactly half width. */}
+                  {row.length === 1 ? <View style={{ flex: 1, flexBasis: 0, padding: space.l }} /> : null}
+                </View>
+              ))}
+            </Reveal>
+          ) : null}
+
           {allCount === 0 ? (
-            <Reveal order={2}>
+            <Reveal order={3}>
             <Panel>
               <View style={{ paddingVertical: space.l, gap: space.s }}>
                 <T variant="title">Nothing logged in {thisName} yet</T>
@@ -210,30 +235,6 @@ export default function Home() {
             </Reveal>
           ) : (
             <>
-              {budgets.length > 0 ? (
-                <Reveal order={2} style={{ gap: space.s }}>
-                  <T variant="title" accessibilityRole="header" style={{ paddingHorizontal: space.xs }}>
-                    Budgets
-                  </T>
-                  {pairs(budgets).map((row) => (
-                    <View key={row[0].category.id} style={{ flexDirection: 'row', gap: space.m }}>
-                      {row.map((b) => (
-                        <BudgetCard
-                          key={b.category.id}
-                          category={b.category}
-                          spent={b.total}
-                          budget={b.budget}
-                          currency={cur}
-                          onPress={() => router.push({ pathname: '/category/[id]', params: { id: b.category.id } })}
-                        />
-                      ))}
-                      {/* Same padding as a card, so a lone card stays exactly half width. */}
-                      {row.length === 1 ? <View style={{ flex: 1, flexBasis: 0, padding: space.l }} /> : null}
-                    </View>
-                  ))}
-                </Reveal>
-              ) : null}
-
               {now.byCategory.length > 0 ? (
                 <Reveal order={3}>
                 <Panel title="Where it went" action={<T variant="headline" numeric>{formatMoney(now.total, cur)}</T>}>
