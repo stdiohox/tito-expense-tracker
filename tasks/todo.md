@@ -8,7 +8,7 @@ Source of truth for scope: `proposals/tito-expense-app/PLAN.md` in the Koret Tec
 - [x] Scaffold Expo SDK 58 app (TypeScript, Expo Router), npm
 - [x] Theme: light + dark tokens, type scale, spacing, icons (Tabler), fonts (Outfit; palette navy #141033, royal #2631AD, electric #2F5BE7, icy #CBE9FD, mint #2AFFCC, per DESIGN.md)
 - [x] Domain: money in kobo/cents integers, per-expense currency, local-time months (fixes web bugs B1–B3)
-- [x] Data: repository interface + in-memory sample data (SQLite + outbox in phase 2)
+- [x] Data: repository interface + in-memory store that starts empty and signed out; demo/sample data removed (SQLite + outbox in phase 2)
 - [x] Screens:
   - [x] Home: month total, pace line vs last month, spending by category
   - [x] Add / edit expense (sheet)
