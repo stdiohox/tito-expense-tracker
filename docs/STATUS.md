@@ -1,0 +1,199 @@
+# TET: project status
+
+Branch `feature/nike-redesign`, 25 November 2026.
+
+## 1. What the app is
+
+- TET (Tito Finance Expense Tracker) is a phone app for logging what you spend and seeing your month at a glance.
+- It shows your month as a pace: how much you have spent so far compared with last month, where it went, and how your budgets are doing.
+- It runs on iOS, Android and the web. It is built with Expo, so it can be tested in the Expo Go app without a full build.
+
+## 2. What's in the codebase today
+
+### Screens
+
+**Signed out**
+- **Welcome (onboarding):** three intro slides with Skip, then "Create an account" or "I already have an account".
+- **Sign up:** first name, email and password, then Setup.
+- **Sign in:** email and password, then Home. Includes a "Forgot your password?" link.
+- **Reset password:** asks for an email, then shows "Check your email" and "Back to sign in".
+
+**Signed in**
+- **Setup:** three steps after sign-up: main currency, how hands-on you want to be, and categories with up to two budgets. Every step can be skipped. It can be run again from Settings.
+- **Home:** greeting, month switcher and month total, a pace chart against last month, and currency cards. Below that: Quick add (one tap per category), budgets, "Where it went" (top five categories) and the latest expenses.
+- **Expenses:** every expense for the month, grouped by day, with search. Deleting has Undo.
+- **Add expense / Edit expense:** amount, currency, category, date and note. Edit can also delete.
+- **Reports:** the month by category, compared with last month, with a bar chart by month.
+- **Category detail:** the total for one category, its budget and its expenses.
+- **Categories and budgets / Edit category:** add, show, hide and rename categories, pick their icons, and set monthly budgets.
+- **Settings:** account, main currency, categories, Appearance (System, Light or Dark), daily reminder, export, privacy policy, sign out and delete account.
+- **Delete account:** you type DELETE to confirm. "Keep my account" goes back.
+
+### Main folders
+
+- `src/app/`: the screens. Every file is a screen; `_layout.tsx` files set up navigation.
+- `src/components/`: shared building blocks such as buttons, fields, panels, glass cards, charts, the toast and the hero card.
+- `src/data/`: the app's data store (in memory for now), the selected month and the totals.
+- `src/domain/`: the core rules for money, dates, categories and month summaries.
+- `src/theme/`: colours, fonts, spacing and light/dark handling.
+- `scripts/`: automatic checks for dates and money, and for colour contrast.
+- `docs/`: architecture notes and this file. `DESIGN.md` is the design system and `PRODUCT.md` is the client brief.
+
+### Tech stack
+
+- Expo SDK 58, React Native 0.88, React 19 and TypeScript.
+- Expo Router for navigation.
+- react-native-svg for the gradient and charts, and Reanimated for motion.
+- Outfit for all text, and Tabler icons.
+- Data lives in memory for now. Phase 2 adds SQLite on the phone and Supabase online.
+
+## 3. What has changed since I joined
+
+Everything after commit `3529e3d` (README and architecture docs).
+
+**Audit fixes**
+- `9b2df22` Settings shows the email of the account that signed in (M5).
+- `d2dff90` Deleting the account resets settings and the starter categories (M4).
+- `f424ad3` Add button shown on Reports and Settings (M7). Later reverted.
+- `12cd024` Budget switch gets the web colour fix (M6).
+- `4a8b7c2` Field borders and switch tracks reach 3:1 contrast (M2).
+- `e11733d` "About the same" threshold depends on the currency (M1).
+- `4922c9a` Every hard-coded colour moved into the theme (L1).
+- `2b0fe09` Focus border on every text input (L5).
+- `696c3fa` Text scaling capped at 2× on the remaining inputs (L6).
+- `3e56eef` Form errors are announced and focus moves to the field (L7).
+- `5754641` Welcome headline marked as a heading (L15).
+- `0cf3409` No success vibration when an update fails (L12).
+- `219b8b5` Reports uses the shared current month (L13).
+
+**Add button revert**
+- `4fd569f` Reverted M7, so the Add button is on Home and Expenses only.
+- `ef0289b` Docs updated to match.
+- `fc613e9` Merged pull request #1 (sign-in work) into main.
+
+**Palette and gradient (first pass)**
+- `4d6e36f` New navy, ivory, French blue, sky, gold and burgundy palette.
+- `f32d75d` Navy to French blue gradient on the Home header and Welcome.
+- `e3eadea` Gold crown on the selected month bar, and the Welcome wordmark.
+- `4422ee5` Colour rules for that palette.
+- `64dddde` Merged main into the theme branch.
+- `3eb5adc` Fixed the gradient passing phone-only props to the web.
+
+**Appearance setting**
+- `29379ac` System, Light or Dark in Settings.
+
+**Onboarding and setup**
+- `7cb4f7e` Three intro slides on the brand gradient.
+- `f217a44` Hidden categories and a setup mode setting.
+- `77f9568` Three-step setup after sign-up, plus Redo setup.
+
+**Blue redesign**
+- `5b36608` Outfit font for all text.
+- `2e7d4e7` Navy, royal, electric, icy and mint palette with a layered gradient.
+- `3f78f16` Floating tab bar, panels and glass cards.
+- `f3e731c` Home: gradient header, glass currency cards, Quick add and budget grid.
+- `33a664c` Mint check on success toasts.
+- `6d7c130` Expenses: stat cards and one panel per day.
+- `6bb94fb` Reports: total panel, comparison cards and sections in panels.
+- `0692b5e` Settings: rounder group panels and 16px margins.
+- `29e7853` Category: hero panel, stat cards, and a budget panel with a % badge.
+- `3c2b328` Design system, rules and architecture docs for the redesign.
+- `386b44d` Tab bar docked to the bottom edge.
+- `a1e1da5` Home: dark brand scene in both modes with frosted glass cards.
+- `1c0900e`, `e042727` Docs for the docked tab bar and glass.
+- `2667252` The same hero on every tab, brighter, and Home follows light and dark.
+- `3520548` Search icon and placeholder lined up on Expenses.
+- `09d49c8` Docs for the shared hero.
+- `b2b089b` Floating dock with a raised Add expense button in the middle.
+- `619585e` Docs for the dock.
+- `0eb1650` White frosted-glass dock at 88% width.
+- `9823613` Docs for the glass dock.
+
+**TET name**
+- `4f55a60` App named TET, Tito Finance Expense Tracker.
+
+**Hero card**
+- `37082d5` The hero is a rounded card, not a full-width band.
+
+**Demo data removal**
+- `269e87f` All demo data removed. The app starts empty and signed out.
+
+**Motion**
+- `8e16b3a` Calm motion: sections fade in, totals count up and budget bars grow.
+- `f70ebc3` Docs for the hero card, motion and wordmark.
+
+**Tidy-up**
+- `4651e91` desktop.ini ignored; todo list and a code comment updated to the new palette and font.
+- `eae8793` Todo list says the data starts empty.
+
+**Flow fix**
+- `7090741` Signed out, the app opens on the onboarding slides, not Reset password, and Reset's "Back to sign in" no longer loops.
+
+## 4. What works fully vs. what is a placeholder
+
+"Works" means it works on the device. Until Phase 2, everything is lost when the app restarts.
+
+| Feature | Status |
+|---|---|
+| Onboarding slides, sign-up → setup → Home, sign-in → Home | Works (any email and password are accepted) |
+| Add, edit and delete expenses, with Undo | Works |
+| Home, Expenses (with search), Reports, Category detail | Works |
+| Categories, hiding categories and monthly budgets | Works |
+| Month switcher, pace chart, budget bars | Works |
+| Appearance (System, Light, Dark) | Works |
+| Naira and US dollar, kept separate | Works |
+| Saving data between launches | Placeholder: in memory only |
+| Real accounts (sign up, sign in) | Placeholder: no server yet |
+| Reset password | Placeholder: no email is sent |
+| Delete account | Placeholder: clears this device only |
+| Share report as PDF | Placeholder: shows "arrives in the next build" |
+| Export as CSV | Placeholder: shows "arrives in the next build" |
+| Daily reminder | Placeholder: the switch saves, but no notification is sent |
+| Privacy policy | Placeholder: not published yet |
+| App icon | Placeholder |
+
+## 5. What's left to build
+
+**Phase 2**
+- **SQLite storage:** save data on the phone so it survives restarts. Totals are worked out in the database.
+- **Supabase login and sync:** real accounts, and a sync queue that sends changes when the phone is online. Every table is locked to its owner.
+- **Real password reset:** Supabase sends the email and the app handles the link.
+- **Account deletion:** a server function deletes the account and all its data, and shows an error if that fails.
+- **PDF and CSV export:** share a month report as a PDF, and export expenses as a spreadsheet.
+- **Daily reminder notifications:** a local notification at the chosen time if nothing was logged that day.
+
+**Also**
+- **App icon:** final TET icon and splash screen.
+- **Real-phone testing:** work through the checklist in `tasks/todo.md` on iOS and Android: header and dock placement, the keyboard, VoiceOver and TalkBack, 200% text, and glass cards.
+- **PRODUCT.md:** update it to the new look once the client signs off on the redesign.
+
+## 6. Features I plan to add
+
+In suggested order:
+
+1. **Multi-currency:** more currencies, each kept in its own currency and never converted. *Works in Expo Go.* Do it straight after SQLite so the stored data is right from the start.
+2. **Stronger budget tracking:** alerts when you're close, weekly pace, and budgets that carry over. *Works in Expo Go.*
+3. **Recurring expenses:** rent and subscriptions that add themselves each month. *Works in Expo Go.* The rules are best kept on the server so they don't add twice across phones.
+4. **Face ID / fingerprint lock:** lock the app on open. *Can be tried in Expo Go; release needs a development build* (for the Face ID permission text).
+5. **Voice entry:** say "spent 5k on fuel" and it fills the form. *Needs a development build* for speech recognition. Reading the sentence can happen on the phone.
+6. **Home-screen quick add:** a widget or icon shortcut that opens Add expense. *Needs a development build* and native widget code for iOS and Android.
+7. **Receipt scan:** take a photo and fill the amount and shop. *The camera works in Expo Go; reading the receipt needs a server.*
+8. **AI spending insights:** short, encouraging notes such as "Food is lower than last month, nice." *Needs a server* (keeps the AI key off the phone) and a few months of real data, so it comes last.
+
+## 7. Scale and reliability (10,000–500,000 users)
+
+What's needed before launch:
+- **Crash reporting** (for example Sentry), so crashes show up with enough detail to fix.
+- **Tests:** automatic tests for the money, date and budget rules, plus a few end-to-end runs (sign up, add, edit, delete, sync).
+- **CI:** every push runs typecheck, lint, the checks and tests, and builds with EAS.
+- **Supabase setup:** a paid plan with backups, every table locked to its owner, indexes on dates and users, rate limits on login, and syncing in small batches. Saving on the phone first keeps server load low.
+- **Staged releases:** TestFlight and Play internal testing first, then a gradual rollout. Over-the-air updates go out in channels so a bad update can be rolled back.
+- **Store basics:** a privacy policy, in-app account deletion (both stores require it), and the final icon.
+
+## 8. Recommended next 5 steps
+
+1. Push this branch, open the pull request, and get client sign-off on the redesign in Expo Go.
+2. Set up Supabase: schema, access rules, and real sign-up, sign-in, reset and delete.
+3. Add SQLite storage with the sync queue, and make the store wait for each save.
+4. Add crash reporting, tests and CI.
+5. Finish the app icon, CSV and PDF export and the daily reminder, then send the first TestFlight and Play internal test builds.
