@@ -68,13 +68,13 @@ function Navigation() {
     colors: { ...base.colors, primary: c.accent, background: c.ground, card: c.surface, text: c.ink, border: c.line },
   };
 
+  // Sheets are drawn by BottomSheet over the screen below (same on iOS, Android and web), so the
+  // route is a see-through modal with no animation of its own: the sheet slides itself in and out.
   const sheet = {
-    // The web stack has no form sheet; a full-screen card renders correctly there.
-    presentation: Platform.OS === 'web' ? ('card' as const) : ('formSheet' as const),
-    sheetGrabberVisible: true,
-    sheetAllowedDetents: [1] as number[],
+    presentation: 'transparentModal' as const,
+    animation: 'none' as const,
     headerShown: false,
-    contentStyle: { backgroundColor: c.surface },
+    contentStyle: { backgroundColor: 'transparent' },
   };
 
   const screenOptions = {

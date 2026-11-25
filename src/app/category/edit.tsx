@@ -1,13 +1,12 @@
-import { IconX } from '@tabler/icons-react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useRef, useState, type ComponentRef } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Switch, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, Switch, TextInput, View } from 'react-native';
 
 import { announceError } from '@/components/announce';
+import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { IconDisc } from '@/components/icon-disc';
-import { PICKABLE_ICONS, STROKE } from '@/components/icons';
+import { PICKABLE_ICONS } from '@/components/icons';
 import { safeBack } from '@/components/nav';
 import { switchColors } from '@/components/switch-colors';
 import { T } from '@/components/text';
@@ -17,7 +16,7 @@ import { useActions, useCategory, useStore } from '@/data/store';
 import { CURRENCIES, amountToInput, formatMoney, parseAmount } from '@/domain/money';
 import { budgetFor } from '@/domain/summary';
 import type { CategoryIcon } from '@/domain/types';
-import { TARGET, fonts, radius, space } from '@/theme/tokens';
+import { fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 const ICON_NAMES: Record<CategoryIcon, string> = {
@@ -33,7 +32,8 @@ export default function EditCategory() {
   const { settings } = useStore();
   const { saveCategory } = useActions();
   const { c } = useTheme();
-  const insets = useSafeAreaInsets();
+  // The sheet fills this with its animated close; until then, plain back.
+  const close = useRef<() => void>(safeBack);
   const toast = useToast();
   const cur = settings.currency;
 
@@ -71,7 +71,7 @@ export default function EditCategory() {
       builtIn: existing?.builtIn ?? false,
     });
     toast({ message: existing ? 'Category saved' : `${name.trim()} added`, success: true });
-    safeBack();
+    close.current();
   };
 
   const field = {
@@ -83,20 +83,11 @@ export default function EditCategory() {
   } as const;
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.surface }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Pressable
-        onPress={safeBack}
-        accessibilityRole="button"
-        accessibilityLabel="Close without saving"
-        style={{ width: TARGET, height: TARGET, alignItems: 'center', justifyContent: 'center', marginLeft: space.s, marginTop: space.m }}>
-        <IconX size={22} color={c.ink} strokeWidth={STROKE} />
-      </Pressable>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: space.xl, paddingBottom: space.xxl }}>
-        <T variant="largeTitle" accessibilityRole="header">
-          {existing ? 'Edit category' : 'New category'}
-        </T>
-
-        <T variant="headline" style={{ marginTop: space.xxl }} nativeID="nameLabel">
+    <BottomSheet
+      title={existing ? 'Edit category' : 'New category'}
+      closeRef={close}
+      footer={<Button label={existing ? 'Save' : 'Create category'} onPress={save} />}>
+        <T variant="headline" nativeID="nameLabel">
           Name
         </T>
         <TextInput
@@ -193,10 +184,6 @@ export default function EditCategory() {
             </T>
           ) : null}
         </View>
-      </ScrollView>
-      <View style={{ paddingHorizontal: space.xl, paddingTop: space.m, paddingBottom: insets.bottom + space.m, borderTopWidth: 1, borderTopColor: c.line }}>
-        <Button label={existing ? 'Save' : 'Create category'} onPress={save} />
-      </View>
-    </KeyboardAvoidingView>
+    </BottomSheet>
   );
 }

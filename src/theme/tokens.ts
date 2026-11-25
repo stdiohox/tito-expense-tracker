@@ -78,6 +78,8 @@ export type Palette = {
   /** Initials avatar on the brand gradient: icy disc, navy letters. */
   avatar: string;
   onAvatar: string;
+  /** Dims the page behind a bottom sheet (used at 40%). */
+  scrim: string;
 };
 
 export const light: Palette = {
@@ -127,6 +129,7 @@ export const light: Palette = {
   dock: '#FFFFFF',
   avatar: '#CBE9FD',
   onAvatar: '#141033',
+  scrim: '#141033',
 };
 
 export const dark: Palette = {
@@ -176,6 +179,7 @@ export const dark: Palette = {
   dock: '#FFFFFF',
   avatar: '#CBE9FD',
   onAvatar: '#141033',
+  scrim: '#000000',
 };
 
 /**

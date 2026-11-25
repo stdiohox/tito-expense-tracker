@@ -1,11 +1,11 @@
-import { IconChevronLeft, IconChevronRight, IconX } from '@tabler/icons-react-native';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react-native';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState, type ComponentRef } from 'react';
-import { AccessibilityInfo, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AccessibilityInfo, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { useToday } from '@/data/month';
 import { useActions, useStore } from '@/data/store';
+import { shortLabel } from '@/domain/categories';
 import { addDays, dayLabel } from '@/domain/dates';
 import { CURRENCIES, amountToInput, formatMoney, parseAmount } from '@/domain/money';
 import type { CurrencyCode, DayKey, Expense } from '@/domain/types';
@@ -13,6 +13,7 @@ import { TARGET, fonts, radius, space, type } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import { announceError } from './announce';
+import { BottomSheet, SheetFold } from './bottom-sheet';
 import { Button } from './button';
 import { IconDisc } from './icon-disc';
 import { STROKE } from './icons';
@@ -25,8 +26,9 @@ type InputRef = ComponentRef<typeof TextInput>;
 
 export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; presetCategory?: string }) {
   const { c } = useTheme();
-  const insets = useSafeAreaInsets();
   const { categories, settings } = useStore();
+  // The sheet fills this with its animated close; until then, plain back.
+  const close = useRef<() => void>(safeBack);
   const { addExpense, updateExpense, deleteExpense, restoreExpense } = useActions();
   const toast = useToast();
   const today = useToday();
@@ -46,10 +48,11 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
   const firstCatRef = useRef<ComponentRef<typeof View>>(null);
   const noteFocus = useFocusBorder();
 
-  // Open the keyboard on the amount for a new expense, unless a screen reader is on:
-  // then the user should land on the heading and hear where they are first.
+  // Web: put the cursor in the amount for a new expense, unless a screen reader is on (then the
+  // user should land on the heading first). On phones the keyboard would take the sheet to full
+  // height straight away, so the sheet opens at half height and a tap on the amount opens it.
   useEffect(() => {
-    if (existing) return;
+    if (existing || Platform.OS !== 'web') return;
     let cancelled = false;
     AccessibilityInfo.isScreenReaderEnabled()
       .then((on) => !on && !cancelled && setTimeout(() => amountRef.current?.focus(), 350))
@@ -86,14 +89,14 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
       toast({ message: `Saved ${formatMoney(amount, currency)} to ${cat?.name ?? 'your expenses'}`, success: true });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     }
-    safeBack();
+    close.current();
   };
 
   const remove = () => {
     if (!existing || busy.current) return;
     busy.current = true;
     const removed = deleteExpense(existing.id);
-    safeBack();
+    close.current();
     if (removed) {
       toast({
         message: `Deleted ${formatMoney(removed.amount, removed.currency)}`,
@@ -111,22 +114,11 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
   const canGoForward = day < today;
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.surface }} behavior="padding">
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.s, paddingTop: space.m }}>
-        <Pressable
-          onPress={safeBack}
-          accessibilityRole="button"
-          accessibilityLabel="Close without saving"
-          style={{ width: TARGET, height: TARGET, alignItems: 'center', justifyContent: 'center' }}>
-          <IconX size={22} color={c.ink} strokeWidth={STROKE} />
-        </Pressable>
-      </View>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: space.xl, paddingBottom: space.xxl }}>
-        <T variant="largeTitle" accessibilityRole="header">
-          {existing ? 'Edit expense' : 'Add expense'}
-        </T>
-
-        <View style={{ marginTop: space.xxl, gap: space.s }}>
+    <BottomSheet
+      title={existing ? 'Edit expense' : 'Add expense'}
+      closeRef={close}
+      footer={<Button label={existing ? 'Save changes' : 'Save expense'} onPress={save} />}>
+        <View style={{ gap: space.s }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.s, justifyContent: 'space-between', alignItems: 'center' }}>
             <T variant="sub" tone="inkSoft" nativeID="amountLabel" importantForAccessibility="no">
               Amount
@@ -186,13 +178,18 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
           </View>
         </View>
 
-        <T variant="headline" style={{ marginTop: space.xxl }} importantForAccessibility="no">
+        <T variant="headline" style={{ marginTop: space.xl }} importantForAccessibility="no">
           Category
         </T>
-        <View
+        {/* One scrolling row, so amount, category and Save fit in the half-height sheet. */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           accessibilityRole="radiogroup"
           accessibilityLabel="Category"
-          style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: space.s, marginHorizontal: -4 }}>
+          style={{ marginTop: space.s, marginHorizontal: -space.xl }}
+          contentContainerStyle={{ paddingHorizontal: space.xl - 4 }}>
           {offered.map((cat, i) => {
             const on = cat.id === categoryId;
             return (
@@ -206,7 +203,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on, selected: on }}
                 accessibilityLabel={cat.name}
-                style={{ width: '33.333%', padding: 4 }}>
+                style={{ width: 88, padding: 4 }}>
                 <View
                   style={{
                     alignItems: 'center',
@@ -216,20 +213,21 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
                     borderWidth: 1.5,
                     borderColor: on ? c.accent : 'transparent',
                     backgroundColor: on ? c.accentTint : 'transparent',
-                    minHeight: 84,
+                    minHeight: 76,
                   }}>
                   <IconDisc icon={cat.icon} size={40} />
-                  <T variant="caption" tone={on ? 'ink' : 'inkSoft'} maxFontSizeMultiplier={1.6} style={{ textAlign: 'center', paddingHorizontal: 2 }}>
-                    {cat.name}
+                  <T variant="caption" tone={on ? 'ink' : 'inkSoft'} maxFontSizeMultiplier={1.6} numberOfLines={1} style={{ textAlign: 'center', paddingHorizontal: 2 }}>
+                    {shortLabel(cat)}
                   </T>
                 </View>
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
         <View accessibilityLiveRegion="polite" aria-live="polite">
           {categoryError ? <T variant="sub" tone="danger">{categoryError}</T> : null}
         </View>
+        <SheetFold />
 
         <T variant="headline" style={{ marginTop: space.xxl }} importantForAccessibility="no">
           Date
@@ -295,10 +293,6 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
             <Button label="Delete expense" variant="danger" onPress={remove} accessibilityHint="You can undo this for a few seconds" />
           </View>
         ) : null}
-      </ScrollView>
-      <View style={{ paddingHorizontal: space.xl, paddingTop: space.m, paddingBottom: insets.bottom + space.m, borderTopWidth: 1, borderTopColor: c.line, backgroundColor: c.surface }}>
-        <Button label={existing ? 'Save changes' : 'Save expense'} onPress={save} />
-      </View>
-    </KeyboardAvoidingView>
+    </BottomSheet>
   );
 }
