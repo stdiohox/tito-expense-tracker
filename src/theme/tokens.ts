@@ -165,7 +165,7 @@ export const dark: Palette = {
   positive: '#86D0A4',
   danger: '#E58AA3',
   dangerTint: '#3A1838',
-  barMuted: '#505FAD',
+  barMuted: '#5C6CBE',
   chartLine: '#CBE9FD',
   chartGhost: 'rgba(255,255,255,0.4)',
   toast: '#29245E',

@@ -12,6 +12,8 @@ export type MonthSummary = {
   byCategory: CategoryTotal[];
   /** Totals in other currencies, never converted. */
   otherCurrencies: { currency: CurrencyCode; total: number; count: number }[];
+  /** Spend on each day, index 0 = day 1. */
+  perDay: number[];
   /** Cumulative spend at the end of each day, index 0 = day 1. */
   cumulative: number[];
 };
@@ -74,6 +76,7 @@ export function summarise(
     count,
     byCategory,
     otherCurrencies: [...other].map(([c, v]) => ({ currency: c, ...v })),
+    perDay,
     cumulative,
   };
 }

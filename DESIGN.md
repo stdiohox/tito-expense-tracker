@@ -48,7 +48,7 @@ colors:
   line-dark: "#2C2862"
   field-border-dark: "#6A6999"
   switch-off-dark: "#6A6999"
-  bar-muted-dark: "#505FAD"
+  bar-muted-dark: "#5C6CBE"
 typography:
   hero:
     fontFamily: "Outfit SemiBold, system-ui, sans-serif"
@@ -224,7 +224,7 @@ Colour is rationed. Royal blue is the brand and the primary action; electric blu
 - **Ground** (light #F1F5FC, an icy white; dark #141033, the deep navy) under every screen.
 - **Surface** (white / #1E1A4A) for panels, cards, sheets and fields; **Raised** (#29245E) for the dark toast.
 - **Ink** (navy / #F4F5FF), **Ink Soft**, **Ink Mute** for text; **Hairline** for dividers and tracks; **Field Border** and **Switch Off** at 3:1 against surface and ground.
-- **Muted Bar** (#7A86D0 / #505FAD): unselected Reports bars, 3:1 against ground.
+- **Muted Bar** (#7A86D0 / #5C6CBE): unselected Reports bars, 3:1 against ground and surface.
 - **On-brand Soft** (#E1EAFB / #C6D8F8): secondary text on the gradient, 4.5:1 against its brightest point, and above that on glass.
 
 ### Category hues

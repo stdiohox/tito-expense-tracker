@@ -2,7 +2,9 @@ import { IconShare } from '@tabler/icons-react-native';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { BudgetChart, type BudgetLine } from '@/components/budget-chart';
 import { Button } from '@/components/button';
+import { DailyChart } from '@/components/daily-chart';
 import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
 import { Panel } from '@/components/panel';
@@ -17,9 +19,9 @@ import { useToast } from '@/components/toast';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
-import { addMonths, monthName, monthOfDay, shortMonth } from '@/domain/dates';
+import { addMonths, dayOfMonth, daysInMonth, monthName, monthOfDay, shortMonth } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
-import { compareWords, pace, summarise } from '@/domain/summary';
+import { budgetFor, compareWords, pace, summarise } from '@/domain/summary';
 import type { MonthKey } from '@/domain/types';
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -61,6 +63,14 @@ export default function Reports() {
     const when = isCurrent ? `by this day in ${lastName}` : lastName;
     headline = word === 'same' ? `About the same as ${when}` : `${formatMoney(Math.abs(vsLast.d), cur)} ${word} than ${when}`;
   }
+
+  // Every budget in the main currency, from the moment it is set (₦0 spent is still a line).
+  const budgetLines: BudgetLine[] = categories
+    .map((k) => ({ k, budget: budgetFor(k, cur) }))
+    .filter((x): x is { k: typeof x.k; budget: number } => x.budget !== null && x.budget > 0 && !x.k.hidden)
+    .map(({ k, budget }) => ({ category: k, budget, spent: now.byCategory.find((b) => b.category.id === k.id)?.total ?? 0 }))
+    .sort((a, b) => b.spent / b.budget - a.spent / a.budget);
+  const overCount = budgetLines.filter((b) => b.spent > b.budget).length;
 
   const deltaPct = vsLast && vsLast.base > 0 ? Math.round((vsLast.d / vsLast.base) * 100) : null;
 
@@ -104,6 +114,35 @@ export default function Reports() {
         </Reveal>
 
         <Reveal order={2}>
+        <Panel title="Day by day">
+          <DailyChart
+            perDay={now.perDay}
+            lastMonth={before.perDay}
+            monthKey={month}
+            monthShort={shortMonth(month)}
+            lastShort={lastShort}
+            lastDay={isCurrent ? dayOfMonth(today) - 1 : daysInMonth(month) - 1}
+            currency={cur}
+          />
+          <View style={{ height: space.m }} />
+        </Panel>
+        </Reveal>
+
+        {budgetLines.length > 0 ? (
+          <Reveal order={3}>
+          <Panel
+            title="Budgets"
+            action={
+              <T variant="sub" tone={overCount ? 'burgundy' : 'inkSoft'}>
+                {overCount ? `${overCount} over` : 'All on track'}
+              </T>
+            }>
+            <BudgetChart lines={budgetLines} currency={cur} monthKey={month} />
+          </Panel>
+          </Reveal>
+        ) : null}
+
+        <Reveal order={4}>
         <Panel title="By category">
           {now.byCategory.length === 0 ? (
             <T variant="sub" tone="inkMute" style={{ paddingVertical: space.m }}>
@@ -138,7 +177,7 @@ export default function Reports() {
         </Reveal>
 
         {history.length > 1 ? (
-          <Reveal order={3}>
+          <Reveal order={5}>
           <Panel title="Month by month">
             <T variant="sub" tone="inkSoft" style={{ marginTop: space.xs }}>
               {past.length
@@ -186,7 +225,7 @@ export default function Reports() {
           </Reveal>
         ) : null}
 
-        <Reveal order={4} style={{ marginTop: space.s }}>
+        <Reveal order={6} style={{ marginTop: space.s }}>
           <Button
             label={`Share ${monthName(month)} as PDF`}
             variant="secondary"

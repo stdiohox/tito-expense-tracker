@@ -71,6 +71,9 @@ for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) 
   check(`${scheme} switch on-track on surface (non-text)`, p.button, p.surface, 3);
   check(`${scheme} switch thumb on off-track (non-text)`, p.thumb, p.switchOff, 3);
   check(`${scheme} barMuted on ground (non-text)`, p.barMuted, p.ground, 3);
+  check(`${scheme} barMuted on surface (daily chart, non-text)`, p.barMuted, p.surface, 3);
+  check(`${scheme} selected day bar (accent) on surface (non-text)`, p.accent, p.surface, 3);
+  check(`${scheme} last-month line (inkMute) on surface (non-text)`, p.inkMute, p.surface, 3);
   check(`${scheme} selected bar on ground (non-text)`, p.button, p.ground, 3);
   check(`${scheme} progress fill on its track (non-text)`, p.accent, p.line, 3);
   check(`${scheme} over-budget fill on its track (non-text)`, p.burgundy, p.line, 3);
