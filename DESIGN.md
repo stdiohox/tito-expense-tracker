@@ -207,7 +207,7 @@ Colour is rationed. Royal blue is the brand and the primary action; electric blu
 ## Colors
 
 ### Primary
-- **Brand gradient** (tab heroes and onboarding): a static diagonal from **Deep Navy** (#141033, top left) through **Royal Blue** (#2631AD) to **Electric Blue** (#2F5BE7, bottom right), with an **Icy Blue** (#CBE9FD) glow at 22% in the text-free top-right corner and a faint white sheen bottom-left. Heroes add a white **flare** (55% at the corner, fading to 0 within 32% of the box) in the same corner for the brighter, whiter look; no text sits there. On the Home header a 28px band at the bottom fades to icy blue in light mode (to the navy ground in dark mode); no content ever sits in that band. Dark mode runs through a deeper royal (#1F2690) to a deeper electric (#2A50CF). Drawn by `BrandGradient` with react-native-svg; never animated.
+- **Brand gradient** (tab heroes and onboarding): a static diagonal from **Deep Navy** (#141033, top left) through **Royal Blue** (#2631AD) to **Electric Blue** (#2F5BE7, bottom right), with an **Icy Blue** (#CBE9FD) glow at 22% in the text-free top-right corner and a faint white sheen bottom-left. Heroes add a white **flare** (55% at the corner, fading to 0 within 32% of the box) in the same corner for the brighter, whiter look; no text sits there. On the Home header a 28px band at the bottom fades to icy blue in light mode (to the navy ground in dark mode); no content ever sits in that band. Dark mode runs through a deeper royal (#1F2690) to a deeper electric (#2A50CF). Drawn by `BrandGradient` with react-native-svg; the gradient itself never animates (on onboarding a separate soft glow drifts behind the illustration; see Motion).
 - **Royal Blue** (brand / button): the primary button in light mode; pressed deepens to #1C2589.
 - **Electric Blue** (accent): links, the active tab, progress fills, the focused field border and selection outlines, on the light ground. In dark mode text needs more light, so the accent lifts to **#7693EF**; the dark primary button is **#3560E8**, the lightest electric that keeps its white label at 4.5:1 and still stands 3:1 off the sheet surface.
 - **Icy Blue**: the gradient's glow and light-mode end, the pace line, the toast's Undo, and the light tint (**Blue Mist** #E2EEFD) behind selected items.
@@ -239,7 +239,7 @@ Each category has a light and a dark icon colour; its disc is the same hue at 12
 
 **The Disc-Only Rule.** Category colour lives inside the small tinted icon disc and nowhere else: not in bars, legends or charts.
 
-**The One Gradient Rule.** The brand gradient appears only in the tab heroes and on the onboarding slides, and it never moves.
+**The One Gradient Rule.** The brand gradient appears only in the tab heroes and on the onboarding slides, and it never moves. The one exception is a soft icy glow that drifts slowly behind the onboarding illustrations, kept inside the illustration box and away from all text.
 
 ## Typography
 
@@ -272,7 +272,10 @@ Calm and brief, never decorative for its own sake, and always off with Reduce Mo
 - **Budget bars** grow to their level (700ms ease-out).
 - **Press:** Quick add tiles and budget cards press in slightly (to 94–97%).
 - **Toast** slides up over 220ms and out over 180ms.
-The brand gradient never moves.
+- **Bottom sheet** slides up over 300ms and down over 200ms; dragging follows the finger.
+- **Charts** on Reports grow in over 700ms when the month changes.
+- **Onboarding** illustrations play once each time their slide shows: cards slide in, icons pop, totals count up, the pace line draws itself, budget bars grow and the donut sweeps in (0.4–1.4s, ease-out). Glass cards float a few points up and down over about 3s, and a soft icy glow drifts behind them over 9s. Calm, never busy.
+The brand gradient itself never moves.
 
 ## Elevation & Depth
 
@@ -310,7 +313,7 @@ On the gradient: this month as a 2.5px icy-blue line with a soft fill, last mont
 The app is **TET**, short for **Tito Finance Expense Tracker**. TET is the name under the app icon. In the app, the wordmark shows "TET" in spaced SemiBold with a small mint dot (teal on light grounds) and the full name beneath it in Caption: at the top of the onboarding slides and in the Settings footer. Screen readers hear "TET, Tito Finance Expense Tracker".
 
 ### Onboarding
-Three full-bleed gradient slides, each with our own decorative SVG shapes in the palette (hidden from screen readers), a hero headline bottom-left and supporting text. "01 / 03" and Skip at the top; a pill indicator whose active segment is mint and wider; one white pill. The setup after sign-up (currency, how hands-on, categories and up to four budgets) uses the light panels, a 3-segment electric progress bar, Skip on every step and one primary button.
+Three full-bleed gradient slides, each with a live illustration built from the app's own components with fixed sample numbers, never the user's data (hidden from screen readers): 1) an expense card slides in, its icon pops and the amount counts up, then a "Saved" toast; 2) a glass card whose pace line draws itself as the total counts up, with a mint % chip; 3) three budget rows whose bars grow, with % badges, and a glass donut of spending by category in brand colours (icy, white, mint; never category colours). A hero headline bottom-left and supporting text. "01 / 03" and Skip at the top; a pill indicator whose active segment is mint and wider; one white pill. The setup after sign-up (currency, how hands-on, categories and up to four budgets) uses the light panels, a 3-segment electric progress bar, Skip on every step and one primary button.
 
 ### Inputs, rows, toast
 Fields: surface fill, 1px Field Border, 2px electric on focus, burgundy on error with a polite live region. Rows: disc, title and subtitle, right-aligned tabular amount, 64px tall, hairline between. Toast: navy (raised in dark), white text, icy Undo, and a mint check on success.
@@ -318,7 +321,7 @@ Fields: surface fill, 1px Field Border, 2px electric on focus, burgundy on error
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the gradient to the tab heroes and onboarding, and keep it still; keep text out of the hero's top-right corner, where the flare is.
+- **Do** keep the gradient to the tab heroes and onboarding, and keep it still (only the onboarding glow drifts, away from text); keep text out of the hero's top-right corner, where the flare is.
 - **Do** keep aqua mint to dark or blue surfaces, and use teal for the pop on light ones.
 - **Do** give each task screen exactly one primary button.
 - **Do** set every amount in tabular figures and right-align it.

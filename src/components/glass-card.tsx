@@ -11,7 +11,7 @@ import { hexAlpha, useTheme } from '@/theme/use-theme';
  * web. The tint and frost are set so white, soft and mint text on it stay above AA
  * (check-contrast.mjs); the highlight and the mark are decorative and carry no text.
  */
-export function GlassCard({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+export function GlassCard({ children, style, mark = true }: { children: ReactNode; style?: StyleProp<ViewStyle>; /** The two-circle mark; off for small cards whose text reaches the corner. */ mark?: boolean }) {
   const { c, scheme } = useTheme();
   return (
     <View
@@ -34,8 +34,12 @@ export function GlassCard({ children, style }: { children: ReactNode; style?: St
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: hexAlpha(c.glassEdge, glass.frost[scheme]) }} />
         <View style={{ position: 'absolute', top: 0, left: space.l, right: space.l, height: 1, backgroundColor: hexAlpha(c.glassEdge, 0.55) }} />
-        <View style={{ position: 'absolute', top: space.l, right: space.l + 14, width: 24, height: 24, borderRadius: 12, backgroundColor: hexAlpha(c.glassEdge, 0.28) }} />
-        <View style={{ position: 'absolute', top: space.l, right: space.l, width: 24, height: 24, borderRadius: 12, backgroundColor: hexAlpha(c.brandGlow, 0.5) }} />
+        {mark ? (
+          <>
+            <View style={{ position: 'absolute', top: space.l, right: space.l + 14, width: 24, height: 24, borderRadius: 12, backgroundColor: hexAlpha(c.glassEdge, 0.28) }} />
+            <View style={{ position: 'absolute', top: space.l, right: space.l, width: 24, height: 24, borderRadius: 12, backgroundColor: hexAlpha(c.brandGlow, 0.5) }} />
+          </>
+        ) : null}
       </View>
       {children}
     </View>
