@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 
+import { Avatar } from '@/components/avatar';
 import { BudgetCard } from '@/components/budget-card';
 import { GlassCard } from '@/components/glass-card';
 import { IconDisc } from '@/components/icon-disc';
@@ -98,6 +99,7 @@ export default function Home() {
         contentContainerStyle={{ paddingBottom: clearance + space.l }}>
         <ScreenHero
           title={settings.firstName ? `Hello, ${settings.firstName}` : 'Hello'}
+          leading={<Avatar first={settings.firstName} last={settings.lastName} size={32} />}
           bleed={
           <ScrollView
             horizontal

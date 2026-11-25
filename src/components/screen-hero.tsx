@@ -19,7 +19,18 @@ import { T } from './text';
  * padding lines its text up with the text inside the panels below. Keep content out of the card's
  * top-right corner, where the flare is.
  */
-export function ScreenHero({ title, children, bleed }: { title: string; children?: ReactNode; bleed?: ReactNode }) {
+export function ScreenHero({
+  title,
+  children,
+  bleed,
+  leading,
+}: {
+  title: string;
+  children?: ReactNode;
+  bleed?: ReactNode;
+  /** Shown before the title on the same line (the small initials avatar on Home). */
+  leading?: ReactNode;
+}) {
   const { scheme } = useTheme();
   const insets = useSafeAreaInsets();
   return (
@@ -30,9 +41,12 @@ export function ScreenHero({ title, children, bleed }: { title: string; children
         <Reveal>
         <BrandGradient flare style={{ borderRadius: radius.xxl, paddingVertical: space.l }}>
           <View style={{ paddingHorizontal: space.l, gap: space.xs }}>
-            <T variant="title" tone="onBrand" accessibilityRole="header">
-              {title}
-            </T>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.s }}>
+              {leading}
+              <T variant="title" tone="onBrand" accessibilityRole="header" style={{ flexShrink: 1 }}>
+                {title}
+              </T>
+            </View>
             {children}
           </View>
           {bleed}

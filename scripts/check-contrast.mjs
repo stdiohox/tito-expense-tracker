@@ -89,6 +89,8 @@ for (const [scheme, p] of [['light', block('light')], ['dark', block('dark')]]) 
   worst(`${scheme} onBrand on glass card`, p.onBrand, glassPts, 4.5);
   worst(`${scheme} onBrandSoft on glass card`, p.onBrandSoft, glassPts, 4.5);
   worst(`${scheme} pop text on glass card`, p.pop, glassPts, 4.5);
+  check(`${scheme} avatar initials (onAvatar on avatar)`, p.onAvatar, p.avatar, 4.5);
+  worst(`${scheme} avatar disc on brand gradient (non-text)`, p.avatar, pts, 3);
 
   // Category icons on their discs, over each surface a disc sits on.
   cats.forEach(([, l, d], i) => {

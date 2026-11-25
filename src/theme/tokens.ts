@@ -75,6 +75,9 @@ export type Palette = {
   focusRing: string;
   /** The floating dock: frosted white glass in both modes (see dockGlass); its content uses the light palette. */
   dock: string;
+  /** Initials avatar on the brand gradient: icy disc, navy letters. */
+  avatar: string;
+  onAvatar: string;
 };
 
 export const light: Palette = {
@@ -122,6 +125,8 @@ export const light: Palette = {
   toastShadow: '#000000',
   focusRing: '#2F5BE7',
   dock: '#FFFFFF',
+  avatar: '#CBE9FD',
+  onAvatar: '#141033',
 };
 
 export const dark: Palette = {
@@ -169,6 +174,8 @@ export const dark: Palette = {
   toastShadow: '#000000',
   focusRing: '#7693EF',
   dock: '#FFFFFF',
+  avatar: '#CBE9FD',
+  onAvatar: '#141033',
 };
 
 /**

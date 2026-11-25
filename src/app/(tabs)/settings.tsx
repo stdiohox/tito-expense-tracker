@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { STROKE } from '@/components/icons';
 import { Segmented } from '@/components/segmented';
 import { ScreenHero } from '@/components/screen-hero';
@@ -31,12 +32,17 @@ export default function Settings() {
       contentInsetAdjustmentBehavior="never"
       contentContainerStyle={{ paddingBottom: clearance + space.xxl }}>
       <ScreenHero title="Settings">
-        <T variant="largeTitle" tone="onBrand" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-          {settings.firstName || 'Your account'}
-        </T>
-        <T variant="sub" tone="onBrandSoft" numberOfLines={1}>
-          {settings.email || 'No email yet'}
-        </T>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.m, marginTop: space.s }}>
+          <Avatar first={settings.firstName} last={settings.lastName} size={56} />
+          <View style={{ flex: 1 }}>
+            <T variant="title" tone="onBrand" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {fullName(settings) || 'Your account'}
+            </T>
+            <T variant="sub" tone="onBrandSoft" numberOfLines={1}>
+              {settings.email || 'No email yet'}
+            </T>
+          </View>
+        </View>
       </ScreenHero>
       <Reveal order={1} style={{ paddingHorizontal: space.l }}>
 
