@@ -8,10 +8,8 @@
  * all (jest.setup.js does it before each test), and `__failNextOpen()` makes the next open fail,
  * for the error screen.
  */
-// process.getBuiltinModule bypasses Jest's module registry, which doesn't know node:sqlite. Node
-// still labels it experimental, a moment after loading; only that one warning is dropped.
-const emitWarning = process.emitWarning;
-process.emitWarning = (warning, ...rest) => (String(warning).includes('SQLite is an experimental') ? undefined : emitWarning.call(process, warning, ...rest));
+// process.getBuiltinModule bypasses Jest's module registry, which doesn't know node:sqlite. (Node
+// prints "SQLite is an experimental feature" once per test worker; it is harmless.)
 const { DatabaseSync } = process.getBuiltinModule('node:sqlite');
 
 const files = new Map();

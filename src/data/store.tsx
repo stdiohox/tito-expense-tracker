@@ -70,8 +70,13 @@ export type Actions = {
   addExpense: (e: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Expense>;
   /** False when the expense was deleted meanwhile. */
   updateExpense: (e: Expense) => Promise<boolean>;
-  /** The deleted expense (for Undo), or undefined if it was already gone. */
+  /**
+   * Soft delete: the expense disappears from every screen but stays as a tombstone, so a later
+   * sync can pass the delete on. Resolves to the expense (for Undo), or undefined if it was
+   * already gone. Every change also writes an outbox row, ready for sync (part B).
+   */
   deleteExpense: (id: string) => Promise<Expense | undefined>;
+  /** Undo: brings a deleted expense back, newer than its delete so a sync can't undo the Undo. */
   restoreExpense: (e: Expense) => Promise<void>;
   saveCategory: (c: Omit<Category, 'id'> & { id?: string }) => Promise<Category>;
   updateSettings: (patch: Partial<Settings>) => Promise<void>;
@@ -182,8 +187,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }),
       restoreExpense: (expense) =>
         write(async (d) => {
-          await repo.restoreExpense(d, expense, Date.now());
-          changed();
+          if (await repo.restoreExpense(d, expense.id, Date.now())) changed();
         }),
       saveCategory: (input) =>
         write(async () => {

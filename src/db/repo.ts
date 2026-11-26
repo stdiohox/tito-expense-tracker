@@ -137,16 +137,19 @@ export async function insertExpense(db: SqlDb, e: Expense): Promise<void> {
       e.createdAt,
       e.updatedAt,
     );
+    await outboxExpense(db, e.id, 'create', null, e.updatedAt);
   });
 }
 
-/** Saves an edit. False when the expense no longer exists (deleted meanwhile). */
+/** Saves an edit. False when the expense no longer exists (deleted meanwhile): a delete wins. */
 export async function updateExpense(db: SqlDb, e: Expense): Promise<boolean> {
   checkExpense(e);
   let changed = false;
   await db.withTransactionAsync(async () => {
-    const r = await db.runAsync(
-      `UPDATE expenses SET amount = ?, currency = ?, category_id = ?, day = ?, note = ?, updated_at = ?, version = version + 1 WHERE id = ? AND ${LIVE}`,
+    const before = await db.getFirstAsync<{ version: number }>(`SELECT version FROM expenses WHERE id = ? AND ${LIVE}`, e.id);
+    if (!before) return;
+    await db.runAsync(
+      `UPDATE expenses SET amount = ?, currency = ?, category_id = ?, day = ?, note = ?, updated_at = ?, version = version + 1 WHERE id = ?`,
       e.amount,
       e.currency,
       e.categoryId,
@@ -155,42 +158,106 @@ export async function updateExpense(db: SqlDb, e: Expense): Promise<boolean> {
       e.updatedAt,
       e.id,
     );
-    changed = r.changes > 0;
+    await outboxExpense(db, e.id, 'update', before.version, e.updatedAt);
+    changed = true;
   });
   return changed;
 }
 
-/** Deletes an expense and returns it (for Undo), or undefined when it was already gone. */
-export async function deleteExpense(db: SqlDb, id: string, _now: number): Promise<Expense | undefined> {
+/**
+ * Soft delete: the row stays as a tombstone (deleted_at set) so a later sync can pass the delete
+ * on. Returns the expense as it was (for Undo), or undefined when it was already gone.
+ */
+export async function deleteExpense(db: SqlDb, id: string, now: number): Promise<Expense | undefined> {
   let found: Expense | undefined;
   await db.withTransactionAsync(async () => {
-    const row = await db.getFirstAsync<ExpenseRow>(`SELECT ${EXPENSE_COLUMNS} FROM expenses WHERE ${LIVE} AND id = ?`, id);
+    const row = await db.getFirstAsync<ExpenseRow & { version: number }>(
+      `SELECT ${EXPENSE_COLUMNS}, version FROM expenses WHERE ${LIVE} AND id = ?`,
+      id,
+    );
     if (!row) return;
     found = toExpense(row);
-    await db.runAsync(`DELETE FROM expenses WHERE id = ?`, id);
+    await db.runAsync(`UPDATE expenses SET deleted_at = ?, updated_at = ?, version = version + 1 WHERE id = ?`, now, now, id);
+    await outboxExpense(db, id, 'delete', row.version, now);
   });
   return found;
 }
 
-/** Undo: puts a deleted expense back. */
-export async function restoreExpense(db: SqlDb, e: Expense, now: number): Promise<void> {
-  checkExpense(e);
+/**
+ * Undo a delete: clears deleted_at with an updated_at newer than the delete (and a new version),
+ * so a sync can't bring the delete back. Does nothing if the expense isn't deleted.
+ */
+export async function restoreExpense(db: SqlDb, id: string, now: number): Promise<boolean> {
+  let restored = false;
   await db.withTransactionAsync(async () => {
-    await db.runAsync(
-      `INSERT OR REPLACE INTO expenses (id, amount, currency, category_id, day, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      e.id,
-      e.amount,
-      e.currency,
-      e.categoryId,
-      e.day,
-      e.note,
-      e.createdAt,
-      now,
+    const row = await db.getFirstAsync<{ version: number; deleted_at: number; updated_at: number }>(
+      `SELECT version, deleted_at, updated_at FROM expenses WHERE id = ? AND deleted_at IS NOT NULL`,
+      id,
     );
+    if (!row) return;
+    // Strictly newer than the delete even if the clock hasn't moved on (or went back).
+    const at = Math.max(now, row.deleted_at + 1, row.updated_at + 1);
+    await db.runAsync(`UPDATE expenses SET deleted_at = NULL, updated_at = ?, version = version + 1 WHERE id = ?`, at, id);
+    await outboxExpense(db, id, 'restore', row.version, at);
+    restored = true;
   });
+  return restored;
 }
 
-/** Development only (stress data): replaces every expense, in batches of 100 rows per INSERT. */
+// ---------------------------------------------------------------------------------------------
+// Outbox: local changes waiting to be sent (part B sends them; nothing reads them yet)
+// ---------------------------------------------------------------------------------------------
+
+export type OutboxOp = 'create' | 'update' | 'delete' | 'restore';
+export type OutboxRow = {
+  id: number;
+  entity: string;
+  entity_id: string;
+  op: OutboxOp;
+  payload: string;
+  base_version: number | null;
+  created_at: number;
+};
+
+/** Appends a change to the outbox. Called inside the change's own transaction. */
+export async function enqueueChange(
+  db: SqlDb,
+  entity: 'expense' | 'category' | 'setting',
+  entityId: string,
+  op: OutboxOp,
+  payload: unknown,
+  baseVersion: number | null,
+  now: number,
+): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO outbox (entity, entity_id, op, payload, base_version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    entity,
+    entityId,
+    op,
+    JSON.stringify(payload),
+    baseVersion,
+    now,
+    now,
+  );
+}
+
+/** The outbox entry for an expense carries the whole row as it is after the change. */
+async function outboxExpense(db: SqlDb, id: string, op: OutboxOp, baseVersion: number | null, now: number): Promise<void> {
+  const row = await db.getFirstAsync(
+    `SELECT id, amount, currency, category_id, day, note, version, created_at, updated_at, deleted_at FROM expenses WHERE id = ?`,
+    id,
+  );
+  await enqueueChange(db, 'expense', id, op, row, baseVersion, now);
+}
+
+/** Changes not yet sent, oldest first. */
+export function pendingChanges(db: SqlDb): OutboxRow[] {
+  return db.getAllSync<OutboxRow>(
+    `SELECT id, entity, entity_id, op, payload, base_version, created_at FROM outbox WHERE deleted_at IS NULL ORDER BY id`,
+  );
+}
+
+/** Development only (stress data): replaces every expense, in batches of 100 rows per INSERT. No outbox rows: test data never syncs. */
 export async function replaceAllExpenses(db: SqlDb, expenses: Expense[]): Promise<void> {
   await db.withTransactionAsync(async () => {
     await db.runAsync(`DELETE FROM expenses`);
