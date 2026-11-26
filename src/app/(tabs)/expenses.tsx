@@ -112,9 +112,11 @@ export default function Expenses() {
             ...searchFocus.border,
             paddingLeft: space.l - searchFocus.inset,
           }}>
-          {/* The icon sits in a centred box and the input has a fixed height with no default
-              padding, so the icon and the placeholder share one centre line on every platform. */}
-          <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+          {/* The input has a fixed height, no padding and (Android) no extra font padding, so its
+              text is centred. The magnifier's lens sits above the middle of its own box (the handle
+              hangs below), and Outfit's lowercase sits a little low, so the icon drops 2px to put
+              the lens on the same line as the placeholder. */}
+          <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center', transform: [{ translateY: 2 }] }}>
             <IconSearch size={20} color={c.inkMute} strokeWidth={STROKE} />
           </View>
           <TextInput
@@ -126,7 +128,7 @@ export default function Expenses() {
             returnKeyType="search"
             {...searchFocus.focusProps}
             maxFontSizeMultiplier={2}
-            style={{ flex: 1, minWidth: 0, height: 48, paddingVertical: 0, textAlignVertical: 'center', fontFamily: fonts.regular, fontSize: 16, color: c.ink }}
+            style={{ flex: 1, minWidth: 0, height: 48, paddingVertical: 0, textAlignVertical: 'center', includeFontPadding: false, fontFamily: fonts.regular, fontSize: 16, color: c.ink }}
           />
           {query ? (
             <Pressable
