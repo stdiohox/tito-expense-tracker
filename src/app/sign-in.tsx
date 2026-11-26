@@ -42,7 +42,7 @@ export default function SignIn() {
     timer.current = setTimeout(() => {
       // Settings shows the account that signed in, not whoever was stored before.
       updateSettings({ email: email.trim() })
-        .then(signIn)
+        .then(() => signIn())
         .then(() => router.replace('/'))
         .catch(() => setBusy(false));
     }, 500);

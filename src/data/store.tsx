@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 import * as repo from '@/db/repo';
 import { openDatabase } from '@/db/open';
+import * as profile from '@/db/profile';
 import type { SqlDb } from '@/db/sql';
 import { STARTER_CATEGORIES } from '@/domain/categories';
 import { monthKey } from '@/domain/dates';
@@ -21,6 +22,9 @@ import { WriteQueue } from './write-queue';
  *   only once it is; they reject if it fails, and nothing on screen changes.
  * - Writes go through one queue, one at a time, in the order they were made.
  * - Every write bumps `version`; the read hooks re-query when it changes.
+ * - Categories, settings, sign-in state and setup progress are saved too (db/profile.ts) and
+ *   read back on launch, so everything survives a restart. Signing out keeps the data on the
+ *   phone; deleting the account wipes it.
  */
 
 /** "Ada Obi", or whichever part is set; empty when neither is. */
@@ -64,6 +68,11 @@ type State = {
   categories: Category[];
   settings: Settings;
   signedIn: boolean;
+  /**
+   * The setup step a new account has reached (0, 1, 2), or null once setup is finished. Saved, so
+   * closing the app mid-setup comes back to the same step. Redo setup from Settings doesn't use it.
+   */
+  setupStep: number | null;
 };
 
 export type Actions = {
@@ -79,9 +88,15 @@ export type Actions = {
   /** Undo: brings a deleted expense back, newer than its delete so a sync can't undo the Undo. */
   restoreExpense: (e: Expense) => Promise<void>;
   saveCategory: (c: Omit<Category, 'id'> & { id?: string }) => Promise<Category>;
+  /** Shows the change at once and saves it; if saving fails, the saved value comes back and this rejects. */
   updateSettings: (patch: Partial<Settings>) => Promise<void>;
-  signIn: () => Promise<void>;
+  /** `newAccount` starts setup at step 0 (it resumes there after a restart). */
+  signIn: (options?: { newAccount?: boolean }) => Promise<void>;
+  /** Signs out. Everything stays on the phone; signing in again shows it. */
   signOut: () => Promise<void>;
+  /** Saves how far a new account has got through setup; null when it's finished. */
+  setSetupStep: (step: number | null) => Promise<void>;
+  /** Wipes everything on the phone: expenses, categories, settings and the outbox. */
   deleteAccount: () => Promise<void>;
   /** Development only: replaces the expenses with 10,000 generated ones (see data/stress.ts). */
   loadStressData: () => Promise<void>;
@@ -101,7 +116,31 @@ const freshState = (): State => ({
   categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
   settings: { ...DEFAULT_SETTINGS },
   signedIn: false,
+  setupStep: null,
 });
+
+/** Settings as saved, over the defaults. A missing or wrongly typed value keeps its default. */
+function savedSettings(saved: Record<string, unknown>): Settings {
+  const settings: Record<string, unknown> = { ...DEFAULT_SETTINGS };
+  for (const [key, fallback] of Object.entries(DEFAULT_SETTINGS)) {
+    const value = saved[key];
+    const ok = key === 'secondCurrency' ? value === null || typeof value === 'string' : typeof value === typeof fallback;
+    if (ok) settings[key] = value;
+  }
+  return applySettings(settings as Settings, {});
+}
+
+/** Everything the store keeps in memory, read from the database (writes the starter categories on first launch). */
+async function readState(db: SqlDb): Promise<State> {
+  await profile.seedCategories(db, STARTER_CATEGORIES, Date.now());
+  const saved = profile.loadSettings(db);
+  return {
+    categories: profile.loadCategories(db),
+    settings: savedSettings(saved),
+    signedIn: saved.signedIn === true,
+    setupStep: typeof saved.setupStep === 'number' ? saved.setupStep : null,
+  };
+}
 
 function applySettings(current: Settings, patch: Partial<Settings>): Settings {
   const defined = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
@@ -128,9 +167,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     openDatabase()
-      .then((opened) => {
+      .then(async (opened) => {
+        const loaded = await readState(opened).catch(async (e: unknown) => {
+          await opened.closeAsync().catch(() => {});
+          throw e;
+        });
         if (cancelled) return void opened.closeAsync().catch(() => {});
         dbRef.current = opened;
+        setState(loaded);
         setDb(opened);
       })
       .catch((e: unknown) => {
@@ -190,22 +234,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (await repo.restoreExpense(d, expense.id, Date.now())) changed();
         }),
       saveCategory: (input) =>
-        write(async () => {
+        write(async (d) => {
           const category: Category = { ...input, id: input.id ?? newId() };
+          await profile.saveCategory(d, category, Date.now());
           setState((s) => ({ ...s, categories: upsert(s.categories, category) }));
+          changed();
           return category;
         }),
-      updateSettings: (patch) =>
-        write(async () => {
-          setState((s) => ({ ...s, settings: applySettings(s.settings, patch) }));
+      updateSettings: (patch) => {
+        // Shown at once (a switch or picker never jumps back while it saves), then saved.
+        setState((s) => ({ ...s, settings: applySettings(s.settings, patch) }));
+        return write(async (d) => {
+          const before = savedSettings(profile.loadSettings(d));
+          const after = applySettings(before, patch);
+          const diff = Object.fromEntries(Object.entries(after).filter(([k, v]) => v !== before[k as keyof Settings]));
+          if (Object.keys(diff).length) await profile.saveSettings(d, diff, Date.now(), true);
+        }).catch((e: unknown) => {
+          // Not saved: show what is saved again.
+          const current = dbRef.current;
+          if (current) setState((s) => ({ ...s, settings: savedSettings(profile.loadSettings(current)) }));
+          throw e;
+        });
+      },
+      signIn: (options) =>
+        write(async (d) => {
+          const setupStep = options?.newAccount ? 0 : null;
+          await profile.saveSettings(d, { signedIn: true, setupStep }, Date.now(), false);
+          setLocal({ signedIn: true, setupStep });
         }),
-      signIn: () => write(async () => setLocal({ signedIn: true })),
-      signOut: () => write(async () => setLocal({ signedIn: false })),
+      signOut: () =>
+        write(async (d) => {
+          await profile.saveSettings(d, { signedIn: false }, Date.now(), false);
+          setLocal({ signedIn: false });
+        }),
+      setSetupStep: (step) =>
+        write(async (d) => {
+          await profile.saveSettings(d, { setupStep: step }, Date.now(), false);
+          setLocal({ setupStep: step });
+        }),
       deleteAccount: () =>
         write(async (d) => {
           await repo.wipeAll(d);
           // Starter categories with no budget, and default settings: no name, email or preferences
           // survive account deletion.
+          await profile.seedCategories(d, STARTER_CATEGORIES, Date.now());
           setState(freshState());
           changed();
         }),

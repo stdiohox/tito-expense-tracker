@@ -126,18 +126,21 @@ function Navigation() {
  * `title` names each screen for screen readers and the web tab; visible headers stay minimal.
  */
 function Routes({ screenOptions, sheet }: { screenOptions: object; sheet: object }) {
-  const { signedIn } = useStore();
+  const { signedIn, setupStep } = useStore();
   const quiet = { headerTitle: '' };
   return (
     <Stack screenOptions={screenOptions}>
       <Stack.Protected guard={signedIn} redirectTo="/welcome">
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'TET · Tito Finance Expense Tracker' }} />
-        <Stack.Screen name="expense/new" options={{ ...sheet, title: 'Add expense' }} />
-        <Stack.Screen name="expense/[id]" options={{ ...sheet, title: 'Edit expense' }} />
-        <Stack.Screen name="category/[id]" options={{ title: 'Category' }} />
-        <Stack.Screen name="category/edit" options={{ ...sheet, title: 'Category' }} />
-        <Stack.Screen name="categories" options={{ title: 'Categories and budgets' }} />
-        <Stack.Screen name="account/delete" options={{ title: 'Delete account', ...quiet }} />
+        {/* A new account that closed the app mid-setup comes back to setup, not Home. */}
+        <Stack.Protected guard={setupStep === null} redirectTo="/setup">
+          <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'TET · Tito Finance Expense Tracker' }} />
+          <Stack.Screen name="expense/new" options={{ ...sheet, title: 'Add expense' }} />
+          <Stack.Screen name="expense/[id]" options={{ ...sheet, title: 'Edit expense' }} />
+          <Stack.Screen name="category/[id]" options={{ title: 'Category' }} />
+          <Stack.Screen name="category/edit" options={{ ...sheet, title: 'Category' }} />
+          <Stack.Screen name="categories" options={{ title: 'Categories and budgets' }} />
+          <Stack.Screen name="account/delete" options={{ title: 'Delete account', ...quiet }} />
+        </Stack.Protected>
         <Stack.Screen name="setup" options={{ title: 'Set up', headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!signedIn}>

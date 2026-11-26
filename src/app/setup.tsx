@@ -35,10 +35,12 @@ const MAX_BUDGETS = 4;
 export default function Setup() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
-  const { settings, categories } = useStore();
-  const { updateSettings, saveCategory } = useActions();
+  const { settings, categories, setupStep } = useStore();
+  const { updateSettings, saveCategory, setSetupStep } = useActions();
   const toast = useToast();
-  const [step, setStep] = useState(0);
+  // A new account's setup is saved step by step (it resumes after a restart); Redo setup isn't.
+  const [isNewAccount] = useState(setupStep !== null);
+  const [step, setStep] = useState(Math.min(Math.max(setupStep ?? 0, 0), 2));
   const [currency, setCurrency] = useState<CurrencyCode>(settings.currency);
   const [second, setSecond] = useState<CurrencyCode | null>(settings.secondCurrency);
   const [mode, setMode] = useState<SetupMode>(settings.mode);
@@ -55,17 +57,29 @@ export default function Setup() {
   const mine = chosenCurrencies(settings);
   const curOf = (id: string): CurrencyCode => (budgetCur[id] && mine.includes(budgetCur[id]) ? budgetCur[id] : settings.currency);
 
-  const finish = () => router.dismissTo('/');
-  const next = () => (step < STEPS.length - 1 ? setStep(step + 1) : finish());
+  const finish = async () => {
+    if (!isNewAccount) return router.dismissTo('/');
+    await setSetupStep(null);
+    router.replace('/');
+  };
+  const go = async (to: number) => {
+    if (isNewAccount) await setSetupStep(to);
+    setStep(to);
+  };
+  const next = () => (step < STEPS.length - 1 ? go(step + 1) : finish());
+  /** Skip: moves on without applying this step; if saving the progress fails, says so. */
+  const skip = () => {
+    next().catch(() => toast({ message: 'Your progress couldn’t be saved. Try again.' }));
+  };
 
   // Each step moves on only once its choices are saved; if saving fails, it stays put and says so.
   const saving = useRef(false);
-  const saveThen = async (work: () => Promise<unknown>, then: () => void) => {
+  const saveThen = async (work: () => Promise<unknown>, then: () => Promise<unknown>) => {
     if (saving.current) return;
     saving.current = true;
     try {
       await work();
-      then();
+      await then();
     } catch {
       toast({ message: 'Your choices couldn’t be saved. Try again.' });
     } finally {
@@ -115,7 +129,7 @@ export default function Setup() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: TARGET }}>
           {step > 0 ? (
             <Pressable
-              onPress={() => setStep(step - 1)}
+              onPress={() => go(step - 1).catch(() => toast({ message: 'Your progress couldn’t be saved. Try again.' }))}
               accessibilityRole="button"
               accessibilityLabel="Back to the previous step"
               style={{ width: TARGET, height: TARGET, alignItems: 'center', justifyContent: 'center', marginLeft: -space.s }}>
@@ -125,7 +139,7 @@ export default function Setup() {
             <View style={{ width: TARGET }} />
           )}
           <Pressable
-            onPress={next}
+            onPress={skip}
             accessibilityRole="button"
             accessibilityLabel={step < STEPS.length - 1 ? `Skip ${STEPS[step].toLowerCase()}` : 'Skip and finish'}
             hitSlop={8}
