@@ -150,7 +150,7 @@ export default function Settings() {
       <View style={{ marginTop: space.xxl, alignItems: 'center', gap: space.s }}>
         <Wordmark align="center" />
         <T variant="caption" tone="inkMute" style={{ textAlign: 'center' }}>
-          Preview build · your data stays until the app reloads
+          Preview build · your data is saved on this device
         </T>
       </View>
       </Reveal>

@@ -3,11 +3,11 @@
 A phone app (iOS and Android) for logging what you spend in seconds and seeing your month at a glance.
 Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.titofinance.com`.
 
-> **Status: phase 1, real use in memory.** Every screen works and there is no demo data: the app
-> starts empty and everything in it is what you enter. Data lives in memory, so it is lost when the
-> app reloads. There are no real accounts, no sync and no backend yet. Phase 2 adds on-device
-> storage (expo-sqlite) and a Supabase backend owned by Koret. It starts after Mr Tito approves
-> the screens.
+> **Status: phase 2 part A, saved on the device.** Every screen works and there is no demo data:
+> the app starts empty and everything in it is what you enter. Expenses, categories, budgets and
+> settings are saved in SQLite on the phone (expo-sqlite), so they survive closing and reopening
+> the app. There are no real accounts, no sync and no backend yet: part B adds a Supabase backend
+> owned by Koret, and sends the outbox of changes the app already records.
 
 | | |
 |---|---|
@@ -74,7 +74,7 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
   - Reduce Motion support.
 
 The account screens (welcome, sign up, sign in, password reset, delete account) are built as UI
-only. In phase 1 they don't talk to a server. See [What is stubbed](#what-is-stubbed-in-phase-1).
+only. They don't talk to a server yet. See [What is stubbed](#what-is-stubbed-in-phase-1).
 
 ---
 
@@ -101,14 +101,29 @@ npx expo start --web    # browser preview; set the window to phone width (390 ×
 
 The app opens **signed out, on the onboarding slides**, with no data. Create an account (any name,
 email and an 8-character password; nothing is sent anywhere) to go through the setup steps, or use
-"I already have an account" with any email and password. Everything you then add stays until the app
-reloads. **Settings → Sign out** returns to the slides; **Delete account** clears it all.
+"I already have an account" with any email and password. Everything you add is saved on the device
+and is still there after you close and reopen the app (or reload the web page). **Settings → Sign
+out** returns to the slides and keeps your data on the device; signing in again shows it.
+**Delete account** wipes it all.
 
 ### Static web build
 
 ```bash
 npx expo export -p web   # writes a single-page app to dist/ (git-ignored)
 ```
+
+SQLite on the web runs in a worker that needs a **cross-origin-isolated** page, so whatever serves
+`dist/` must send two headers on every response:
+
+```
+Cross-Origin-Embedder-Policy: credentialless
+Cross-Origin-Opener-Policy: same-origin
+```
+
+They are already set for the dev server (`metro.config.js`), for Netlify and Cloudflare Pages
+(`public/_headers`), for `npx serve dist` (`public/serve.json`) and for EAS Hosting (the
+`expo-router` plugin in `app.json`). Without them the app shows "Your expenses didn't open" with
+Try again, instead of a blank page.
 
 ---
 
@@ -122,7 +137,8 @@ npx expo export -p web   # writes a single-page app to dist/ (git-ignored)
 | `npm run lint` | `expo lint` (ESLint 9 flat config, `eslint-config-expo`) |
 | `npm run check:dates` | Date, money and summary assertions run with `TZ=Africa/Lagos`. Guards against the web tracker's bug B1 (month navigation broken in UTC+1) and bug B3 (yesterday's date just after midnight), and checks amount parsing and month summaries. |
 | `npm run check:contrast` | Checks every text/background pair in `src/theme/tokens.ts` against WCAG AA, in light and dark. Exits non-zero on any failure. |
-| `npm test` | Jest (jest-expo, React Native Testing Library), in `Africa/Lagos`: unit tests for money (all 20 currencies), dates, summaries, budgets and pace, and flow tests that render the real app (sign up → setup → Home; add, edit, delete and undo; the currency toggle; a budget at ₦0; the error screens). |
+| `npm test` | Jest (jest-expo, React Native Testing Library), in `Africa/Lagos`: unit tests for money (all 20 currencies), dates, summaries, budgets and pace, flow tests that render the real app (sign up → setup → Home; add, edit, delete and undo; the currency toggle; a budget at ₦0; the error screens; closing and reopening the app keeps everything; setup resumes; sign out keeps data; delete account wipes it), and database tests (migrations, create/read/update, soft delete and Undo, outbox rows, and SQL totals matching `summarise()` in all 20 currencies). SQLite runs on Node's built-in copy (`jest.sqlite.js`). |
+| `npm run perf` | Loads 10,000 expenses and times the work behind each screen (docs/SCALE-PLAN.md §8). Not part of `npm test`. |
 | `npx expo-doctor` | Checks dependency versions and config against SDK 58 |
 
 **Before you push**, run:
@@ -131,8 +147,8 @@ npx expo export -p web   # writes a single-page app to dist/ (git-ignored)
 npm run typecheck && npm run lint && npm run check:dates && npm run check:contrast && npm test && npx expo-doctor
 ```
 
-There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test suite: plain
-`node:assert` checks on the pure functions in `src/domain/`. Add new domain cases there.
+`scripts/check-dates.ts` also checks the pure functions in `src/domain/` with plain `node:assert`,
+in plain Node; add domain cases there or in `src/domain/__tests__/`.
 
 ---
 
@@ -167,7 +183,8 @@ There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test su
     │   ├── setup.tsx        Three-step setup after sign-up (and Settings → Redo setup)
     │   └── welcome.tsx, sign-in.tsx, sign-up.tsx, reset.tsx   (welcome = three intro slides)
     ├── components/          Shared UI: Row, Button, Field, T (text), PaceChart, Toast, ExpenseForm, …
-    ├── data/                State: store (phase 1: in memory, empty at launch), month/today provider, summary hook
+    ├── data/                State and read hooks: store (async actions, launch state), expenses and summary hooks, month/today
+    ├── db/                  SQLite: migrations, open, reads and writes (repo.ts, profile.ts). Only src/data uses it.
     ├── domain/              Pure TypeScript, no React: types, dates, money, summaries, starter categories
     ├── hooks/               Small platform hooks (colour scheme)
     └── theme/               Colour tokens (light and dark), type scale, spacing, web focus ring
@@ -231,8 +248,9 @@ The web tracker's bugs come back if these rules are broken.
    - Removing a currency keeps its expenses: they still show under that currency on Home and in
      the toggle, and editing one keeps its currency.
 4. **Screens reach data only through hooks:** `useStore()`, `useActions()`, `useMonth()`,
-   `useCurrencyView()` and `useSummary()`. Because of this boundary, phase 2 can replace the storage without rewriting
-   screens.
+   `useCurrencyView()`, `useSummary()` and the expense hooks in `src/data/expenses.ts`. Screens and
+   components never import `src/db` or `expo-sqlite` (a test checks). Actions are async: show a
+   toast or navigate only after the promise resolves, and say so calmly if it rejects.
 5. **Add packages with `npx expo install <pkg>`**, not `npm install <pkg>`, so versions match SDK 58.
    Before using an Expo API, read the SDK 58 docs at `https://docs.expo.dev/versions/v58.0.0/`.
 6. **Design rules.** The full list is in [DESIGN.md](DESIGN.md). The main ones:
@@ -257,10 +275,21 @@ The web tracker's bugs come back if these rules are broken.
    that has nothing underneath.
 
 **Add a store action.**
-1. In `src/data/store.tsx`, add an `Action` variant and its `reducer` case.
-2. Add the function to `Actions` and to the `useMemo` block. Action identities must stay stable (that
-   `useMemo` has an empty dependency list).
-3. When the action needs the current state, read it from the `latest` ref, not from a closure.
+1. Write the database part in `src/db/repo.ts` (or `profile.ts`): async, in one
+   `withTransactionAsync`, and append an outbox row with `enqueueChange()` if it changes user data.
+2. In `src/data/store.tsx`, add it to `Actions` and to the `useMemo` block, wrapped in `write(…)` so
+   it runs in the write queue. Call `changed()` after a write that changes expenses, so the read
+   hooks re-query. Action identities must stay stable (that `useMemo` has an empty dependency list).
+3. Add a test in `src/db/__tests__/`.
+
+**Change the database schema.**
+1. Append a migration to `MIGRATIONS` in `src/db/migrations.ts` with the next version number. Never
+   edit one that has shipped. The rules for not losing data are at the top of that file.
+2. Add a test to `src/db/__tests__/migrations.test.ts` that upgrades a database with rows in it.
+
+**Read new data on a screen.** Add a hook to `src/data/expenses.ts` built on `useQuery()`, with
+every argument the query uses as a key, and a read function in `src/db/repo.ts`. Add up totals in
+SQL, not by looping over every expense.
 
 **Add a currency.**
 1. Add the code to `CURRENCY_CODES` in `src/domain/types.ts`.
@@ -311,32 +340,33 @@ build** (`eas build --profile development`).
 
 ## What is stubbed in phase 1
 
-| Feature | Phase 1 behaviour | Phase 2 |
+| Feature | Now | Phase 2 part B |
 |---|---|---|
-| Data | In memory, empty at launch (no demo data); lost on reload | expo-sqlite on the device plus an outbox, synced to Supabase |
-| Sign up / sign in | Validates the form, waits 0.5 s, then signs in locally | Supabase Auth with real error states |
+| Data | **Done (part A):** SQLite on the device (expo-sqlite), empty at first launch, kept across restarts. Every change is also written to an outbox. | The outbox is sent to Supabase; changes from other devices come back into SQLite |
+| Sign up / sign in | Validates the form, waits 0.5 s, then signs in locally; the signed-in state is saved | Supabase Auth with real error states |
 | Password reset | Shows "sent" for any valid email | `resetPasswordForEmail` |
-| Delete account | Clears local data after 0.6 s | Delete-account Edge Function, with an error path |
+| Delete account | Wipes everything on the device after 0.6 s | Delete-account Edge Function first, with an error path; then the local wipe |
 | Share report as PDF | Toast: "arrives in the next build" | expo-print + expo-sharing |
 | Export CSV | Toast: "arrives in the next build" | Export through the share sheet |
 | Daily reminder | The switch stores the setting only | Local notifications (expo-notifications) |
 | Privacy policy | Toast | Link to the published policy |
 
-The Settings footer reads "Preview build · your data stays until the app reloads" so testers know what to expect.
+The Settings footer reads "Preview build · your data is saved on this device" so testers know what to expect.
 
 ---
 
 ## Roadmap
 
 - **Phase 1, screens in memory (no demo data).** Done. Waiting for Mr Tito's review and real-phone checks.
-- **Phase 2, real data.** See [tasks/todo.md](tasks/todo.md) and
+- **Phase 2 part A, on-device storage.** Done (`feature/nike-storage`): expo-sqlite with versioned
+  migrations, an async store with a launch gate, soft deletes and Undo, an outbox, totals in SQL,
+  and settings, sign-in and setup progress that survive restarts.
+- **Phase 2 part B, real data online.** See [tasks/todo.md](tasks/todo.md) and
   [docs/ARCHITECTURE.md §10](docs/ARCHITECTURE.md#10-phase-2-target-architecture). Scope:
-  - expo-sqlite store and outbox;
   - Supabase schema and RLS;
-  - auth and sync;
-  - account deletion;
-  - an async store API with soft deletes;
-  - aggregates computed in SQL.
+  - auth, and syncing the outbox;
+  - one local database per user;
+  - account deletion on the server.
 - **Later:**
   - reminders, PDF and CSV;
   - store preparation (EAS, privacy labels, Data safety);

@@ -1,6 +1,6 @@
 # TET: project status
 
-Branch `feature/nike-reliability` (from `main`), 26 November 2026.
+Branch `feature/nike-storage` (from `main`), 26 November 2026.
 
 ## 1. What the app is
 
@@ -33,7 +33,8 @@ Branch `feature/nike-reliability` (from `main`), 26 November 2026.
 
 - `src/app/`: the screens. Every file is a screen; `_layout.tsx` files set up navigation.
 - `src/components/`: shared building blocks such as buttons, fields, panels, glass cards, charts, the toast and the hero card.
-- `src/data/`: the app's data store (in memory for now), the selected month and the totals.
+- `src/data/`: the app's data store and the hooks screens read through, the selected month and the totals.
+- `src/db/`: the SQLite database on the phone: migrations, reads and writes, the outbox.
 - `src/domain/`: the core rules for money, dates, categories and month summaries.
 - `src/theme/`: colours, fonts, spacing and light/dark handling.
 - `scripts/`: automatic checks for dates and money, and for colour contrast.
@@ -48,7 +49,7 @@ Branch `feature/nike-reliability` (from `main`), 26 November 2026.
 - FlashList for the long lists (Expenses, Categories).
 - Sentry for crash reporting (off until a DSN is set; no personal data).
 - Jest with jest-expo and React Native Testing Library; GitHub Actions for CI.
-- Data lives in memory for now. Phase 2 adds SQLite on the phone and Supabase online.
+- expo-sqlite: data is saved on the phone (Phase 2 part A). Supabase online comes in part B.
 
 ## 3. What has changed since I joined
 
@@ -158,9 +159,17 @@ Everything after commit `3529e3d` (README and architecture docs).
 - `bafc038` Long lists use FlashList; a development-only button loads 10,000 test expenses; the slow spots found with it are fixed.
 - `7be1096` GitHub Actions runs every check, the tests and a web build on each pull request and push to main.
 
+**On-device storage, Phase 2 part A** (branch `feature/nike-storage`)
+- `525c7c3` SQLite database (expo-sqlite): expenses, categories, settings and an outbox, each with id, user_id, created/updated/deleted times; indexes on day, category and currency; versioned migrations that never lose data. Web build set up for it (headers and the .wasm file).
+- `18c8ef6` The store runs on SQLite behind the same hooks. Saving waits for the write before the toast; if it fails, the sheet stays open and says so. A calm "Your expenses didn't open" screen with Try again if the database can't open.
+- `049aa36` Delete keeps a hidden tombstone; Undo brings it back newer than the delete, so a future sync can't undo it. Every change is recorded in the outbox.
+- `f532c75` Totals by month, category, day and currency are added up in SQL; Reports' history is one query. An extra index on currency and day. Timings in docs/SCALE-PLAN.md §8.
+- `5c8a5b0` Name, email, currencies, appearance, budgets, hidden categories, sign-in and setup progress survive restarts. Sign out keeps the data; Delete account wipes it.
+- Tests for the database and for closing and reopening the app; docs updated.
+
 ## 4. What works fully vs. what is a placeholder
 
-"Works" means it works on the device. Until Phase 2, everything is lost when the app restarts.
+"Works" means it works on the device. Data is saved on the device and survives restarts; nothing is sent online yet.
 
 | Feature | Status |
 |---|---|
@@ -179,10 +188,11 @@ Everything after commit `3529e3d` (README and architecture docs).
 | Crash reporting (Sentry) | Ready; off until you add a Sentry DSN |
 | Automatic tests (`npm test`) and CI on GitHub | Works; CI runs from the first pull request |
 | Smooth with 10,000 expenses | Works in tests (`npm run perf`); check on a real phone |
-| Saving data between launches | Placeholder: in memory only |
+| Saving data between launches (expenses, categories, budgets, settings, sign-in, setup progress) | Works (SQLite; tested by closing and reopening the app in the flow tests; check on real phones) |
+| Recording changes for sync (outbox) | Works; nothing is sent until Supabase is set up |
 | Real accounts (sign up, sign in) | Placeholder: no server yet |
 | Reset password | Placeholder: no email is sent |
-| Delete account | Placeholder: clears this device only |
+| Delete account | Placeholder: wipes this device only (no server yet) |
 | Share report as PDF | Placeholder: shows "arrives in the next build" |
 | Export as CSV | Placeholder: shows "arrives in the next build" |
 | Daily reminder | Placeholder: the switch saves, but no notification is sent |
@@ -192,7 +202,7 @@ Everything after commit `3529e3d` (README and architecture docs).
 ## 5. What's left to build
 
 **Phase 2**
-- **SQLite storage:** save data on the phone so it survives restarts. Totals are worked out in the database.
+- ~~**SQLite storage:** save data on the phone so it survives restarts. Totals are worked out in the database.~~ Done on `feature/nike-storage`.
 - **Supabase login and sync:** real accounts, and a sync queue that sends changes when the phone is online. Every table is locked to its owner.
 - **Real password reset:** Supabase sends the email and the app handles the link.
 - **Account deletion:** a server function deletes the account and all its data, and shows an error if that fails.
@@ -221,9 +231,9 @@ In suggested order:
 
 The full plan is in `docs/SCALE-PLAN.md`. Already done:
 - **Crash reporting:** Sentry is installed and wired to the error screens; it needs a DSN to switch on.
-- **Tests:** 122 automatic tests (`npm test`), including the main journeys; sync tests come with Phase 2.
+- **Tests:** 204 automatic tests (`npm test`), including the main journeys, closing and reopening the app, and the database (migrations, soft delete and Undo, the outbox, SQL totals in all 20 currencies); sync tests come with part B.
 - **CI:** GitHub Actions runs every check, the tests and a web build on each pull request.
-- **Performance:** checked with 10,000 expenses (`npm run perf`).
+- **Performance:** checked with 10,000 expenses (`npm run perf`); totals now come from SQL (docs/SCALE-PLAN.md §8).
 
 Still needed before launch:
 - **Supabase setup:** a paid plan with backups, every table locked to its owner, indexes on dates and users, rate limits on login, and syncing in small batches. Saving on the phone first keeps server load low.
@@ -233,7 +243,7 @@ Still needed before launch:
 ## 8. Recommended next 5 steps
 
 1. Merge `feature/nike-reliability` once CI passes on its pull request, turn on branch protection for `main`, and connect Sentry (docs/SCALE-PLAN.md §7). Test in Expo Go on an iPhone and an Android phone (sheet drag and keyboard, onboarding motion, Reduce Motion, VoiceOver/TalkBack on the new charts), then push both branches, open the pull requests and get client sign-off.
-2. Set up Supabase: schema, access rules, and real sign-up (with first and last name), sign-in, reset and delete.
-3. Add SQLite storage with the sync queue, and make the store wait for each save.
-4. Add the Phase 2 tests: offline sync (add 5 offline, reconnect, exactly 5 sync), SQL totals matching the JavaScript ones, and the two-account access test.
+2. Review and merge `feature/nike-storage` (on-device storage). Check in Expo Go on a real iPhone and Android phone that expenses, settings and setup progress survive closing the app completely, and that the web build opens its data when served with the headers in README → Static web build.
+3. Set up Supabase: schema, access rules, and real sign-up (with first and last name), sign-in, reset and delete. Then send the outbox and pull changes back (part B), with one local database per user.
+4. Add the part B tests: offline sync (add 5 offline, reconnect, exactly 5 sync) and the two-account access test.
 5. Finish the app icon, CSV and PDF export and the daily reminder, then send the first TestFlight and Play internal test builds.

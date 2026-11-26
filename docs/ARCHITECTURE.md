@@ -5,8 +5,8 @@ How the app is built today (phase 1), why it is built that way, and the target d
 
 | | |
 |---|---|
-| **Applies to** | the phase-1 build (in memory, no demo data) |
-| **Last updated** | 2026-11-23 |
+| **Applies to** | phase 2 part A: data saved on the device in SQLite (no backend yet, no demo data) |
+| **Last updated** | 2026-11-26 |
 | **Scope source** | `proposals/tito-expense-app/PLAN.md` in the Koret Tech repo. Decision D1 = **Track B**: Koret builds its own backend (2026-11-09). |
 | **Status key** | **Built**: in the code now. **Planned**: agreed in PLAN.md or `tasks/todo.md`, not built. **Proposed**: this document's recommendation, not yet decided. |
 
@@ -31,15 +31,15 @@ How the app is built today (phase 1), why it is built that way, and the target d
 
 ## 1. System context
 
-### Today (phase 1, built)
+### Today (phase 2 part A, built)
 
-The app is self-contained. Everything runs on the device, in memory, seeded with synthetic data.
-Nothing leaves the phone.
+The app is self-contained. Everything runs on the device and is saved in SQLite, so it survives
+restarts. Nothing leaves the phone. Every change is also recorded in an outbox, ready for part B.
 
 ```mermaid
 flowchart LR
   user([Tito Finance user]) --> app["Tito Expenses app<br/>Expo / React Native<br/>iOS · Android · web preview"]
-  app --> mem[("In-memory store<br/>empty at launch")]
+  app --> sqlite[("expo-sqlite on the device<br/>expenses, categories, settings, outbox")]
 ```
 
 ### Target (phase 2 and launch, planned)
@@ -72,14 +72,14 @@ owner of that backend provides an export (PLAN.md §7.2, Track B).
 | Language | TypeScript 6, `strict: true`, path alias `@/*` → `src/*` | Built |
 | Compiler | React Compiler (`experiments.reactCompiler` in `app.json`) | Built |
 | Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `expo-router/ui` tabs with a floating finance dock | Built |
-| State | React Context + `useReducer` (in memory) | Built; replaced in phase 2 |
+| State | React Context over SQLite: async actions through a write queue; read hooks keyed on a data version | Built (phase 2 part A) |
 | Charts | `react-native-svg`, hand-drawn (pace line, bars) | Built |
 | Animation | `react-native-reanimated` 4 (toast), honours Reduce Motion | Built |
 | Icons | Tabler (`@tabler/icons-react-native`), stroke 1.75, including the tab bar | Built |
 | Fonts | Outfit 400, 500, 600 via `@expo-google-fonts/outfit`; tabular figures through its `tnum` feature | Built |
 | IDs | `expo-crypto` `randomUUID()` (client-generated) | Built |
 | Haptics | `expo-haptics` | Built |
-| Local database | `expo-sqlite`, with versioned migrations | Planned |
+| Local database | `expo-sqlite`, with versioned migrations (`PRAGMA user_version`), an outbox and soft deletes. Web: wa-sqlite in a worker, needs cross-origin isolation headers | Built (phase 2 part A) |
 | Backend | Supabase: Postgres, Auth, RLS, an Edge Function | Planned |
 | Network state | NetInfo (to know when to flush the outbox) | Planned (PLAN §7.1) |
 | Token storage | `expo-secure-store` (Keychain / Keystore) | Planned |
@@ -97,6 +97,8 @@ flowchart TD
   A["src/app<br/>routes and screens"] --> C["src/components<br/>shared UI"]
   A --> D["src/data<br/>store, month, summary hooks"]
   C --> D
+  D --> DB["src/db<br/>SQLite: migrations, repo, profile"]
+  DB --> M
   D --> M["src/domain<br/>pure TS: types, dates, money, summary"]
   C --> M
   A --> M
@@ -109,7 +111,8 @@ flowchart TD
 |---|---|---|---|
 | **Routes** | `src/app/` | Screens and navigators. Each file is a route; `_layout.tsx` files define navigators. | everything below |
 | **Components** | `src/components/` | Reusable UI (`Row`, `Button`, `Field`, `T`, `PaceChart`, `Toast`, `ExpenseForm`, `ScreenHero`, `MonthSwitcher`, …) and small UI helpers (`nav.ts`, `announce.ts`, `tab-bar.ts`) | data, domain, theme |
-| **Data** | `src/data/` | State providers and hooks: `store.tsx`, `month.tsx`, `use-summary.ts` | domain |
+| **Data** | `src/data/` | State providers and hooks: `store.tsx`, `expenses.ts`, `use-summary.ts`, `month.tsx`, `currency-view.tsx`, `write-queue.ts` | db, domain |
+| **Database** | `src/db/` | SQLite: `migrations.ts`, `open.ts`, `repo.ts` (expenses, totals, outbox), `profile.ts` (categories, settings) | domain |
 | **Domain** | `src/domain/` | Pure functions and types: `types.ts`, `dates.ts`, `money.ts`, `summary.ts`, `categories.ts` | only other domain files |
 | **Theme** | `src/theme/` | `tokens.ts` (palettes, category colours, spacing, radius, type), `use-theme.ts`, `web-focus.ts` | domain types only |
 
@@ -118,8 +121,10 @@ flowchart TD
 1. **Domain is pure.** No React, no React Native, no `Date.now()` hidden inside calculations (callers
    pass `now` or `today`). This is why `scripts/check-dates.ts` can run it in plain Node under a
    forced timezone.
-2. **Screens never touch storage directly.** They read through `useStore()`, `useMonth()` and
-   `useSummary()`, and write through `useActions()`. This is the seam phase 2 replaces.
+2. **Screens never touch storage directly.** They read through `useStore()`, `useMonth()`,
+   `useSummary()` and the hooks in `data/expenses.ts`, and write through `useActions()`. Nothing
+   in `src/app` or `src/components` imports `src/db` or `expo-sqlite`;
+   `src/__tests__/boundaries.test.ts` fails if one does.
 3. **Non-route code stays out of `src/app/`.** Expo Router treats every file there as a screen.
 4. **Colours come only from `src/theme/tokens.ts`.** Components ask `useTheme()` for the palette
    (`c`) and never hard-code a hex. That includes the toast, the Welcome button label, shadows,
@@ -129,18 +134,28 @@ flowchart TD
 
 ## 4. Runtime composition
 
-`src/app/_layout.tsx` is the root. It keeps the splash screen up until the fonts load (or fail), then
-mounts the provider tree:
+`src/app/_layout.tsx` is the root. It keeps the splash screen up until the fonts load (or fail) and
+the database has opened (or failed), then mounts the provider tree:
 
 ```
 GestureHandlerRootView
 └─ SafeAreaProvider
-   └─ ThemeProvider            (React Navigation theme built from our tokens; light or dark)
-      └─ StoreProvider         (expenses, categories, settings, signedIn + actions)
-         └─ MonthProvider      (viewed month, current month, local "today")
-            └─ ToastProvider   (one snackbar for the whole app, rendered above everything)
-               └─ Routes       (Stack with two Stack.Protected groups)
+   └─ StoreProvider            (opens SQLite and migrates; categories, settings, signedIn, setupStep + actions)
+      └─ StoreGate             (database opening: StartupLoading; failed: StartupError with Try again)
+         └─ AppearanceProvider
+            └─ ThemeProvider   (React Navigation theme built from our tokens; light or dark)
+               └─ MonthProvider      (viewed month, current month, local "today")
+                  └─ CurrencyViewProvider
+                     └─ ToastProvider   (one snackbar for the whole app, rendered above everything)
+                        └─ Routes       (Stack with Stack.Protected groups)
 ```
+
+**The launch gate.** `StoreProvider` opens the database (`db/open.ts`: open, WAL on phones,
+`migrate()`), writes the starter categories on a first launch, and reads categories, settings,
+sign-in state and setup progress into memory. Until then nothing below `StoreGate` renders, and the
+splash stays up (`StartupLoading` shows a spinner only if it takes over 400 ms). If opening fails
+(a damaged file, a schema from a newer app, or a web page served without the isolation headers),
+`StartupError` says so calmly, says nothing was deleted, and offers **Try again**, which reopens.
 
 The order matters:
 
@@ -347,44 +362,87 @@ These are the twelve categories from the web tracker, in its order, with slug id
 
 ---
 
-## 7. State and data flow (phase 1)
+## 7. State and data flow (phase 2 part A)
 
-### 7.1 Store (`data/store.tsx`)
+### 7.1 The database (`src/db/`)
+
+| Table | Holds | Notes |
+|---|---|---|
+| `expenses` | one row per expense: amount (minor units), currency, category_id, day, note, version | Indexes on `day`, `category_id`, `currency` and `(currency, day)`. Deleted rows stay as tombstones (`deleted_at`). |
+| `categories` | starters and custom categories: name, icon, budget, budget_currency, built_in, hidden, position, version | The starter set is written on first launch and after account deletion. |
+| `settings` | one row per setting: id = name, value = JSON | Preferences, plus device-only `signedIn` and `setupStep`. |
+| `outbox` | one row per change: entity, entity_id, op (`create`, `update`, `delete`, `restore`), the row after the change, base_version | Written in the same transaction as the change. Nothing sends it yet (part B). |
+
+Every table has `id`, `user_id` (null until part B), `created_at`, `updated_at` and `deleted_at`.
+Times are epoch milliseconds.
+
+- **Migrations** (`db/migrations.ts`): `PRAGMA user_version` holds the schema version. On every
+  launch `migrate()` runs each newer migration in its own transaction together with the version
+  bump, so a migration lands completely or not at all. Migrations are append-only, additive first,
+  and never delete user rows; a reshape copies rows across inside one migration. A database from a
+  newer app is refused (the error screen), never written into. Version 1 is the schema; version 2
+  adds the `(currency, day)` index.
+- **Reads are synchronous** (`getAllSync`): indexed queries for one month, well under a
+  millisecond for a normal month, so screens render straight from SQLite with no loading flash.
+  **Writes are async**, each in one `withTransactionAsync`, and checked before storing (positive
+  whole minor units, a real calendar day via `toDayKey`, a known currency).
+- **On the web**, expo-sqlite runs wa-sqlite in a worker that talks to the page through
+  `SharedArrayBuffer`, so the page must be cross-origin isolated (`Cross-Origin-Embedder-Policy:
+  credentialless`, `Cross-Origin-Opener-Policy: same-origin`). The dev server sends them
+  (`metro.config.js`, which also serves `.wasm`), and `public/_headers`, `public/serve.json` and the
+  `expo-router` plugin in `app.json` cover hosting.
+- **In Jest**, `expo-sqlite` maps to `jest.sqlite.js`, which runs the same SQL on Node's built-in
+  `node:sqlite`. Databases live in memory per name and survive "closing", which is how tests restart
+  the app.
+
+### 7.2 Store (`data/store.tsx`)
 
 ```ts
 type State = {
-  expenses: Expense[];
   categories: Category[];
-  settings: { currency; reminderOn; reminderTime; firstName; email };
+  settings: Settings;          // currency, secondCurrency, appearance, mode, reminder, name, email
   signedIn: boolean;
+  setupStep: number | null;    // a new account's setup step; null when done
 };
 ```
 
-- **A reducer with nine actions:** `add`, `update`, `delete`, `restore`, `upsertCategory`,
-  `settings`, `signIn`, `signOut`, `wipe`.
-- **Two contexts.** `StateCtx` holds the state and `ActionsCtx` holds the action functions. The
-  actions are built once (`useMemo(…, [])`), so their identities never change, and components that
-  only *write* never re-render when the data changes.
-- **The `latest` ref.** Actions that must answer "did this exist?" read `latest.current` instead of
-  a closure, so they never see stale state:
-  - `updateExpense` returns `false` when the expense was deleted;
-  - `deleteExpense` returns the removed expense so it can be undone.
+Expenses are not held in React state; they are read from SQLite by the hooks in §7.4.
 
-  `deleteExpense` also updates the ref straight away, so a double tap can't delete twice.
-- **Undo** dispatches `restore` with a fresh `updatedAt`. Phase 2 needs this: a restored row must be
-  newer than its tombstone, so a sync can't revert it.
-- **`wipe`** (account deletion) clears expenses, resets categories to the starter set with no
-  budgets, and signs out.
+- **Contexts.** `StateCtx` (the state above), `ActionsCtx` (actions, built once so their
+  identities never change), `StatusCtx` (`ready`, `error`, `retry` for the launch gate) and `DbCtx`
+  (the open database and a data `version`, for the read hooks only).
+- **Async actions.** Every action returns a promise that resolves after the write is saved, and
+  rejects if it fails. All writes go through one `WriteQueue`, one at a time, in order. After a
+  write that changes expenses, `version` goes up and every read hook re-queries.
+- **Callers wait.** The expense sheet shows "Saved …", vibrates and closes only after
+  `addExpense` resolves; on failure the sheet stays open with what was typed, and a toast says
+  "couldn't be saved. Try again." Setup, sign-in, sign-up, sign-out, Edit category and Delete
+  account work the same way.
+- **Settings show at once.** `updateSettings` updates the screen immediately (so a switch or picker
+  never jumps back), then saves only what changed. If saving fails, the saved values are read back
+  and the promise rejects.
+- **Soft delete and Undo.** `deleteExpense` sets `deleted_at` (and `updated_at` and a new
+  `version`) and returns the expense as it was. A second delete finds nothing, so a double tap
+  can't delete twice; `updateExpense` returns `false` for a deleted expense (a delete wins).
+  `restoreExpense` (Undo) clears `deleted_at` with an `updated_at` strictly newer than the delete,
+  even if the phone's clock went back, and a new `version`, so a sync can't bring the delete back.
+- **Outbox.** Every create, edit, delete and Undo of an expense, every category save and every
+  preference change writes an outbox row in the same transaction. Sign-in state and setup progress
+  are device-only and don't. The development stress data writes none.
+- **Sign out** saves `signedIn = false` and keeps everything on the device; signing in again shows it.
+- **`deleteAccount`** wipes all four tables, writes the starter categories again, and resets the
+  state to defaults, signed out.
 
 Public hooks:
 
 | Hook | Returns |
 |---|---|
 | `useStore()` | `State` |
-| `useActions()` | `addExpense`, `updateExpense`, `deleteExpense`, `restoreExpense`, `saveCategory`, `updateSettings`, `signIn`, `signOut`, `deleteAccount` |
+| `useActions()` | `addExpense`, `updateExpense`, `deleteExpense`, `restoreExpense`, `saveCategory`, `updateSettings`, `signIn({ newAccount })`, `signOut`, `setSetupStep`, `deleteAccount`, `loadStressData` (development only); all async |
+| `useStoreStatus()` | `ready`, `error`, `retry` (root layout only) |
 | `useCategory(id)` | One category, or `undefined` |
 
-### 7.2 Month and "today" (`data/month.tsx`)
+### 7.3 Month and "today" (`data/month.tsx`)
 
 `MonthProvider` holds the month being viewed. Home, Expenses and Reports share it, so switching the
 month on one tab switches it on all three.
@@ -397,21 +455,39 @@ month on one tab switches it on all three.
   chose.
 - **Navigation is clamped.** `next()` never goes past the current month.
 
-### 7.3 Derived data (`data/use-summary.ts`)
+### 7.4 Reading data (`data/expenses.ts`, `data/use-summary.ts`)
 
-`useSummary(month)` memoises `summarise()` for the viewed month and the month before, keyed on
-`expenses`, `categories`, `month` and the main currency. Screens never add up amounts themselves.
-There are two exceptions:
+Every read hook is built on `useQuery(read, …keys)`: it runs a synchronous query, and runs it again
+only when the data `version` or one of its keys changes. Otherwise it returns the same object, so
+memoised children (each day on Expenses) don't redraw.
 
-- the Expenses tab's per-day subtotals;
-- the category detail's own month totals.
+| Hook | Query |
+|---|---|
+| `useSummary(month, currency?)` | `repo.monthGroups` for this month and last, through `summariseGroups()` |
+| `useMonthSummaries(month, codes)` | One `monthGroups` query, split by currency (Home's cards and budgets) |
+| `useMonthTotals(months, currency)` | One `GROUP BY month` query (Reports → Month by month) |
+| `useMonthExpenses(month, currency)` | The month's rows in one currency, newest first (Expenses) |
+| `useRecentExpenses(month, n)` | Home → Latest |
+| `useExpense(id)` | The edit sheet |
+| `useCategoryMonth(id, currency, month)` | Category detail: the month's rows, and last month's total in SQL |
+| `useExpenseCount()`, `useUsedCurrencies()`, `useFirstMonth()` | Delete account, the currency toggle, Reports' first month |
 
-### 7.4 Starting state (no demo data)
+**Totals are added up in SQL.** `repo.monthGroups()` is one `GROUP BY currency, category_id, day`
+query per month: at most currencies × categories × days rows, however many expenses there are.
+`summariseGroups()` (pure, in `domain/summary.ts`) builds the `MonthSummary` from them, with the
+same rules as `summarise()`: other currencies kept apart, an unknown category counted under Other,
+malformed days skipped. `summarise()` stays as the reference; `src/db/__tests__/totals.test.ts`
+checks both agree in all 20 currencies. Screens never add up amounts themselves, except the
+Expenses tab's per-day subtotals and category detail's month total, which add the rows already on
+screen. Search filters the month's rows already read; a keystroke never queries.
 
-The store starts empty and signed out: no expenses, the twelve starter categories with no
-budgets, and `DEFAULT_SETTINGS`. The app opens on the onboarding slides, so testers create their own
-account (sign-up leads through setup) and every figure on screen is one they entered. The earlier
-synthetic sample generator (`data/sample.ts`) has been removed.
+### 7.5 Starting state (no demo data)
+
+The first launch writes the twelve starter categories (no budgets); settings are the defaults and
+the user is signed out. The app opens on the onboarding slides, so testers create their own account
+(sign-up leads through setup) and every figure on screen is one they entered. From then on the app
+opens where the user left it: signed in on Home, or back in setup at the step they reached
+(`Stack.Protected guard={setupStep === null} redirectTo="/setup"`).
 
 ---
 
@@ -435,10 +511,16 @@ sequenceDiagram
   alt invalid amount or no category
     F->>U: inline error + warning haptic + announce, focus moves to the field
   else valid
-    F->>S: addExpense({amount, currency, categoryId, day, note})
-    S-->>F: Expense (UUID, createdAt = updatedAt = now)
-    F->>T: "Saved ₦2,500 to Food & Groceries"
-    F->>F: success haptic, safeBack()
+    F->>S: await addExpense({amount, currency, categoryId, day, note})
+    S->>S: INSERT expense + outbox row (one transaction), version + 1
+    alt saved
+      S-->>F: Expense (UUID, createdAt = updatedAt = now)
+      F->>T: "Saved ₦2,500 to Food & Groceries"
+      F->>F: success haptic, safeBack()
+    else the write failed
+      S-->>F: rejects
+      F->>T: "This expense couldn't be saved. Try again." (sheet stays open)
+    end
   end
 ```
 
@@ -454,12 +536,14 @@ sequenceDiagram
   participant S as Store
   participant T as Toast
   U->>F: Delete expense
-  F->>S: deleteExpense(id)
-  S-->>F: removed expense (or undefined if already gone)
+  F->>S: await deleteExpense(id)
+  S->>S: deleted_at = now, version + 1, outbox "delete" (one transaction)
+  S-->>F: the expense as it was (or undefined if already gone)
   F->>F: safeBack()
   F->>T: "Deleted ₦2,500" + Undo (6 s, or 20 s with a screen reader)
   opt user taps Undo
-    T->>S: restoreExpense(removed)  ➜ updatedAt = now
+    T->>S: restoreExpense(removed)
+    S->>S: deleted_at = NULL, updated_at > the delete, version + 1, outbox "restore"
   end
 ```
 
@@ -486,11 +570,17 @@ sequenceDiagram
 
 ### 8.4 Sign-out and account deletion
 
-- **Sign out:** `signOut()` sets `signedIn = false`. `Stack.Protected` removes every signed-in screen,
-  and the app replaces to `/welcome`.
-- **Delete account:** the user types `DELETE`. `deleteAccount()` dispatches `wipe` and the app
-  replaces to `/welcome`. In phase 1 this is local only. Phase 2 calls the Edge Function first and
-  only wipes local data once the server confirms (§10.6).
+- **Sign out:** `signOut()` saves `signedIn = false`. `Stack.Protected` removes every signed-in
+  screen, and the app replaces to `/welcome`. The data stays on the device: signing in again shows
+  it. (Part B makes the database one file per user, §10.5.)
+- **Delete account:** the user types `DELETE`. `deleteAccount()` wipes every table on the device,
+  writes the starter categories again, and the app replaces to `/welcome`. If the wipe fails, the
+  button resets and a toast says so. This is local only for now; part B calls the Edge Function
+  first and only wipes local data once the server confirms (§10.6).
+- **Setup progress:** sign-up calls `signIn({ newAccount: true })`, which saves `setupStep = 0`;
+  each step saves the next one; Finish saves `null`. While it isn't null, a nested
+  `Stack.Protected` keeps every signed-in screen except `/setup` closed, so reopening the app mid-setup
+  lands back on the same step. Redo setup from Settings doesn't use it.
 
 ---
 
@@ -572,9 +662,9 @@ behind the dock.
 
 ## 10. Phase 2 target architecture
 
-> **Status:** planned. The bullet points in `tasks/todo.md` (Phase 2) and PLAN.md §7.1 are agreed.
-> The schema, the sync protocol on Supabase and the module layout below are **proposed**, adapting
-> PLAN.md's sync design to Track B. Review them before building.
+> **Status:** part A (on the device) is **built**: §7 describes it. §10.3 is done. Part B (Supabase,
+> auth, sync, server-side account deletion) is still planned; the server schema and sync protocol
+> below are **proposed**, adapting PLAN.md's sync design to Track B. Review them before building.
 
 ### 10.1 Goals and constraints
 
@@ -608,7 +698,11 @@ flowchart TB
 **SQLite is the only thing screens read from.** Network responses are written into SQLite, never
 shown directly, so there are never two caches that disagree (PLAN.md §7.1).
 
-### 10.3 Store API changes (from `tasks/todo.md`)
+### 10.3 Store API changes (from `tasks/todo.md`), built in part A
+
+All of these are built (§7). Two details differ from the plan: reads are synchronous SQLite queries
+rather than an async repository (writes are async), and CSV import is not built yet, so
+`toDayKey()` checks rows on the way *into* the database.
 
 - **Mutators become async.** They return promises. Toasts and navigation happen after the local
   write resolves.
@@ -776,28 +870,32 @@ So nothing is compiled or mocked.
 | AD5 | **Hand-rolled `formatMoney`** instead of `Intl.NumberFormat` | Identical output on Hermes and the web | `Intl` (output differs by engine and locale data) |
 | AD6 | **Client-generated UUIDs** for expenses | Offline creation without server ids; idempotent retries | Server integer ids (as on the web) |
 | AD7 | **Charts with `react-native-svg`**, not Victory Native/Skia | Two simple charts; Skia needs extra WebAssembly setup for the web build | Victory Native (Skia), suggested in PLAN.md §7.1 |
-| AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for phase 1; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
+| AD8 | **Context + reducer** for phase-1 state, behind hooks (replaced in phase 2 part A by AD13) | Smallest thing that works for phase 1; the hook boundary kept the phase-2 swap local: screens changed only to await writes and to use the new read hooks | Redux, Zustand, TanStack Query in phase 1 |
 | AD9 | **`Stack.Protected`** for auth gating | No back gesture into signed-out data | Redirects in `useEffect` |
 | AD10 | **Floating finance dock with `expo-router/ui`** on every platform (redesign, 2026-11-24) | The design calls for a custom dark bar, which the system tab bar can't do; one layout for all platforms | The system tab bar (`NativeTabs`), used until the redesign |
 | AD11 | **Redesign palette** (navy, royal, electric, icy, one mint pop) and **Outfit** | The redesign brief; Outfit's `tnum` gives tabular amounts | The earlier Tito indigo + Manrope/Fraunces look; the web tracker's monospace amounts |
 | AD12 | **SQLite as the only read source in phase 2**, with an outbox | Offline first, instant screens, one cache | Reading straight from the network; two caches |
+| AD13 | **Synchronous reads, async writes** over expo-sqlite, re-queried on a data version (part A, 2026-11-26) | Indexed month queries take well under a millisecond, so screens render from SQLite with no loading state or flash, and the hooks stay synchronous; writes run off the JS thread on phones and in transactions | Async read hooks with loading states; mirroring every expense in React state |
+| AD14 | **Totals in SQL as GROUP BY rows**, assembled by a pure `summariseGroups()` | The cost depends on one month, not the whole history; the assembly rules stay testable in plain TypeScript and are checked against `summarise()` | One SQL query per figure; keeping `summarise()` over every expense |
+| AD15 | **Node's built-in SQLite in Jest** (`jest.sqlite.js`) | Tests run the real schema, migrations and SQL, including restarting the app, without a device | Mocking the repository; an in-memory fake of SQL |
 
 ---
 
 ## 13. Known limitations and open questions
 
-**Phase 1 limitations (by design)**
+**Current limitations (by design, until part B)**
 
-- Data is in memory and reseeded on every launch. Nothing persists.
+- Data is saved on the device only. One database holds everything, whoever signs in; part B
+  makes it one file per user.
+- The web build needs the two cross-origin isolation headers from whatever hosts it (§7.1).
+  Without them it shows the "didn't open" screen.
+- The outbox fills up and is never sent or trimmed until part B.
 - Auth, reset, delete account, PDF, CSV, the reminder and the privacy policy are UI stubs (see the
   README).
-- `summarise()` scans every expense, and Reports calls it up to six times for the month-by-month
-  bars. This is fine for a phase-1 month of data. Phase 2 moves it to SQL.
-- Only NGN and USD exist. PLAN.md §5.5 lists NGN, USD, EUR, GBP and CAD for settings.
 - Forms use local state and inline checks. PLAN.md §7.1 suggests react-hook-form + Zod. Decide
   before phase 2 whether the extra forms justify it.
 - The tab bar and toast offsets come from `useTabBarClearance()`; confirm them on devices.
-- There is no unit-test runner. Domain checks are assertions in a script.
+- Tests run SQLite through Node, not a phone; check on real devices (`tasks/todo.md`).
 
 **Open questions**
 

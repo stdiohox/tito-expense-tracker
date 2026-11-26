@@ -9,11 +9,15 @@ For 10,000 to 200,000 users. Builds on [ARCHITECTURE.md §10](./ARCHITECTURE.md#
 - **Error boundary on every route.** A crash in one screen shows a calm "Something went wrong" screen with Try again and Go home, never a blank page. (Step 2 of the reliability pass.)
 - **Small boundaries around risky parts:** charts, onboarding animations and currency formatting. If one fails, only that part is replaced by a quiet fallback; the rest of the screen keeps working.
 - **Unhandled promise rejections are caught and logged**, and sent to crash reporting once it is connected.
-- **Defensive data:** every currency lookup goes through `currencyInfo()`, so an unknown or old currency code never crashes. Rows read from storage are validated before use (`toDayKey`, `toMonthKey`).
+- **Defensive data:** every currency lookup goes through `currencyInfo()`, so an unknown or old currency code never crashes. Expenses are checked before they are stored (positive whole minor units, a real day via `toDayKey`, a known currency); saved settings of the wrong type fall back to their defaults.
+- **The database never shows a white screen:** if it can't open at launch, a calm "Your expenses didn't open" screen offers Try again.
 - **No work in render that grows with data:** summaries are memoised per month and currency; long lists are virtualised (FlashList).
 - **Force update:** a minimum supported version checked on launch (ARCHITECTURE.md §10.7), so a broken old build can be retired.
 
 ## 2. Data and sync (Phase 2: SQLite + outbox + Supabase)
+
+**Built in part A** (`feature/nike-storage`): SQLite on the phone as the only thing screens read; versioned migrations that run in a transaction each and refuse a newer schema; every write and its outbox row in one transaction; soft deletes with an Undo that is always newer than the delete; totals in SQL with indexes on `day`, `category_id`, `currency` and `(currency, day)`; a calm error screen with Try again if the database can't open. **Still to build in part B:** sending the outbox, pulling changes, one database per user, and the rest of this section.
+
 
 - **SQLite on the phone is the only thing screens read.** Logging works offline and never waits for the network.
 - **Outbox:** every write goes to SQLite and the outbox in one transaction. Sync pushes the outbox, then pulls changes since a cursor.
@@ -61,7 +65,8 @@ Rough sizing: 200,000 active users logging about 2 expenses a day is about 12 mi
 - **Unit tests** (Jest + jest-expo) for money in all 20 currencies, dates in Africa/Lagos, summaries, budgets and pace.
 - **Component tests** (React Native Testing Library) for the key flows: sign up → setup → Home; add, edit, delete and undo; currency toggle; a budget at ₦0.
 - **Domain check script** (`npm run check:dates`) and **contrast check** (`npm run check:contrast`) keep running.
-- **Phase 2:** sync tests (offline add 5, kill, reconnect → exactly 5), a SQL-vs-JavaScript totals test, and the two-account RLS test.
+- **Database tests** (built in part A, `src/db/__tests__/`): migrations (fresh, repeat, upgrade with rows, a failed migration rolls back, a newer schema is refused), create/read/update, soft delete and Undo, outbox rows, categories and settings, account wipe, and SQL totals matching `summarise()` in all 20 currencies. Flow tests close and reopen the app and check everything is still there. SQLite runs on Node's built-in copy in Jest.
+- **Phase 2 part B:** sync tests (offline add 5, kill, reconnect → exactly 5) and the two-account RLS test.
 - **Real devices** before each store release: the checklist in `tasks/todo.md`.
 
 ## 5. Release process

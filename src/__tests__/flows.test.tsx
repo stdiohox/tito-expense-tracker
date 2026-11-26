@@ -133,6 +133,133 @@ describe('budgets', () => {
   });
 });
 
+/** Closes the app completely and opens it again: the saved data is all that carries over. */
+async function restart() {
+  await screen.unmount();
+  await renderRouter(APP, { initialUrl: '/' });
+}
+
+describe('data survives a restart', () => {
+  it('keeps expenses and stays signed in', async () => {
+    await signUp();
+    await addExpense('2500', 'Food & Groceries');
+    await restart();
+    await screen.findByText('Hello, Ada');
+    expect(screen.getAllByText('₦2,500').length).toBeGreaterThan(0);
+  });
+
+  it('keeps currencies, budgets and the name', async () => {
+    await signUp({ second: 'USD', budgets: 1 });
+    await addExpense('15', 'Transportation', 'USD');
+    await restart();
+    await screen.findByText('Hello, Ada');
+    expect(screen.getByLabelText(/^US dollar: \$15 in /)).toBeTruthy();
+    expect(screen.getByLabelText(/budget: ₦0 of ₦90,000 spent, 0%, ₦90,000 left$/)).toBeTruthy();
+  });
+
+  it('keeps the appearance', async () => {
+    await signUp();
+    await press('Settings');
+    await press('Dark');
+    await screen.findByText('Appearance');
+    await restart();
+    await screen.findByText('Hello, Ada');
+    await press('Settings');
+    expect(screen.getAllByLabelText('Dark').at(-1)!.props.accessibilityState).toMatchObject({ checked: true });
+    expect(screen.getAllByLabelText('Light').at(-1)!.props.accessibilityState).toMatchObject({ checked: false });
+  });
+
+  it('keeps a deleted expense deleted, and an undone delete undone', async () => {
+    await signUp();
+    await addExpense('2500', 'Food & Groceries');
+    await addExpense('700', 'Transportation');
+    await press('Expenses');
+    await screen.findByLabelText(/^Search .* by note or category$/);
+    await pressText('Food & Groceries');
+    await press('Delete expense');
+    await screen.findByText('Deleted ₦2,500');
+    await pressText('Transportation');
+    await press('Delete expense');
+    await screen.findByText('Deleted ₦700');
+    await press('Undo delete');
+    await screen.findAllByText('₦700');
+    await restart();
+    await screen.findByText('Hello, Ada');
+    expect(screen.getAllByText('₦700').length).toBeGreaterThan(0);
+    expect(screen.queryByText('₦2,500')).toBeNull();
+  });
+
+  it('carries on with setup where it stopped', async () => {
+    await renderRouter(APP, { initialUrl: '/' });
+    await screen.findByLabelText('Skip to the last slide');
+    await press('Skip to the last slide');
+    await press('Create an account');
+    await screen.findByLabelText('First name');
+    await type('First name', 'Ada');
+    await type('Last name', 'Obi');
+    await type('Email', 'ada@example.test');
+    await type('Password', 'testpass123');
+    await press('Create account');
+    await screen.findByText('Your currencies');
+    await press('Continue');
+    await screen.findByText('How hands-on do you want to be?');
+    await restart();
+    await screen.findByText('How hands-on do you want to be?');
+    await press('Continue');
+    await press('Finish');
+    await screen.findByText('Hello, Ada');
+    await restart();
+    await screen.findByText('Hello, Ada');
+  });
+
+  it('signing out keeps the data on the phone', async () => {
+    await signUp();
+    await addExpense('2500', 'Food & Groceries');
+    await press('Settings');
+    await pressText('Sign out');
+    await screen.findByLabelText('Skip to the last slide');
+    await restart();
+    await screen.findByLabelText('Skip to the last slide');
+    await press('Skip to the last slide');
+    await pressText('I already have an account');
+    await screen.findByLabelText('Email');
+    await type('Email', 'ada@example.test');
+    await type('Password', 'testpass123');
+    await press('Sign in');
+    await screen.findByText('Hello, Ada');
+    expect(screen.getAllByText('₦2,500').length).toBeGreaterThan(0);
+  });
+
+  it('deleting the account wipes everything', async () => {
+    await signUp({ budgets: 1 });
+    await addExpense('2500', 'Food & Groceries');
+    await press('Settings');
+    await pressText('Delete account');
+    await screen.findByText('Type DELETE to confirm');
+    await type('Type DELETE to confirm', 'DELETE');
+    await press('Delete account');
+    await screen.findByLabelText('Skip to the last slide');
+    await restart();
+    await signUp();
+    expect(screen.getByText(/^Nothing logged in /)).toBeTruthy();
+    expect(screen.queryByText('₦2,500')).toBeNull();
+    expect(screen.queryByText('Budgets')).toBeNull();
+  });
+});
+
+describe('when the saved data can’t be opened', () => {
+  it('shows a calm error with Try again, which recovers', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    // expo-sqlite is Node's SQLite in tests (jest.sqlite.js); make the next open fail.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    (require('expo-sqlite') as { __failNextOpen: () => void }).__failNextOpen();
+    await renderRouter(APP, { initialUrl: '/' });
+    await screen.findByText('Your expenses didn’t open');
+    await press('Try again');
+    await screen.findByLabelText('Skip to the last slide');
+  });
+});
+
 describe('never a white screen', () => {
   const Boom = () => {
     throw new Error('boom');
