@@ -66,7 +66,7 @@ Rough sizing: 200,000 active users logging about 2 expenses a day is about 12 mi
 
 ## 5. Release process
 
-1. Every pull request runs CI: typecheck, lint, checks, tests and a web build. `main` only accepts green pull requests.
+1. Every pull request and every push to `main` runs CI (`.github/workflows/ci.yml`): `npm ci`, typecheck, lint, `check:dates`, `check:contrast`, `npm test` and a web build. `main` only accepts pull requests where it passes. To enforce that, on GitHub: **Settings → Branches → Add branch protection rule** (or **Rules → Rulesets → New branch ruleset**) for `main`, then turn on **Require a pull request before merging** and **Require status checks to pass before merging**, and pick **Checks, tests and web build**. Also turn on **Require branches to be up to date before merging**, and **Do not allow bypassing the above settings** so admins follow the same rule.
 2. Builds go through EAS: `preview` to TestFlight and Play internal testing (against a staging Supabase project), then `production`.
 3. **Staged rollout:** Play 5% → 20% → 50% → 100%, and iOS phased release over 7 days. Stop if crash-free sessions fall under 99.5%.
 4. **Over-the-air updates** (EAS Update) for fixes only, on a `runtimeVersion` policy, first to a 10% channel, then everyone. Roll back with one command if crashes rise.
