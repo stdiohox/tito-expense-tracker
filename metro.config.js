@@ -7,6 +7,24 @@ const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const config = getSentryExpoConfig(__dirname, { includeWebReplay: false, includeWebFeedback: false });
 
 /*
+ * expo-sqlite on the web (https://docs.expo.dev/versions/v58.0.0/sdk/sqlite/): SQLite is a
+ * WebAssembly file, and it runs in a worker that talks to the page through SharedArrayBuffer, which
+ * browsers only allow on a cross-origin-isolated page. So: serve .wasm as an asset, and send the two
+ * isolation headers from the dev server. Hosting the web build needs the same two headers
+ * (public/_headers, public/serve.json and the expo-router plugin in app.json).
+ */
+config.resolver.assetExts.push('wasm');
+const enhance = config.server.enhanceMiddleware;
+config.server.enhanceMiddleware = (middleware, server) => {
+  const inner = enhance ? enhance(middleware, server) : middleware;
+  return (req, res, next) => {
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    return inner(req, res, next);
+  };
+};
+
+/*
  * Cap how many Metro cache files are open at once.
  *
  * Expo's cache store reads and writes each cached transform with an unbounded fs.promises call,
