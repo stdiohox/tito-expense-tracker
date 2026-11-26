@@ -13,20 +13,20 @@ Branch `feature/nike-polish` (from `feature/nike-redesign`), 25 November 2026.
 ### Screens
 
 **Signed out**
-- **Welcome (onboarding):** three intro slides with Skip, then "Create an account" or "I already have an account".
-- **Sign up:** first name, email and password, then Setup.
+- **Welcome (onboarding):** three intro slides, each with a short animated illustration using sample numbers (an expense being logged, the month's pace line, budget bars and a donut). Skip, "01 / 03", then "Create an account" or "I already have an account". With Reduce Motion on, the illustrations stay still.
+- **Sign up:** first name, last name, email and password (all required), then Setup.
 - **Sign in:** email and password, then Home. Includes a "Forgot your password?" link.
 - **Reset password:** asks for an email, then shows "Check your email" and "Back to sign in".
 
 **Signed in**
 - **Setup:** three steps after sign-up: main currency, how hands-on you want to be, and categories with up to four budgets. Every step can be skipped. It can be run again from Settings.
-- **Home:** greeting, month switcher and month total, a pace chart against last month, and currency cards. Below that: Quick add (one tap per category), budgets, "Where it went" (top five categories) and the latest expenses.
+- **Home:** your initials avatar and greeting, month switcher and month total, a pace chart against last month, and currency cards. Below that: Quick add (one tap per category), budgets (shown as soon as they are set, even at ₦0 spent), "Where it went" (top five categories) and the latest expenses.
 - **Expenses:** every expense for the month, grouped by day, with search. Deleting has Undo.
-- **Add expense / Edit expense:** amount, currency, category, date and note. Edit can also delete.
-- **Reports:** the month by category, compared with last month, with a bar chart by month.
+- **Add expense / Edit expense:** a bottom sheet over the page, about half the screen high: amount, currency and category, with date and note below. Drag up for full height, drag down or ✕ to close. On phones it goes full height when the keyboard opens, so Save stays visible. Edit can also delete.
+- **Reports:** the month total and comparison cards, a Day by day chart (tap a day to see its total against last month), a Budgets chart (spent against each budget, with "left" or "over" in words), the month by category, and a bar chart by month.
 - **Category detail:** the total for one category, its budget and its expenses.
-- **Categories and budgets / Edit category:** add, show, hide and rename categories, pick their icons, and set monthly budgets.
-- **Settings:** account, main currency, categories, Appearance (System, Light or Dark), daily reminder, export, privacy policy, sign out and delete account.
+- **Categories and budgets / Edit category:** add, show, hide and rename categories, pick their icons, and set monthly budgets. Edit category opens in the same bottom sheet.
+- **Settings:** your avatar, full name and email at the top, then account, main currency, categories, Appearance (System, Light or Dark), daily reminder, export, privacy policy, sign out and delete account.
 - **Delete account:** you type DELETE to confirm. "Keep my account" goes back.
 
 ### Main folders
