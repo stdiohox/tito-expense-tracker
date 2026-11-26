@@ -306,6 +306,9 @@ A frosted white-glass bar floating over the page in both modes: 88% of the scree
 A dark panel with a 4-column grid of the visible categories: icon disc and a short label (the full name for screen readers). A tap opens Add expense with that category chosen.
 
 
+### Currencies
+**Currency picker** (setup step 1 and Settings → Money): a field-styled row showing the flag, code, symbol and name that opens a search field and the list below it (flag, code, name, country · symbol; the selected one on Blue Mist with an electric check). The main currency is required; the second is optional ("None") and the main one is greyed out in its list. **Currency toggle** (Expenses and Reports): a segmented control of "₦ NGN", "$ USD" and so on, shown only when there is more than one; it switches the whole screen and never converts. **Home** has a glass card per currency (flag, code and name; its own total and payments), and tapping one opens Expenses in that currency. Budgets with two currencies get the same segmented control to pick the budget's currency.
+
 ### Bottom sheet
 Add expense, Edit expense and Edit category open as a sheet drawn by the app (the same on iOS, Android and web), over the dimmed page (scrim: navy at 40%, black in dark mode). It opens just tall enough for the essentials and Save (never under 45% of the screen), with a handle, the title and a ✕ on top and Save pinned at the bottom. Drag the header up for full height or down to close; the handle is also a button. It goes full height while the keyboard is open. Surface fill, 28px top corners.
 

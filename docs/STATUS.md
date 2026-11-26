@@ -19,14 +19,14 @@ Branch `feature/nike-polish` (from `feature/nike-redesign`), 25 November 2026.
 - **Reset password:** asks for an email, then shows "Check your email" and "Back to sign in".
 
 **Signed in**
-- **Setup:** three steps after sign-up: main currency, how hands-on you want to be, and categories with up to four budgets. Every step can be skipped. It can be run again from Settings.
-- **Home:** your initials avatar and greeting, month switcher and month total, a pace chart against last month, and currency cards. Below that: Quick add (one tap per category), budgets (shown as soon as they are set, even at ₦0 spent), "Where it went" (top five categories) and the latest expenses.
-- **Expenses:** every expense for the month, grouped by day, with search. Deleting has Undo.
-- **Add expense / Edit expense:** a bottom sheet over the page, about half the screen high: amount, currency and category, with date and note below. Drag up for full height, drag down or ✕ to close. On phones it goes full height when the keyboard opens, so Save stays visible. Edit can also delete.
-- **Reports:** the month total and comparison cards, a Day by day chart (tap a day to see its total against last month), a Budgets chart (spent against each budget, with "left" or "over" in words), the month by category, and a bar chart by month.
+- **Setup:** three steps after sign-up: your currencies (a main one and an optional second, from a searchable list of sixteen), how hands-on you want to be, and categories with up to four budgets. Every step can be skipped. It can be run again from Settings.
+- **Home:** your initials avatar and greeting, month switcher and month total, a pace chart against last month, and a glass card for each of your currencies (tap one to see its expenses). Below that: Quick add (one tap per category), budgets (shown as soon as they are set, even at ₦0 spent), "Where it went" (top five categories) and the latest expenses.
+- **Expenses:** every expense for the month in one currency (a toggle switches when you have two), grouped by day, with search. Deleting has Undo.
+- **Add expense / Edit expense:** a bottom sheet over the page, about half the screen high: amount, currency (only your currencies) and category, with date and note below. Drag up for full height, drag down or ✕ to close. On phones it goes full height when the keyboard opens, so Save stays visible. Edit can also delete.
+- **Reports:** one currency at a time (same toggle): the month total and comparison cards, a Day by day chart (tap a day to see its total against last month), a Budgets chart (spent against each budget, with "left" or "over" in words), the month by category, and a bar chart by month.
 - **Category detail:** the total for one category, its budget and its expenses.
 - **Categories and budgets / Edit category:** add, show, hide and rename categories, pick their icons, and set monthly budgets. Edit category opens in the same bottom sheet.
-- **Settings:** your avatar, full name and email at the top, then account, main currency, categories, Appearance (System, Light or Dark), daily reminder, export, privacy policy, sign out and delete account.
+- **Settings:** your avatar, full name and email at the top, then account, main and second currency, categories, Appearance (System, Light or Dark), daily reminder, export, privacy policy, sign out and delete account.
 - **Delete account:** you type DELETE to confirm. "Keep my account" goes back.
 
 ### Main folders
@@ -138,6 +138,12 @@ Everything after commit `3529e3d` (README and architecture docs).
 - `bf1d8f9` Reports: a Day by day chart and a Budgets chart.
 - `19fffe5` Onboarding slides have live illustrations with sample numbers.
 - `4377254` Web: sections no longer overlap after the reveal animation.
+- `2e33c2c` Expenses: the search icon lines up with the placeholder.
+
+**Currencies** (branch `feature/nike-currencies`)
+- `f23e707` Sixteen currencies with symbols, flags and the right decimals (none for the yen and the CFA franc).
+- `ca00fc5` Setup and Settings: pick a main currency and an optional second from a searchable list.
+- `ab9c916` Each currency tracked on its own: a Home card each, a toggle on Expenses and Reports, budgets in their own currency, and a removed currency's expenses kept.
 
 ## 4. What works fully vs. what is a placeholder
 
@@ -154,7 +160,8 @@ Everything after commit `3529e3d` (README and architecture docs).
 | Reports: Day by day and Budgets charts | Works |
 | Onboarding illustrations (sample numbers only) | Works |
 | Appearance (System, Light, Dark) | Works |
-| Naira and US dollar, kept separate | Works |
+| Sixteen currencies; a main and an optional second, each tracked separately, never converted | Works (tested with the date and money checks; check on real phones) |
+| Budgets in their own currency, picked per budget | Works |
 | Saving data between launches | Placeholder: in memory only |
 | Real accounts (sign up, sign in) | Placeholder: no server yet |
 | Reset password | Placeholder: no email is sent |
@@ -184,7 +191,7 @@ Everything after commit `3529e3d` (README and architecture docs).
 
 In suggested order:
 
-1. **Multi-currency:** more currencies, each kept in its own currency and never converted. *Works in Expo Go.* Do it straight after SQLite so the stored data is right from the start.
+1. **Multi-currency:** done on `feature/nike-currencies` (sixteen currencies, a main and a second, never converted). Next: more than two at once if users ask. *Works in Expo Go.*
 2. **Stronger budget tracking:** alerts when you're close, weekly pace, and budgets that carry over. *Works in Expo Go.*
 3. **Recurring expenses:** rent and subscriptions that add themselves each month. *Works in Expo Go.* The rules are best kept on the server so they don't add twice across phones.
 4. **Face ID / fingerprint lock:** lock the app on open. *Can be tried in Expo Go; release needs a development build* (for the Face ID permission text).
@@ -205,7 +212,7 @@ What's needed before launch:
 
 ## 8. Recommended next 5 steps
 
-1. Test `feature/nike-polish` in Expo Go on an iPhone and an Android phone (sheet drag and keyboard, onboarding motion, Reduce Motion, VoiceOver/TalkBack on the new charts), then push both branches, open the pull requests and get client sign-off.
+1. Test `feature/nike-polish` and `feature/nike-currencies` in Expo Go on an iPhone and an Android phone (sheet drag and keyboard, onboarding motion, Reduce Motion, VoiceOver/TalkBack on the new charts), then push both branches, open the pull requests and get client sign-off.
 2. Set up Supabase: schema, access rules, and real sign-up (with first and last name), sign-in, reset and delete.
 3. Add SQLite storage with the sync queue, and make the store wait for each save.
 4. Add crash reporting, tests and CI.

@@ -52,9 +52,10 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 - **Categories and budgets.** The twelve starter categories come from the web tracker, and users can
   add their own. Any category can have a monthly budget. Budgets inform and never alarm: going over
   shows in burgundy with words, never in red.
-- **Two currencies (NGN and USD).** Each expense keeps the currency it was entered in. Changing the
-  main currency never relabels saved amounts. Other-currency spending is counted separately and
-  never converted.
+- **Sixteen currencies, a main one and an optional second.** NGN, USD, GBP, EUR, CAD, AUD, GHS,
+  KES, ZAR, XOF, EGP, AED, SAR, INR, CNY and JPY. Each expense keeps the currency it was entered
+  in, and each currency is tracked on its own: its own card on Home, and a toggle on Expenses and
+  Reports. Nothing is ever converted.
 - **Light and dark mode**, following the phone or forced in **Settings → Appearance**. Both are designed as a pair.
 - **Onboarding.** Three intro slides, then a three-step setup after sign-up (main currency, how hands-on, categories and budgets); **Settings → Redo setup** reopens it.
 - **Accessible.** The app has:
@@ -174,17 +175,17 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Route | File | Shown as | Purpose |
 |---|---|---|---|
-| `/` | `(tabs)/index.tsx` | Tab | Home: greeting, month total, pace line and chart, glass currency cards, Quick add, budget cards, where it went, latest |
+| `/` | `(tabs)/index.tsx` | Tab | Home: greeting, month total, pace line and chart, a glass card per currency, Quick add, budget cards, where it went, latest |
 | `/expenses` | `(tabs)/expenses.tsx` | Tab | Stat cards, search, and the month grouped by day in panels |
 | `/reports` | `(tabs)/reports.tsx` | Tab | Total, comparison cards, by category, month-by-month bars, share as PDF (stub) |
-| `/settings` | `(tabs)/settings.tsx` | Tab | Account, Redo setup, main currency, appearance, categories, reminder, export, sign out, delete |
+| `/settings` | `(tabs)/settings.tsx` | Tab | Account, Redo setup, main and second currency, appearance, categories, reminder, export, sign out, delete |
 | `/expense/new?category=` | `expense/new.tsx` | Sheet | Add an expense (the category can be preset) |
 | `/expense/[id]` | `expense/[id].tsx` | Sheet | Edit or delete an expense |
 | `/category/[id]` | `category/[id].tsx` | Push | Category total, budget, activity, "Add to …" |
 | `/category/edit?id=` | `category/edit.tsx` | Sheet | Create a category (no `id`) or edit one |
 | `/categories` | `categories.tsx` | Push | All categories with their budgets |
 | `/account/delete` | `account/delete.tsx` | Push | Type DELETE to confirm account deletion |
-| `/setup` | `setup.tsx` | Full screen | After sign-up: main currency, how hands-on, categories and up to four budgets |
+| `/setup` | `setup.tsx` | Full screen | After sign-up: your currencies (main and optional second), how hands-on, categories and up to four budgets |
 | `/welcome` · `/sign-in` · `/sign-up` · `/reset` | root files | Stack | Signed-out screens; `/welcome` is three intro slides |
 
 **Sheet** means a native form sheet on iOS and Android, and a full-screen card on the web.
@@ -198,17 +199,26 @@ can never return to the old data. The deep-link scheme is `titoexpenses://` (for
 
 The web tracker's bugs come back if these rules are broken.
 
-1. **Money is an integer in minor units** (kobo or cents), and every expense carries its `currency`.
+1. **Money is an integer in minor units** (kobo, cents; whole yen and CFA francs, which have no
+   minor unit), and every expense carries its `currency`.
    Use `formatMoney()` and `parseAmount()` from `src/domain/money.ts`. Never store or add floats.
 2. **Dates are local calendar strings.** A day is a `DayKey` (`"2026-11-23"`) and a month is a
    `MonthKey` (`"2026-11"`), both built from the device's local date parts. **Never use
    `toISOString()` for a date.** It returns UTC, and that is what broke month navigation in Nigeria.
    Use `src/domain/dates.ts`.
-3. **Currencies are never converted or relabelled.** Totals use the main currency. Other currencies
-   show as "Plus $14.99 in USD, counted separately". A budget only applies in the currency it was
-   set in.
-4. **Screens reach data only through hooks:** `useStore()`, `useActions()`, `useMonth()` and
-   `useSummary()`. Because of this boundary, phase 2 can replace the storage without rewriting
+3. **Currencies are never converted or relabelled.**
+   - The user picks a main currency (`settings.currency`) and an optional second one
+     (`settings.secondCurrency`, null when none). They are always different.
+   - Every total, chart and budget is in one currency. Home has a card per currency; Expenses and
+     Reports show one at a time through the shared toggle (`useCurrencyView()`).
+   - New expenses can only be in the user's currencies. Changing the main currency never relabels
+     saved amounts.
+   - A budget is in the currency it was set in (`budgetCurrency`), chosen per budget in setup and
+     in Edit category, and only counts expenses in that currency.
+   - Removing a currency keeps its expenses: they still show under that currency on Home and in
+     the toggle, and editing one keeps its currency.
+4. **Screens reach data only through hooks:** `useStore()`, `useActions()`, `useMonth()`,
+   `useCurrencyView()` and `useSummary()`. Because of this boundary, phase 2 can replace the storage without rewriting
    screens.
 5. **Add packages with `npx expo install <pkg>`**, not `npm install <pkg>`, so versions match SDK 58.
    Before using an Expo API, read the SDK 58 docs at `https://docs.expo.dev/versions/v58.0.0/`.
@@ -240,12 +250,12 @@ The web tracker's bugs come back if these rules are broken.
 3. When the action needs the current state, read it from the `latest` ref, not from a closure.
 
 **Add a currency.**
-1. Add the code to `CurrencyCode` in `src/domain/types.ts`.
-2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol, name, minor units per major
-   unit, and `sameBelow` (the smallest month-to-month difference worth mentioning, in minor units).
-   The pickers read `CURRENCIES`, so the UI updates on its own.
-3. Extend the symbol-stripping regex in `parseAmount`. It only strips `₦` and `$` today.
-4. Add cases to `scripts/check-dates.ts`.
+1. Add the code to `CURRENCY_CODES` in `src/domain/types.ts`.
+2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol (and whether it needs a space,
+   like `KSh 1,200`), name, flag, country, decimals (ISO 4217) and `sameBelow` (roughly a dollar's
+   worth, in whole units). Pick a symbol that doesn't clash with another (`CA$`, not `$`).
+   `parseAmount` strips every symbol and code automatically, and the pickers read `CURRENCIES`.
+3. Add its expected output to the table in `scripts/check-dates.ts`.
 
 **Add a category icon.**
 1. Add the key to `CategoryIcon` in `src/domain/types.ts`.
