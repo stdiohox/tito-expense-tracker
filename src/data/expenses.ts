@@ -61,12 +61,12 @@ export function useCategoryMonth(
   month: MonthKey,
 ): { items: Expense[]; total: number; lastTotal: number } {
   return useQuery((db) => {
+    // The rows are on screen anyway; last month only needs its total, added up in SQL.
     const items = repo.categoryExpenses(db, categoryId, currency, month);
-    const last = repo.categoryExpenses(db, categoryId, currency, addMonths(month, -1));
     return {
       items,
       total: items.reduce((s, e) => s + e.amount, 0),
-      lastTotal: last.reduce((s, e) => s + e.amount, 0),
+      lastTotal: repo.categoryTotal(db, categoryId, currency, addMonths(month, -1)),
     };
   }, categoryId, currency, month);
 }

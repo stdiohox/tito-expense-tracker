@@ -20,6 +20,8 @@ function params(rest) {
   const list = rest.length === 1 && Array.isArray(rest[0]) ? rest[0] : rest;
   return list.map((v) => (v === undefined ? null : typeof v === 'boolean' ? (v ? 1 : 0) : v));
 }
+// node:sqlite rows have no prototype; expo-sqlite's are plain objects. Only single rows are copied
+// (cheap); lists are returned as they come, so timings in npm run perf aren't inflated by copying.
 const plain = (row) => (row ? { ...row } : null);
 
 function wrap(raw, name) {
@@ -31,7 +33,7 @@ function wrap(raw, name) {
       const r = raw.prepare(sql).run(...params(rest));
       return { changes: Number(r.changes), lastInsertRowId: Number(r.lastInsertRowid) };
     },
-    getAllSync: (sql, ...rest) => raw.prepare(sql).all(...params(rest)).map(plain),
+    getAllSync: (sql, ...rest) => raw.prepare(sql).all(...params(rest)),
     getFirstSync: (sql, ...rest) => plain(raw.prepare(sql).get(...params(rest))),
     execAsync: async (sql) => db.execSync(sql),
     runAsync: async (sql, ...rest) => db.runSync(sql, ...rest),
@@ -86,7 +88,7 @@ module.exports = {
     files.delete(name);
   },
   __resetDatabases: () => {
-    for (const raw of files.values()) raw.close();
+    // Forgotten, not closed: a test file that opened one in beforeAll keeps using it.
     files.clear();
     failNext = null;
   },

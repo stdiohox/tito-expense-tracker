@@ -81,6 +81,70 @@ export function summarise(
   };
 }
 
+/** Spending already added up by currency, category and day (the database's GROUP BY). */
+export type SpendGroup = { currency: CurrencyCode; categoryId: CategoryId; day: DayKey; total: number; count: number };
+
+/**
+ * The same MonthSummary as `summarise()`, built from totals the database has already added up
+ * (at most currencies × categories × days rows, however many expenses there are). `summarise()`
+ * stays the reference: a test checks the two agree in every currency.
+ */
+export function summariseGroups(
+  groups: readonly SpendGroup[],
+  categories: Category[],
+  month: MonthKey,
+  currency: CurrencyCode,
+): MonthSummary {
+  const days = daysInMonth(month);
+  const perDay = new Array<number>(days).fill(0);
+  const byCat = new Map<CategoryId, { total: number; count: number }>();
+  const other = new Map<CurrencyCode, { total: number; count: number }>();
+  const known = new Set(categories.map((c) => c.id));
+  const fallback = known.has('other') ? 'other' : categories[0]?.id;
+  let total = 0;
+  let count = 0;
+
+  for (const g of groups) {
+    if (monthOfDay(g.day) !== month) continue;
+    if (g.currency !== currency) {
+      const o = other.get(g.currency) ?? { total: 0, count: 0 };
+      o.total += g.total;
+      o.count += g.count;
+      other.set(g.currency, o);
+      continue;
+    }
+    const d = dayOfMonth(g.day);
+    if (!(d >= 1 && d <= days)) continue;
+    total += g.total;
+    count += g.count;
+    perDay[d - 1] += g.total;
+    const catId = known.has(g.categoryId) ? g.categoryId : fallback;
+    if (catId === undefined) continue;
+    const c = byCat.get(catId) ?? { total: 0, count: 0 };
+    c.total += g.total;
+    c.count += g.count;
+    byCat.set(catId, c);
+  }
+
+  const cumulative: number[] = [];
+  perDay.reduce((acc, v, i) => (cumulative[i] = acc + v), 0);
+  const byCategory = categories
+    .map((category) => ({ category, ...(byCat.get(category.id) ?? { total: 0, count: 0 }) }))
+    .filter((c) => c.total > 0)
+    .sort((a, b) => b.total - a.total);
+
+  return {
+    month,
+    currency,
+    total,
+    count,
+    byCategory,
+    otherCurrencies: [...other].map(([c, v]) => ({ currency: c, ...v })),
+    perDay,
+    cumulative,
+  };
+}
+
 /**
  * How this month compares with last month at the same day of the month.
  * Positive delta = spending more than last month's pace.

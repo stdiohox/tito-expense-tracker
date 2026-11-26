@@ -127,6 +127,32 @@ How to read the render rows: the test renderer has no screen, so FlashList mount
 - Home summarises every currency in one pass over the expenses, not one pass per currency.
 - Summaries stay memoised per month and currency (`useSummary`, Reports history, Home).
 
-**Known limits, for Phase 2:**
+**Phase 2, part A: totals in SQLite** (branch `feature/nike-storage`, 26 November 2026)
+
+The expenses now live in SQLite on the phone, and the work behind each screen changed:
+- **Totals are added up in SQL.** One `GROUP BY currency, category_id, day` query per month gives every currency's total, each category and each day (at most currencies × categories × days rows, however many expenses there are). `summariseGroups()` turns that into the screen's summary; `summarise()` over every expense stays as the reference, and a test checks the two agree in all 20 currencies.
+- **Reports' month-by-month bars** are one `GROUP BY month` query instead of six passes over every expense.
+- **Lists read only the month on screen**, through an index on `(currency, day)` (migration 2). With only single-column indexes SQLite chose the currency index, which in the main currency is most of the table.
+- **Search** filters the month's rows already read; a keystroke never goes back to the database.
+- All 10,000 expenses are never loaded into JavaScript.
+
+Measured with `npm run perf`, main and this branch run back to back three times each on the same PC (median, in ms; Jest runs SQLite through Node's built-in copy). Each timed function also gets one untimed warm-up run on both sides.
+
+| What | main (in memory) | SQLite |
+|---|---|---|
+| Month summary in one currency (Home, Expenses, Reports) | 4.0 | 3.1 |
+| Home: a summary for each of 20 currencies | 2.4 | 3.5 |
+| Reports: 6 months of history | 5.7 | 1.7 |
+| Expenses: get one month's rows and group them into days | 0.6 | 1.2 |
+| Search: one keystroke | 0.7 | 0.1 |
+| Open Home (render) | 171 | 169 |
+| Open Expenses (render) | 1,771 | 1,481 |
+| Search Expenses for "fuel" (render) | 251 | 266 |
+| Open Reports (render) | 244 | 228 |
+| Previous month on Reports (render) | 360 | 395 |
+
+How to read it: every data step stays well under a 16 ms frame on both. Run to run, the same row varies by up to 2× on this PC (antivirus and other load), so differences of a few milliseconds, or 10% on a render, are noise. For example, "Previous month on Reports" ranged 284–445 ms on SQLite and 342–808 ms on main. The clear wins are Reports' history (one query instead of six passes) and search (the month's rows only). Reading a month from SQLite costs about half a millisecond more than filtering an array already in memory, and it happens once per change or month switch, not per render. What matters at scale: these SQL costs depend on the size of one month, not of the whole history, and the app no longer holds every expense in memory.
+
+**Known limits:**
 - With many currencies in use, the Expenses and Reports currency toggle gets crowded (it's designed for two or three). Make it scroll sideways when there are more than three.
-- Totals are worked out in JavaScript over every expense. Phase 2 moves them to SQL with an index on `day` (§2), so the cost no longer grows with the number of expenses.
+- Times above come from Node, not a phone. Check on a real phone with the React Native Perf Monitor in a development build.

@@ -9,9 +9,11 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 
 import { makeStressExpenses } from '@/data/stress';
+import { openDatabase } from '@/db/open';
+import * as repo from '@/db/repo';
 import { STARTER_CATEGORIES } from '@/domain/categories';
 import { addMonths, monthKey } from '@/domain/dates';
-import { summarise } from '@/domain/summary';
+import { summarise, summariseGroups } from '@/domain/summary';
 import { CURRENCY_CODES } from '@/domain/types';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -28,7 +30,7 @@ const clock: { now: () => number } = jest.requireActual<{ performance: { now: ()
 const results: [string, number][] = [];
 let rowsMounted = 0;
 const time = <T,>(label: string, fn: () => T, runs = 5): T => {
-  let out!: T;
+  let out = fn(); // warm-up run, not timed (first-call compile and JIT)
   const t0 = clock.now();
   for (let i = 0; i < runs; i++) out = fn();
   results.push([label, (clock.now() - t0) / runs]);
@@ -48,23 +50,35 @@ describe('10,000 expenses', () => {
   const categories = STARTER_CATEGORIES.map((c) => ({ ...c }));
   const expenses = makeStressExpenses({ lastMonth: month, categoryIds: categories.map((c) => c.id) });
 
-  it('data work stays within a frame', () => {
+  // The same work the screens do now: totals added up in SQLite (GROUP BY, indexed on day), and
+  // only the viewed month's rows read for lists and search. The 10,000 expenses never all come
+  // into JavaScript. (Jest runs SQLite through Node's built-in copy; see jest.sqlite.js.)
+  it('data work stays within a frame', async () => {
     expect(expenses).toHaveLength(10_000);
     expect(new Set(expenses.map((e) => e.currency)).size).toBe(20);
-    time('Month summary, one currency (Home, Expenses, Reports)', () => summarise(expenses, categories, month, 'NGN'));
-    time('Home: a summary for each of the 20 currencies (one pass, as Home does it)', () => {
-      const byCurrency = new Map<string, typeof expenses>();
-      for (const e of expenses) if (e.day.startsWith(month)) byCurrency.set(e.currency, [...(byCurrency.get(e.currency) ?? []), e]);
-      return CURRENCY_CODES.map((c) => summarise(byCurrency.get(c) ?? [], categories, month, c));
+    const db = await openDatabase('perf.db');
+    await repo.replaceAllExpenses(db, expenses);
+    expect(repo.countExpenses(db)).toBe(10_000);
+
+    time('Month summary, one currency (Home, Expenses, Reports)', () => summariseGroups(repo.monthGroups(db, month), categories, month, 'NGN'));
+    time('Home: a summary for each of the 20 currencies (one query, as Home does it)', () => {
+      const byCurrency = new Map<string, ReturnType<typeof repo.monthGroups>>();
+      for (const g of repo.monthGroups(db, month)) byCurrency.set(g.currency, [...(byCurrency.get(g.currency) ?? []), g]);
+      return CURRENCY_CODES.map((c) => summariseGroups(byCurrency.get(c) ?? [], categories, month, c));
     });
-    time('Reports: 6 months of history', () => [0, 1, 2, 3, 4, 5].map((i) => summarise(expenses, categories, addMonths(month, -i), 'NGN')));
-    time('Expenses: group one month into days', () => {
+    time('Reports: 6 months of history', () => repo.monthTotals(db, [0, 1, 2, 3, 4, 5].map((i) => addMonths(month, -i)), 'NGN'));
+    // The Expenses tab reads its month once (again only after a change or a month switch) and
+    // groups it; each search keystroke then filters those rows without going back to the database.
+    const monthRows = time('Expenses: read one month and group it into days', () => {
+      const rows = repo.monthExpenses(db, month, 'NGN');
       const byDay = new Map<string, number>();
-      for (const e of expenses) if (e.day.startsWith(month) && e.currency === 'NGN') byDay.set(e.day, (byDay.get(e.day) ?? 0) + 1);
-      return byDay;
+      for (const e of rows) byDay.set(e.day, (byDay.get(e.day) ?? 0) + 1);
+      return rows;
     });
-    time('Search: one keystroke over the month', () => expenses.filter((e) => e.day.startsWith(month) && e.note.toLowerCase().includes('fuel')));
-    for (const [label, ms] of results) expect(ms).toBeLessThan(100);
+    time('Search: one keystroke over the month', () => monthRows.filter((e) => e.note.toLowerCase().includes('fuel')));
+    // The old way, for comparison: summarise() over all 10,000 expenses in JavaScript.
+    time('Reference: summarise() over all 10,000 in JavaScript', () => summarise(expenses, categories, month, 'NGN'));
+    for (const [, ms] of results) expect(ms).toBeLessThan(100);
   });
 
   it('screens render and switch with the stress data loaded', async () => {

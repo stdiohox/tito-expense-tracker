@@ -86,6 +86,14 @@ export const MIGRATIONS: readonly Migration[] = [
       );
     `,
   },
+  {
+    version: 2,
+    name: 'index expenses by currency and day',
+    // Most screens ask for one currency in one month. With only single-column indexes SQLite
+    // picked expenses_currency, which in the main currency is most of the table; this one goes
+    // straight to the month's rows in that currency.
+    sql: `CREATE INDEX expenses_currency_day ON expenses (currency, day);`,
+  },
 ];
 
 export const LATEST_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;

@@ -1,6 +1,7 @@
 import { toDayKey } from '@/domain/dates';
 import { isKnownCurrency } from '@/domain/money';
-import type { CurrencyCode, DayKey, Expense, MonthKey } from '@/domain/types';
+import type { SpendGroup } from '@/domain/summary';
+import type { CurrencyCode, Expense, MonthKey } from '@/domain/types';
 
 import type { SqlDb } from './sql';
 
@@ -12,31 +13,17 @@ import type { SqlDb } from './sql';
  * Writes are async; each runs in a transaction.
  */
 
-type ExpenseRow = {
-  id: string;
-  amount: number;
-  currency: string;
-  category_id: string;
-  day: string;
-  note: string;
-  created_at: number;
-  updated_at: number;
-};
-
-const EXPENSE_COLUMNS = 'id, amount, currency, category_id, day, note, created_at, updated_at';
+/**
+ * The columns of an Expense, named as the app names them, so each row SQLite returns already is an
+ * Expense: no second object per row (a month can be hundreds of rows). Values were checked on the
+ * way in (checkExpense).
+ */
+type ExpenseRow = Expense;
+const EXPENSE_COLUMNS = 'id, amount, currency, category_id AS categoryId, day, note, created_at AS createdAt, updated_at AS updatedAt';
 /** Rows that are not deleted. */
 const LIVE = 'deleted_at IS NULL';
 
-const toExpense = (r: ExpenseRow): Expense => ({
-  id: r.id,
-  amount: r.amount,
-  currency: r.currency as CurrencyCode,
-  categoryId: r.category_id,
-  day: r.day as DayKey,
-  note: r.note,
-  createdAt: r.created_at,
-  updatedAt: r.updated_at,
-});
+const toExpense = (r: ExpenseRow): Expense => r;
 
 /** First and last possible key of a month: `day BETWEEN` these uses the index on day. */
 export const monthBounds = (m: MonthKey): [string, string] => [`${m}-00`, `${m}-99`];
@@ -120,6 +107,55 @@ export function firstMonth(db: SqlDb): MonthKey | null {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Totals, added up in SQL (indexed on day), never by scanning every expense in JavaScript
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * A month's spending added up by currency, category and day: at most currencies × categories ×
+ * days rows however many expenses there are. summariseGroups() turns these into a MonthSummary.
+ */
+export function monthGroups(db: SqlDb, month: MonthKey): SpendGroup[] {
+  const [from, to] = monthBounds(month);
+  return db.getAllSync<SpendGroup>(
+    `SELECT currency, category_id AS categoryId, day, SUM(amount) AS total, COUNT(*) AS count
+       FROM expenses WHERE ${LIVE} AND day BETWEEN ? AND ?
+      GROUP BY currency, category_id, day`,
+    from,
+    to,
+  );
+}
+
+/** Each month's total in one currency, for the months given (missing months are 0). */
+export function monthTotals(db: SqlDb, months: readonly MonthKey[], currency: CurrencyCode): { month: MonthKey; total: number }[] {
+  if (months.length === 0) return [];
+  const sorted = [...months].sort();
+  const rows = db.getAllSync<{ month: MonthKey; total: number }>(
+    `SELECT substr(day, 1, 7) AS month, SUM(amount) AS total
+       FROM expenses WHERE ${LIVE} AND currency = ? AND day BETWEEN ? AND ?
+      GROUP BY month`,
+    currency,
+    monthBounds(sorted[0])[0],
+    monthBounds(sorted[sorted.length - 1])[1],
+  );
+  const byMonth = new Map(rows.map((r) => [r.month, r.total]));
+  return months.map((m) => ({ month: m, total: byMonth.get(m) ?? 0 }));
+}
+
+/** One category's total in one currency and month. */
+export function categoryTotal(db: SqlDb, categoryId: string, currency: CurrencyCode, month: MonthKey): number {
+  const [from, to] = monthBounds(month);
+  return (
+    db.getFirstSync<{ total: number | null }>(
+      `SELECT SUM(amount) AS total FROM expenses WHERE ${LIVE} AND category_id = ? AND currency = ? AND day BETWEEN ? AND ?`,
+      categoryId,
+      currency,
+      from,
+      to,
+    )?.total ?? 0
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
 // Expense writes
 // ---------------------------------------------------------------------------------------------
 
@@ -176,7 +212,8 @@ export async function deleteExpense(db: SqlDb, id: string, now: number): Promise
       id,
     );
     if (!row) return;
-    found = toExpense(row);
+    const { version: _version, ...expense } = row;
+    found = toExpense(expense);
     await db.runAsync(`UPDATE expenses SET deleted_at = ?, updated_at = ?, version = version + 1 WHERE id = ?`, now, now, id);
     await outboxExpense(db, id, 'delete', row.version, now);
   });
