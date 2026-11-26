@@ -2,8 +2,8 @@ import { IconCheck, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/i
 import { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
-import { CURRENCIES } from '@/domain/money';
-import { CURRENCY_CODES, type CurrencyCode } from '@/domain/types';
+import { REGIONS, currencyInfo, searchCurrencies } from '@/domain/money';
+import type { CurrencyCode } from '@/domain/types';
 import { TARGET, fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -12,11 +12,13 @@ import { T } from './text';
 import { useFocusBorder } from './use-focus-border';
 
 /** "Nigerian naira (NGN)", for screen readers. */
-const spoken = (code: CurrencyCode) => `${CURRENCIES[code].name} (${code})`;
+const spoken = (code: CurrencyCode) => `${currencyInfo(code).name} (${code})`;
 
 /**
  * Pick one currency from the sixteen: a row showing the choice (flag, code, name) that opens a
- * search field and the list below it. Search matches the code, name, country or symbol.
+ * search field and the list below it, grouped by region. Search matches the code, name, symbol and
+ * every country that uses it ("Germany" finds the euro, "Senegal" the West African CFA franc),
+ * ignoring accents and punctuation.
  * `exclude` greys out a currency already used elsewhere (the main one, when picking the second);
  * `allowNone` adds a "None" option and lets the value be null.
  */
@@ -40,12 +42,10 @@ export function CurrencyPicker({
   const [query, setQuery] = useState('');
   const focus = useFocusBorder();
 
-  const q = query.trim().toLowerCase();
-  const matches = CURRENCY_CODES.filter((code) => {
-    if (!q) return true;
-    const k = CURRENCIES[code];
-    return [code, k.name, k.country, k.symbol].some((s) => s.toLowerCase().includes(q));
-  });
+  const q = query.trim();
+  const matches = searchCurrencies(q);
+  // The list in its regions (Africa, Europe, ...), empty regions left out.
+  const groups = REGIONS.map((region) => ({ region, codes: matches.filter((code) => currencyInfo(code).region === region) })).filter((g) => g.codes.length);
 
   const choose = (code: CurrencyCode | null) => {
     onChange(code);
@@ -53,7 +53,7 @@ export function CurrencyPicker({
     setQuery('');
   };
 
-  const current = value ? CURRENCIES[value] : null;
+  const current = value ? currencyInfo(value) : null;
 
   return (
     <View style={{ gap: space.xs }}>
@@ -114,7 +114,7 @@ export function CurrencyPicker({
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search: naira, GBP, Kenya…"
+              placeholder="Search: naira, GBP, Senegal…"
               placeholderTextColor={c.inkMute}
               accessibilityLabel={`Search currencies for ${label.toLowerCase()}`}
               autoCorrect={false}
@@ -126,8 +126,17 @@ export function CurrencyPicker({
           </View>
           <View accessibilityRole="radiogroup" accessibilityLabel={label} style={{ borderRadius: radius.m, backgroundColor: c.surface, overflow: 'hidden' }}>
             {allowNone && !q ? <Option code={null} on={value === null} onPress={() => choose(null)} /> : null}
-            {matches.map((code) => (
-              <Option key={code} code={code} on={code === value} disabled={code === exclude} onPress={() => choose(code)} />
+            {groups.map((g) => (
+              <View key={g.region}>
+                <View accessibilityRole="header" style={{ paddingHorizontal: space.m, paddingTop: space.m, paddingBottom: space.xs, backgroundColor: c.ground }}>
+                  <T variant="caption" tone="inkSoft">
+                    {g.region}
+                  </T>
+                </View>
+                {g.codes.map((code) => (
+                  <Option key={code} code={code} on={code === value} disabled={code === exclude} onPress={() => choose(code)} />
+                ))}
+              </View>
             ))}
             {matches.length === 0 ? (
               <T variant="sub" tone="inkMute" style={{ padding: space.m }} accessibilityLiveRegion="polite">
@@ -143,7 +152,7 @@ export function CurrencyPicker({
 
 function Option({ code, on, disabled, onPress }: { code: CurrencyCode | null; on: boolean; disabled?: boolean; onPress: () => void }) {
   const { c } = useTheme();
-  const k = code ? CURRENCIES[code] : null;
+  const k = code ? currencyInfo(code) : null;
   return (
     <Pressable
       onPress={onPress}

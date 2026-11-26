@@ -1,4 +1,4 @@
-import { CURRENCIES } from '@/domain/money';
+import { currencyInfo } from '@/domain/money';
 import { useCurrencyView } from '@/data/currency-view';
 
 import { Segmented } from './segmented';
@@ -15,7 +15,7 @@ export function CurrencyToggle() {
       label="Currency"
       value={view}
       onChange={setView}
-      options={options.map((code) => ({ key: code, label: `${CURRENCIES[code].symbol} ${code}`, a11yLabel: `${CURRENCIES[code].name}` }))}
+      options={options.map((code) => ({ key: code, label: `${currencyInfo(code).symbol} ${code}`, a11yLabel: `${currencyInfo(code).name}` }))}
     />
   );
 }

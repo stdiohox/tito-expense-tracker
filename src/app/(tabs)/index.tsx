@@ -23,7 +23,7 @@ import { chosenCurrencies, useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
 import { shortLabel, visibleCategories } from '@/domain/categories';
 import { addMonths, daysInMonth, dayOfMonth, monthName, shortDay, shortMonth } from '@/domain/dates';
-import { CURRENCIES, formatMoney } from '@/domain/money';
+import { currencyInfo, formatMoney } from '@/domain/money';
 import { compareWords, pace, summarise } from '@/domain/summary';
 import type { CurrencyCode } from '@/domain/types';
 import { light, space } from '@/theme/tokens';
@@ -125,14 +125,14 @@ export default function Home() {
                   router.push('/expenses');
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`${CURRENCIES[card.code].name}: ${formatMoney(card.total, card.code)} in ${thisName}, ${card.count} ${card.count === 1 ? 'payment' : 'payments'}${
+                accessibilityLabel={`${currencyInfo(card.code).name}: ${formatMoney(card.total, card.code)} in ${thisName}, ${card.count} ${card.count === 1 ? 'payment' : 'payments'}${
                   i === 0 && paceBadge ? `, ${paceBadge.replace('vs', 'compared with')}` : ''
                 }`}
                 accessibilityHint={`Shows your ${card.code} expenses`}
                 style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] })}>
                 <GlassCard style={{ width: CARD_WIDTH, gap: space.xs }}>
                   <T variant="caption" tone="onBrandSoft" numberOfLines={1}>
-                    {CURRENCIES[card.code].flag} {card.code} · {CURRENCIES[card.code].name}
+                    {currencyInfo(card.code).flag} {card.code} · {currencyInfo(card.code).name}
                   </T>
                   <T variant="title" tone="onBrand" numeric numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ marginTop: space.l }}>
                     {formatMoney(card.total, card.code)}

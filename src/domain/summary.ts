@@ -1,5 +1,5 @@
 import { dayOfMonth, daysInMonth, monthOfDay } from './dates';
-import { CURRENCIES } from './money';
+import { currencyInfo } from './money';
 import type { Category, CategoryId, CurrencyCode, DayKey, Expense, MonthKey } from './types';
 
 export type CategoryTotal = { category: Category; total: number; count: number };
@@ -104,6 +104,6 @@ export function pace(
  * "Same" when the difference is under the currency's floor (₦100, $1) or 2% of the base.
  */
 export function compareWords(delta: number, base: number, currency: CurrencyCode): 'less' | 'more' | 'same' {
-  if (Math.abs(delta) < Math.max(CURRENCIES[currency].sameBelow, base * 0.02)) return 'same';
+  if (Math.abs(delta) < Math.max(currencyInfo(currency).sameBelow, base * 0.02)) return 'same';
   return delta < 0 ? 'less' : 'more';
 }

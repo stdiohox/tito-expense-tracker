@@ -1,5 +1,16 @@
 /** The currencies the app supports (ISO 4217). Each expense keeps its own; nothing is ever converted. */
-export const CURRENCY_CODES = ['NGN', 'USD', 'GBP', 'EUR', 'CAD', 'AUD', 'GHS', 'KES', 'ZAR', 'XOF', 'EGP', 'AED', 'SAR', 'INR', 'CNY', 'JPY'] as const;
+export const CURRENCY_CODES = [
+  // Africa
+  'NGN', 'GHS', 'KES', 'ZAR', 'XAF', 'XOF', 'EGP', 'MAD', 'UGX', 'TZS',
+  // Europe
+  'EUR', 'GBP',
+  // Americas
+  'USD', 'CAD',
+  // Middle East and Asia
+  'AED', 'SAR', 'INR', 'JPY', 'CNY',
+  // Oceania
+  'AUD',
+] as const;
 export type CurrencyCode = (typeof CURRENCY_CODES)[number];
 
 /** Light or dark: follow the phone ("system") or force one. */

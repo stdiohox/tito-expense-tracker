@@ -19,7 +19,7 @@ Branch `feature/nike-polish` (from `feature/nike-redesign`), 25 November 2026.
 - **Reset password:** asks for an email, then shows "Check your email" and "Back to sign in".
 
 **Signed in**
-- **Setup:** three steps after sign-up: your currencies (a main one and an optional second, from a searchable list of sixteen), how hands-on you want to be, and categories with up to four budgets. Every step can be skipped. It can be run again from Settings.
+- **Setup:** three steps after sign-up: your currencies (a main one and an optional second, from a list of twenty grouped by region, searchable by currency or by any country that uses it), how hands-on you want to be, and categories with up to four budgets. Every step can be skipped. It can be run again from Settings.
 - **Home:** your initials avatar and greeting, month switcher and month total, a pace chart against last month, and a glass card for each of your currencies (tap one to see its expenses). Below that: Quick add (one tap per category), budgets (shown as soon as they are set, even at ₦0 spent), "Where it went" (top five categories) and the latest expenses.
 - **Expenses:** every expense for the month in one currency (a toggle switches when you have two), grouped by day, with search. Deleting has Undo.
 - **Add expense / Edit expense:** a bottom sheet over the page, about half the screen high: amount, currency (only your currencies) and category, with date and note below. Drag up for full height, drag down or ✕ to close. On phones it goes full height when the keyboard opens, so Save stays visible. Edit can also delete.
@@ -144,6 +144,7 @@ Everything after commit `3529e3d` (README and architecture docs).
 - `f23e707` Sixteen currencies with symbols, flags and the right decimals (none for the yen and the CFA franc).
 - `ca00fc5` Setup and Settings: pick a main currency and an optional second from a searchable list.
 - `ab9c916` Each currency tracked on its own: a Home card each, a toggle on Expenses and Reports, budgets in their own currency, and a removed currency's expenses kept.
+- Final list of twenty currencies (adds XAF, MAD, UGX and TZS), grouped by region in the picker, searchable by every country that uses each one; a currency no longer on the list keeps working.
 
 ## 4. What works fully vs. what is a placeholder
 
@@ -160,7 +161,7 @@ Everything after commit `3529e3d` (README and architecture docs).
 | Reports: Day by day and Budgets charts | Works |
 | Onboarding illustrations (sample numbers only) | Works |
 | Appearance (System, Light, Dark) | Works |
-| Sixteen currencies; a main and an optional second, each tracked separately, never converted | Works (tested with the date and money checks; check on real phones) |
+| Twenty currencies (by region, searchable by country); a main and an optional second, each tracked separately, never converted | Works (tested with the date and money checks; check on real phones) |
 | Budgets in their own currency, picked per budget | Works |
 | Saving data between launches | Placeholder: in memory only |
 | Real accounts (sign up, sign in) | Placeholder: no server yet |
@@ -191,7 +192,7 @@ Everything after commit `3529e3d` (README and architecture docs).
 
 In suggested order:
 
-1. **Multi-currency:** done on `feature/nike-currencies` (sixteen currencies, a main and a second, never converted). Next: more than two at once if users ask. *Works in Expo Go.*
+1. **Multi-currency:** done on `feature/nike-currencies` (twenty currencies, a main and a second, never converted). Next: more than two at once if users ask. *Works in Expo Go.*
 2. **Stronger budget tracking:** alerts when you're close, weekly pace, and budgets that carry over. *Works in Expo Go.*
 3. **Recurring expenses:** rent and subscriptions that add themselves each month. *Works in Expo Go.* The rules are best kept on the server so they don't add twice across phones.
 4. **Face ID / fingerprint lock:** lock the app on open. *Can be tried in Expo Go; release needs a development build* (for the Face ID permission text).

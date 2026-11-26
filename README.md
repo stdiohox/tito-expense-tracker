@@ -52,10 +52,17 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 - **Categories and budgets.** The twelve starter categories come from the web tracker, and users can
   add their own. Any category can have a monthly budget. Budgets inform and never alarm: going over
   shows in burgundy with words, never in red.
-- **Sixteen currencies, a main one and an optional second.** NGN, USD, GBP, EUR, CAD, AUD, GHS,
-  KES, ZAR, XOF, EGP, AED, SAR, INR, CNY and JPY. Each expense keeps the currency it was entered
-  in, and each currency is tracked on its own: its own card on Home, and a toggle on Expenses and
-  Reports. Nothing is ever converted.
+- **Twenty currencies, a main one and an optional second.** Picked from a list grouped by region
+  and searchable by any country that uses the currency ("Germany" finds the euro, "Senegal" the
+  West African CFA franc):
+  - Africa: NGN, GHS, KES, ZAR, XAF, XOF, EGP, MAD, UGX, TZS
+  - Europe: EUR, GBP
+  - Americas: USD, CAD
+  - Middle East and Asia: AED, SAR, INR, JPY, CNY
+  - Oceania: AUD
+
+  Each expense keeps the currency it was entered in, and each currency is tracked on its own: its
+  own card on Home, and a toggle on Expenses and Reports. Nothing is ever converted.
 - **Light and dark mode**, following the phone or forced in **Settings → Appearance**. Both are designed as a pair.
 - **Onboarding.** Three intro slides, then a three-step setup after sign-up (main currency, how hands-on, categories and budgets); **Settings → Redo setup** reopens it.
 - **Accessible.** The app has:
@@ -199,8 +206,13 @@ can never return to the old data. The deep-link scheme is `titoexpenses://` (for
 
 The web tracker's bugs come back if these rules are broken.
 
-1. **Money is an integer in minor units** (kobo, cents; whole yen and CFA francs, which have no
-   minor unit), and every expense carries its `currency`.
+1. **Money is an integer in minor units** (kobo, cents; whole units for XAF, XOF, UGX and JPY,
+   which have no minor unit in ISO 4217), and every expense carries its `currency`.
+   Symbols never clash: `$` is the US dollar, `CA$`, `A$`, `CN¥` and `¥` are distinct, the CFA
+   francs are `FCFA` (XAF) and `CFA` (XOF), and letter symbols get a space (`USh 5,000`).
+   Look a currency up with `currencyInfo(code)`, never `CURRENCIES[code]`: a code that is no longer
+   on the list (older saved data) then still shows as its code with two decimals, instead of
+   crashing, and its expenses are kept.
    Use `formatMoney()` and `parseAmount()` from `src/domain/money.ts`. Never store or add floats.
 2. **Dates are local calendar strings.** A day is a `DayKey` (`"2026-11-23"`) and a month is a
    `MonthKey` (`"2026-11"`), both built from the device's local date parts. **Never use
@@ -251,11 +263,14 @@ The web tracker's bugs come back if these rules are broken.
 
 **Add a currency.**
 1. Add the code to `CURRENCY_CODES` in `src/domain/types.ts`.
+   Its place in the list is its place in the picker, inside its region.
 2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol (and whether it needs a space,
-   like `KSh 1,200`), name, flag, country, decimals (ISO 4217) and `sameBelow` (roughly a dollar's
-   worth, in whole units). Pick a symbol that doesn't clash with another (`CA$`, not `$`).
-   `parseAmount` strips every symbol and code automatically, and the pickers read `CURRENCIES`.
-3. Add its expected output to the table in `scripts/check-dates.ts`.
+   like `KSh 1,200`), name, flag, the country shown, region, every country or place that uses it
+   (for search), decimals (ISO 4217) and `sameBelow` (roughly a dollar's worth, in whole units).
+   Pick a symbol that doesn't clash with another (`CA$`, not `$`). `parseAmount` strips every
+   symbol and code automatically, and the pickers read `CURRENCIES`.
+3. Add its expected output to the table in `scripts/check-dates.ts`, and update the order and
+   region counts there.
 
 **Add a category icon.**
 1. Add the key to `CategoryIcon` in `src/domain/types.ts`.

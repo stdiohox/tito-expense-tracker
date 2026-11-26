@@ -14,7 +14,7 @@ import { CurrencyPicker } from '@/components/currency-picker';
 import { Segmented } from '@/components/segmented';
 import { T } from '@/components/text';
 import { chosenCurrencies, useActions, useStore } from '@/data/store';
-import { CURRENCIES, parseAmount } from '@/domain/money';
+import { currencyInfo, parseAmount } from '@/domain/money';
 import type { CurrencyCode, SetupMode } from '@/domain/types';
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -286,19 +286,19 @@ export default function Setup() {
                               label={`Currency for the ${cat?.name ?? 'category'} budget`}
                               value={cur}
                               onChange={(code) => setBudgetCur({ ...budgetCur, [id]: code })}
-                              options={mine.map((code) => ({ key: code, label: `${CURRENCIES[code].symbol} ${code}`, a11yLabel: CURRENCIES[code].name }))}
+                              options={mine.map((code) => ({ key: code, label: `${currencyInfo(code).symbol} ${code}`, a11yLabel: currencyInfo(code).name }))}
                             />
                           ) : null}
                           <Field
                             ref={(el) => {
                               fieldRefs.current[id] = el;
                             }}
-                            label={`${cat?.name ?? 'Category'}: a month, in ${CURRENCIES[cur].name}`}
+                            label={`${cat?.name ?? 'Category'}: a month, in ${currencyInfo(cur).name}`}
                             value={amounts[id] ?? ''}
                             onChangeText={(t) => setAmounts({ ...amounts, [id]: t.replace(/[^\d.,]/g, '') })}
                             keyboardType="decimal-pad"
                             inputMode="decimal"
-                            placeholder={`${CURRENCIES[cur].symbol}${CURRENCIES[cur].spaced ? ' ' : ''}50,000`}
+                            placeholder={`${currencyInfo(cur).symbol}${currencyInfo(cur).spaced ? ' ' : ''}50,000`}
                             error={bad ? 'Enter a monthly amount' : null}
                           />
                         </View>

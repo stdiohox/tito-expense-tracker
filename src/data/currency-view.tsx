@@ -25,7 +25,10 @@ export function CurrencyViewProvider({ children }: { children: ReactNode }) {
   const options = useMemo(() => {
     const mine = chosenCurrencies(settings);
     const used = new Set(expenses.map((e) => e.currency));
-    return [...mine, ...CURRENCY_CODES.filter((c) => used.has(c) && !mine.includes(c))];
+    const known = CURRENCY_CODES.filter((c) => used.has(c) && !mine.includes(c));
+    // A code no longer on the list (older saved data) still gets its own view, after the rest.
+    const unlisted = [...used].filter((c) => !mine.includes(c) && !(CURRENCY_CODES as readonly string[]).includes(c)).sort();
+    return [...mine, ...known, ...unlisted];
   }, [settings, expenses]);
 
   // Falls back to the main currency when the picked one is no longer an option.

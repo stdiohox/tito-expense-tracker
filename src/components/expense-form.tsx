@@ -7,7 +7,7 @@ import { useToday } from '@/data/month';
 import { chosenCurrencies, useActions, useStore } from '@/data/store';
 import { shortLabel } from '@/domain/categories';
 import { addDays, dayLabel } from '@/domain/dates';
-import { CURRENCIES, amountToInput, formatMoney, parseAmount } from '@/domain/money';
+import { currencyInfo, amountToInput, formatMoney, parseAmount } from '@/domain/money';
 import type { CurrencyCode, DayKey, Expense } from '@/domain/types';
 import { TARGET, fonts, radius, space, type } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -126,8 +126,8 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
               Amount
             </T>
             {offeredCurrencies.length < 2 ? (
-              <T variant="caption" tone="inkMute" accessibilityLabel={`In ${CURRENCIES[currency].name}`}>
-                {CURRENCIES[currency].symbol} {currency}
+              <T variant="caption" tone="inkMute" accessibilityLabel={`In ${currencyInfo(currency).name}`}>
+                {currencyInfo(currency).symbol} {currency}
               </T>
             ) : (
             <View
@@ -142,10 +142,10 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
                     onPress={() => setCurrency(code)}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: on, selected: on }}
-                    accessibilityLabel={`${code}, ${CURRENCIES[code].name}`}
+                    accessibilityLabel={`${code}, ${currencyInfo(code).name}`}
                     style={{ minHeight: TARGET, minWidth: 64, paddingHorizontal: space.m, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.surface : 'transparent' }}>
                     <T variant="caption" tone={on ? 'ink' : 'inkMute'}>
-                      {CURRENCIES[code].symbol} {code}
+                      {currencyInfo(code).symbol} {code}
                     </T>
                   </Pressable>
                 );
@@ -162,7 +162,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
               paddingBottom: space.xs,
             }}>
             <T variant="total" tone="inkSoft" maxFontSizeMultiplier={1.5} style={{ marginRight: 4 }} importantForAccessibility="no">
-              {CURRENCIES[currency].symbol}
+              {currencyInfo(currency).symbol}
             </T>
             <TextInput
               ref={amountRef}
@@ -172,7 +172,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
               inputMode="decimal"
               placeholder="0"
               placeholderTextColor={c.inkMute}
-              accessibilityLabel={`Amount in ${CURRENCIES[currency].name}`}
+              accessibilityLabel={`Amount in ${currencyInfo(currency).name}`}
               accessibilityHint={amountError ?? undefined}
               aria-invalid={!!amountError}
               maxFontSizeMultiplier={1.5}

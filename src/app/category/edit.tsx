@@ -14,7 +14,7 @@ import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
 import { useFocusBorder } from '@/components/use-focus-border';
 import { chosenCurrencies, useActions, useCategory, useStore } from '@/data/store';
-import { CURRENCIES, amountToInput, parseAmount } from '@/domain/money';
+import { currencyInfo, amountToInput, parseAmount } from '@/domain/money';
 import type { CategoryIcon, CurrencyCode } from '@/domain/types';
 import { fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -162,14 +162,14 @@ export default function EditCategory() {
               label="Budget currency"
               value={cur}
               onChange={setCur}
-              options={budgetOptions.map((code) => ({ key: code, label: `${CURRENCIES[code].symbol} ${code}`, a11yLabel: CURRENCIES[code].name }))}
+              options={budgetOptions.map((code) => ({ key: code, label: `${currencyInfo(code).symbol} ${code}`, a11yLabel: currencyInfo(code).name }))}
             />
           </View>
         ) : null}
         {hasBudget ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: space.s, ...field, ...budgetFocus.border, paddingHorizontal: space.l - budgetFocus.inset }}>
             <T variant="bodyStrong" tone="inkSoft">
-              {CURRENCIES[cur].symbol}
+              {currencyInfo(cur).symbol}
             </T>
             <TextInput
               ref={budgetRef}
@@ -179,7 +179,7 @@ export default function EditCategory() {
               inputMode="decimal"
               placeholder="50,000"
               placeholderTextColor={c.inkMute}
-              accessibilityLabel={`Monthly budget in ${CURRENCIES[cur].name}`}
+              accessibilityLabel={`Monthly budget in ${currencyInfo(cur).name}`}
               maxFontSizeMultiplier={2}
               {...budgetFocus.focusProps}
               style={{ flex: 1, minHeight: 50, marginLeft: 4, fontFamily: fonts.semibold, fontSize: 16, color: c.ink }}
