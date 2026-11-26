@@ -50,6 +50,21 @@ export function dayOfMonth(d: DayKey): number {
   return Number(d.slice(8, 10));
 }
 
+/** A real calendar day "YYYY-MM-DD" (so not 2026-02-31), or null. Checks data before it is stored. */
+export function toDayKey(s: string): DayKey | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const m = toMonthKey(s.slice(0, 7));
+  const d = Number(s.slice(8, 10));
+  return m && d >= 1 && d <= daysInMonth(m) ? (s as DayKey) : null;
+}
+
+/** A real month "YYYY-MM", or null. */
+export function toMonthKey(s: string): MonthKey | null {
+  if (!/^\d{4}-\d{2}$/.test(s)) return null;
+  const month = Number(s.slice(5, 7));
+  return month >= 1 && month <= 12 ? (s as MonthKey) : null;
+}
+
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',

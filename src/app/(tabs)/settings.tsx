@@ -25,6 +25,8 @@ export default function Settings() {
   const { settings } = useStore();
   const { updateSettings, signOut, loadStressData } = useActions();
   const toast = useToast();
+  const set = (patch: Parameters<typeof updateSettings>[0]) =>
+    updateSettings(patch).catch(() => toast({ message: 'That setting couldn’t be saved. Try again.' }));
 
   return (
     <ScrollView
@@ -57,12 +59,12 @@ export default function Settings() {
           <CurrencyPicker
             label="Main currency"
             value={settings.currency}
-            onChange={(currency) => currency && updateSettings({ currency })}
+            onChange={(currency) => currency && set({ currency })}
           />
           <CurrencyPicker
             label="Second currency (optional)"
             value={settings.secondCurrency}
-            onChange={(secondCurrency) => updateSettings({ secondCurrency })}
+            onChange={(secondCurrency) => set({ secondCurrency })}
             exclude={settings.currency}
             allowNone
           />
@@ -78,7 +80,7 @@ export default function Settings() {
           <Segmented<AppearanceMode>
             label="Appearance"
             value={settings.appearance}
-            onChange={(appearance) => updateSettings({ appearance })}
+            onChange={(appearance) => set({ appearance })}
             options={[
               { key: 'system', label: 'System', a11yLabel: 'System, follows your phone' },
               { key: 'light', label: 'Light' },
@@ -103,7 +105,7 @@ export default function Settings() {
           </View>
           <Switch
             value={settings.reminderOn}
-            onValueChange={(v) => updateSettings({ reminderOn: v })}
+            onValueChange={(v) => set({ reminderOn: v })}
             accessibilityLabel="Daily reminder"
             accessibilityHint={`A nudge at ${settings.reminderTime} if you haven’t logged anything that day`}
             {...switchColors(c)}
@@ -122,8 +124,9 @@ export default function Settings() {
           <Item
             label="Load stress data (10,000 expenses)"
             onPress={() => {
-              loadStressData();
-              toast({ message: 'Loaded 10,000 expenses over 24 months in 20 currencies' });
+              loadStressData()
+                .then(() => toast({ message: 'Loaded 10,000 expenses over 24 months in 20 currencies' }))
+                .catch(() => toast({ message: 'The stress data couldn’t be loaded' }));
             }}
             last
           />
@@ -135,8 +138,10 @@ export default function Settings() {
           label="Sign out"
           tone="accent"
           onPress={() => {
-            signOut();
-            router.replace('/welcome');
+            // Your expenses stay on this phone; signing back in shows them again.
+            signOut()
+              .then(() => router.replace('/welcome'))
+              .catch(() => toast({ message: 'You couldn’t be signed out. Try again.' }));
           }}
         />
         <Item label="Delete account" tone="danger" onPress={() => router.push('/account/delete')} last />

@@ -69,7 +69,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
   const amountError = tried && amount === null ? 'Enter an amount, for example 2,500' : null;
   const categoryError = tried && !categoryOk ? 'Choose a category' : null;
 
-  const save = () => {
+  const save = async () => {
     if (busy.current) return;
     setTried(true);
     if (amount === null || !categoryOk || !categoryId) {
@@ -80,31 +80,49 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
     }
     busy.current = true;
     const cat = categories.find((k) => k.id === categoryId);
-    if (existing) {
-      const ok = updateExpense({ ...existing, amount, currency, categoryId, day, note: note.trim() });
-      toast({ message: ok ? 'Expense updated' : 'This expense was deleted, so it could not be updated', success: ok });
-      // A failed update is not a success: warn instead.
-      const feedback = ok ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning;
-      Haptics.notificationAsync(feedback).catch(() => {});
-    } else {
-      addExpense({ amount, currency, categoryId, day, note: note.trim() });
-      toast({ message: `Saved ${formatMoney(amount, currency)} to ${cat?.name ?? 'your expenses'}`, success: true });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    try {
+      // The toast and closing wait for the write: nothing says "saved" until it is.
+      if (existing) {
+        const ok = await updateExpense({ ...existing, amount, currency, categoryId, day, note: note.trim() });
+        toast({ message: ok ? 'Expense updated' : 'This expense was deleted, so it could not be updated', success: ok });
+        // A failed update is not a success: warn instead.
+        const feedback = ok ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning;
+        Haptics.notificationAsync(feedback).catch(() => {});
+      } else {
+        await addExpense({ amount, currency, categoryId, day, note: note.trim() });
+        toast({ message: `Saved ${formatMoney(amount, currency)} to ${cat?.name ?? 'your expenses'}`, success: true });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      }
+      close.current();
+    } catch {
+      // The sheet stays open with what was typed, so nothing is lost.
+      busy.current = false;
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      toast({ message: 'This expense couldn’t be saved. Try again.' });
     }
-    close.current();
   };
 
-  const remove = () => {
+  const remove = async () => {
     if (!existing || busy.current) return;
     busy.current = true;
-    const removed = deleteExpense(existing.id);
+    let removed: Expense | undefined;
+    try {
+      removed = await deleteExpense(existing.id);
+    } catch {
+      busy.current = false;
+      toast({ message: 'This expense couldn’t be deleted. Try again.' });
+      return;
+    }
     close.current();
     if (removed) {
+      const gone = removed;
       toast({
-        message: `Deleted ${formatMoney(removed.amount, removed.currency)}`,
+        message: `Deleted ${formatMoney(gone.amount, gone.currency)}`,
         actionLabel: 'Undo',
         actionA11yLabel: 'Undo delete',
-        onAction: () => restoreExpense(removed),
+        onAction: () => {
+          restoreExpense(gone).catch(() => toast({ message: 'The expense couldn’t be brought back. Try again.' }));
+        },
       });
     }
   };

@@ -17,6 +17,7 @@ import { T } from '@/components/text';
 import { CountUpMoney } from '@/components/use-count-up';
 import { useFocusBorder } from '@/components/use-focus-border';
 import { useCurrencyView } from '@/data/currency-view';
+import { useMonthExpenses } from '@/data/expenses';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
@@ -30,8 +31,9 @@ export default function Expenses() {
   const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, isCurrent, today } = useMonth();
-  const { expenses, categories } = useStore();
+  const { categories } = useStore();
   const { view } = useCurrencyView();
+  const monthRows = useMonthExpenses(month, view);
   const { now } = useSummary(month, view);
   const [query, setQuery] = useState('');
   const searchFocus = useFocusBorder();
@@ -43,9 +45,8 @@ export default function Expenses() {
   const { sections, matches } = useMemo(() => {
     const byDay = new Map<DayKey, Expense[]>();
     let matches = 0;
-    for (const e of expenses) {
-      // One currency at a time: the toggle switches between them; nothing is converted.
-      if (!e.day.startsWith(month) || e.currency !== view) continue;
+    // One currency at a time (the toggle switches; nothing is converted), newest first, from SQLite.
+    for (const e of monthRows) {
       if (q) {
         const cat = catById.get(e.categoryId)?.name ?? '';
         if (!e.note.toLowerCase().includes(q) && !cat.toLowerCase().includes(q)) continue;
@@ -61,11 +62,11 @@ export default function Expenses() {
         return {
           day,
           total: formatMoney(data.reduce((s, e) => s + e.amount, 0), view),
-          data: [...data].sort((a, b) => b.createdAt - a.createdAt),
+          data,
         };
       });
     return { sections, matches };
-  }, [expenses, catById, month, q, view]);
+  }, [monthRows, catById, q, view]);
 
   // Tell screen-reader users how many results a search returned (debounced by the deferred value).
   useEffect(() => {

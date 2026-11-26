@@ -9,11 +9,10 @@
  * for the error screen.
  */
 // process.getBuiltinModule bypasses Jest's module registry, which doesn't know node:sqlite. Node
-// still labels it experimental; that one warning is noise in test output.
+// still labels it experimental, a moment after loading; only that one warning is dropped.
 const emitWarning = process.emitWarning;
-process.emitWarning = (warning, ...rest) => (String(warning).includes('SQLite') ? undefined : emitWarning.call(process, warning, ...rest));
+process.emitWarning = (warning, ...rest) => (String(warning).includes('SQLite is an experimental') ? undefined : emitWarning.call(process, warning, ...rest));
 const { DatabaseSync } = process.getBuiltinModule('node:sqlite');
-process.emitWarning = emitWarning;
 
 const files = new Map();
 let failNext = null;

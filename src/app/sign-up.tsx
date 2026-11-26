@@ -49,10 +49,11 @@ export default function SignUp() {
     setBusy(true);
     // Phase 2: Supabase Auth sign-up + email confirmation.
     timer.current = setTimeout(() => {
-      updateSettings({ firstName: first.trim(), lastName: last.trim(), email: email.trim() });
-      signIn();
-      // New accounts go through the three-step setup, which ends on Home.
-      router.replace('/setup');
+      updateSettings({ firstName: first.trim(), lastName: last.trim(), email: email.trim() })
+        .then(signIn)
+        // New accounts go through the three-step setup, which ends on Home.
+        .then(() => router.replace('/setup'))
+        .catch(() => setBusy(false));
     }, 500);
   };
 

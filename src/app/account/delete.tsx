@@ -7,7 +7,9 @@ import { Button } from '@/components/button';
 import { safeBack } from '@/components/nav';
 import { useFocusBorder } from '@/components/use-focus-border';
 import { T } from '@/components/text';
-import { useActions, useStore } from '@/data/store';
+import { useToast } from '@/components/toast';
+import { useExpenseCount } from '@/data/expenses';
+import { useActions } from '@/data/store';
 import { fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -15,8 +17,9 @@ import { useTheme } from '@/theme/use-theme';
 export default function DeleteAccount() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
-  const { expenses } = useStore();
+  const count = useExpenseCount();
   const { deleteAccount } = useActions();
+  const toast = useToast();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
@@ -33,7 +36,7 @@ export default function DeleteAccount() {
           Delete your account
         </T>
         <T variant="body" tone="inkSoft" style={{ marginTop: space.l }}>
-          This permanently removes your account and all {expenses.length} expenses from this phone and from our
+          This permanently removes your account and all {count} expenses from this phone and from our
           servers. It can’t be undone.
         </T>
         <T variant="body" tone="inkSoft" style={{ marginTop: space.m }}>
@@ -76,8 +79,13 @@ export default function DeleteAccount() {
             setBusy(true);
             // Phase 2: call the delete-account Edge Function; on failure reset busy and say why.
             timer.current = setTimeout(() => {
-              deleteAccount(); // clears local expenses and categories, then signs out
-              router.replace('/welcome');
+              // Clears every expense, category and setting on this phone, then signs out.
+              deleteAccount()
+                .then(() => router.replace('/welcome'))
+                .catch(() => {
+                  setBusy(false);
+                  toast({ message: 'Your account couldn’t be deleted. Try again.' });
+                });
             }, 600);
           }}
         />

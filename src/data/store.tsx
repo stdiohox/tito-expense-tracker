@@ -1,17 +1,26 @@
 import * as Crypto from 'expo-crypto';
-import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
+import * as repo from '@/db/repo';
+import { openDatabase } from '@/db/open';
+import type { SqlDb } from '@/db/sql';
 import { STARTER_CATEGORIES } from '@/domain/categories';
 import { monthKey } from '@/domain/dates';
 import type { AppearanceMode, Category, CurrencyCode, Expense, SetupMode } from '@/domain/types';
+import { reportError } from '@/lib/report';
 
+import { WriteQueue } from './write-queue';
 
 /*
- * Phase-1 store: in memory and empty at launch (no demo data): the app opens signed out on the
- * onboarding, and everything in it is what the tester enters. Phase 2 replaces the backing with
- * expo-sqlite (the single read source) plus an outbox that syncs to Supabase. Screens only
- * talk to the hooks below. Known phase-2 changes (see tasks/todo.md): async mutators with
- * a ready/error state, soft deletes with tombstones, and aggregates computed in SQL.
+ * The store: expo-sqlite on the device is where the data lives and the only thing screens read.
+ * Screens never touch the database; they use the hooks here and in ./expenses.ts.
+ *
+ * - On launch the database opens and migrates; until then `ready` is false, and if it fails
+ *   `error` is set and `retry()` tries again (the root layout shows a calm screen for both).
+ * - Mutators are async. They resolve after the write is saved, so screens show toasts and move on
+ *   only once it is; they reject if it fails, and nothing on screen changes.
+ * - Writes go through one queue, one at a time, in the order they were made.
+ * - Every write bumps `version`; the read hooks re-query when it changes.
  */
 
 /** "Ada Obi", or whichever part is set; empty when neither is. */
@@ -52,152 +61,180 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 type State = {
-  expenses: Expense[];
   categories: Category[];
   settings: Settings;
   signedIn: boolean;
 };
 
-type Action =
-  | { type: 'add'; expense: Expense }
-  | { type: 'update'; expense: Expense }
-  | { type: 'delete'; id: string }
-  | { type: 'restore'; expense: Expense }
-  | { type: 'upsertCategory'; category: Category }
-  | { type: 'settings'; patch: Partial<Settings> }
-  | { type: 'loadExpenses'; expenses: Expense[] }
-  | { type: 'signIn' }
-  | { type: 'signOut' }
-  | { type: 'wipe' };
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'add':
-    case 'restore':
-      return { ...state, expenses: [action.expense, ...state.expenses.filter((e) => e.id !== action.expense.id)] };
-    case 'update':
-      return { ...state, expenses: state.expenses.map((e) => (e.id === action.expense.id ? action.expense : e)) };
-    case 'delete':
-      return { ...state, expenses: state.expenses.filter((e) => e.id !== action.id) };
-    case 'upsertCategory': {
-      const exists = state.categories.some((c) => c.id === action.category.id);
-      return {
-        ...state,
-        categories: exists
-          ? state.categories.map((c) => (c.id === action.category.id ? action.category : c))
-          : [...state.categories, action.category],
-      };
-    }
-    case 'settings': {
-      const patch = Object.fromEntries(Object.entries(action.patch).filter(([, v]) => v !== undefined));
-      const settings: Settings = { ...state.settings, ...patch };
-      // The two currencies are always different: making the second one main clears the second.
-      if (settings.secondCurrency === settings.currency) settings.secondCurrency = null;
-      return { ...state, settings };
-    }
-    case 'loadExpenses':
-      return { ...state, expenses: action.expenses };
-    case 'signIn':
-      return { ...state, signedIn: true };
-    case 'signOut':
-      return { ...state, signedIn: false };
-    case 'wipe':
-      // Starter categories with no budget (and no budgetCurrency), and default settings: no name,
-      // email or preferences survive account deletion.
-      return {
-        expenses: [],
-        categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
-        settings: { ...DEFAULT_SETTINGS },
-        signedIn: false,
-      };
-  }
-}
-
 export type Actions = {
-  addExpense: (e: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => Expense;
-  updateExpense: (e: Expense) => boolean;
-  deleteExpense: (id: string) => Expense | undefined;
-  restoreExpense: (e: Expense) => void;
-  saveCategory: (c: Omit<Category, 'id'> & { id?: string }) => Category;
-  updateSettings: (patch: Partial<Settings>) => void;
-  signIn: () => void;
-  signOut: () => void;
-  deleteAccount: () => void;
+  addExpense: (e: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Expense>;
+  /** False when the expense was deleted meanwhile. */
+  updateExpense: (e: Expense) => Promise<boolean>;
+  /** The deleted expense (for Undo), or undefined if it was already gone. */
+  deleteExpense: (id: string) => Promise<Expense | undefined>;
+  restoreExpense: (e: Expense) => Promise<void>;
+  saveCategory: (c: Omit<Category, 'id'> & { id?: string }) => Promise<Category>;
+  updateSettings: (patch: Partial<Settings>) => Promise<void>;
+  signIn: () => Promise<void>;
+  signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   /** Development only: replaces the expenses with 10,000 generated ones (see data/stress.ts). */
-  loadStressData: () => void;
+  loadStressData: () => Promise<void>;
 };
+
+type Status = { ready: boolean; error: Error | null; retry: () => void };
 
 const StateCtx = createContext<State | null>(null);
 const ActionsCtx = createContext<Actions | null>(null);
+const StatusCtx = createContext<Status | null>(null);
+/** The open database and the data version, for the read hooks in src/data only. */
+const DbCtx = createContext<{ db: SqlDb; version: number } | null>(null);
 
 export const newId = (): string => Crypto.randomUUID();
 
+const freshState = (): State => ({
+  categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
+  settings: { ...DEFAULT_SETTINGS },
+  signedIn: false,
+});
+
+function applySettings(current: Settings, patch: Partial<Settings>): Settings {
+  const defined = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+  const settings: Settings = { ...current, ...defined };
+  // The two currencies are always different: making the second one main clears the second.
+  if (settings.secondCurrency === settings.currency) settings.secondCurrency = null;
+  return settings;
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
-    expenses: [],
-    categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
-    settings: { ...DEFAULT_SETTINGS },
-    signedIn: false,
-  }));
-  // Latest state for actions that must answer "did it exist?" without stale closures.
-  const latest = useRef(state);
+  const [db, setDb] = useState<SqlDb | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [state, setState] = useState<State>(freshState);
+  const [version, setVersion] = useState(0);
+
+  // Latest values for actions, which are built once.
+  const dbRef = useRef<SqlDb | null>(null);
+  const stateRef = useRef(state);
   useEffect(() => {
-    latest.current = state;
+    stateRef.current = state;
   }, [state]);
 
-  // Built once: action identities never change, so consumers of actions never re-render for them.
-  const actions = useMemo<Actions>(
-    () => ({
-      addExpense: (input) => {
-        const now = Date.now();
-        const expense: Expense = { ...input, id: newId(), createdAt: now, updatedAt: now };
-        dispatch({ type: 'add', expense });
-        return expense;
-      },
-      updateExpense: (e) => {
-        if (!latest.current.expenses.some((x) => x.id === e.id)) return false;
-        dispatch({ type: 'update', expense: { ...e, updatedAt: Date.now() } });
-        return true;
-      },
-      deleteExpense: (id) => {
-        const found = latest.current.expenses.find((e) => e.id === id);
-        if (!found) return undefined;
-        latest.current = { ...latest.current, expenses: latest.current.expenses.filter((e) => e.id !== id) };
-        dispatch({ type: 'delete', id });
-        return found;
-      },
-      restoreExpense: (expense) => dispatch({ type: 'restore', expense: { ...expense, updatedAt: Date.now() } }),
-      saveCategory: (input) => {
-        const category: Category = { ...input, id: input.id ?? newId() };
-        dispatch({ type: 'upsertCategory', category });
-        return category;
-      },
-      updateSettings: (patch) => dispatch({ type: 'settings', patch }),
-      signIn: () => dispatch({ type: 'signIn' }),
-      signOut: () => dispatch({ type: 'signOut' }),
-      deleteAccount: () => dispatch({ type: 'wipe' }),
-      loadStressData: () => {
-        // Inside `if (__DEV__)` so production builds fold the block away, require and all: the
-        // generator never ships.
-        if (__DEV__) {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { makeStressExpenses } = require('./stress') as typeof import('./stress');
-          const expenses = makeStressExpenses({
-            lastMonth: monthKey(new Date()),
-            main: latest.current.settings.currency,
-            categoryIds: latest.current.categories.map((c) => c.id),
-          });
-          dispatch({ type: 'loadExpenses', expenses });
-        }
-      },
-    }),
-    [],
-  );
+  useEffect(() => {
+    let cancelled = false;
+    openDatabase()
+      .then((opened) => {
+        if (cancelled) return void opened.closeAsync().catch(() => {});
+        dbRef.current = opened;
+        setDb(opened);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        reportError(e, { where: 'open database' });
+        setError(e instanceof Error ? e : new Error(String(e)));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
+
+  const retry = useCallback(() => {
+    setError(null);
+    setAttempt((n) => n + 1);
+  }, []);
+
+  // Actions are built once: their identities never change, so components that only write never
+  // re-render when the data changes.
+  const actions = useMemo<Actions>(() => {
+    const queue = new WriteQueue();
+    /** Runs writes one at a time; a failed write rejects its own promise but not the next one. */
+    const write = <T,>(task: (db: SqlDb) => Promise<T>): Promise<T> =>
+      queue.run(() => {
+        const current = dbRef.current;
+        if (!current) return Promise.reject(new Error('The database is not open'));
+        return task(current);
+      });
+    const changed = () => setVersion((v) => v + 1);
+    const setLocal = (patch: Partial<State>) => setState((s) => ({ ...s, ...patch }));
+    const upsert = (list: Category[], category: Category) =>
+      list.some((c) => c.id === category.id) ? list.map((c) => (c.id === category.id ? category : c)) : [...list, category];
+
+    return {
+      addExpense: (input) =>
+        write(async (d) => {
+          const now = Date.now();
+          const expense: Expense = { ...input, id: newId(), createdAt: now, updatedAt: now };
+          await repo.insertExpense(d, expense);
+          changed();
+          return expense;
+        }),
+      updateExpense: (e) =>
+        write(async (d) => {
+          const ok = await repo.updateExpense(d, { ...e, updatedAt: Date.now() });
+          if (ok) changed();
+          return ok;
+        }),
+      deleteExpense: (id) =>
+        write(async (d) => {
+          const removed = await repo.deleteExpense(d, id, Date.now());
+          if (removed) changed();
+          return removed;
+        }),
+      restoreExpense: (expense) =>
+        write(async (d) => {
+          await repo.restoreExpense(d, expense, Date.now());
+          changed();
+        }),
+      saveCategory: (input) =>
+        write(async () => {
+          const category: Category = { ...input, id: input.id ?? newId() };
+          setState((s) => ({ ...s, categories: upsert(s.categories, category) }));
+          return category;
+        }),
+      updateSettings: (patch) =>
+        write(async () => {
+          setState((s) => ({ ...s, settings: applySettings(s.settings, patch) }));
+        }),
+      signIn: () => write(async () => setLocal({ signedIn: true })),
+      signOut: () => write(async () => setLocal({ signedIn: false })),
+      deleteAccount: () =>
+        write(async (d) => {
+          await repo.wipeAll(d);
+          // Starter categories with no budget, and default settings: no name, email or preferences
+          // survive account deletion.
+          setState(freshState());
+          changed();
+        }),
+      loadStressData: () =>
+        write(async (d) => {
+          // Inside `if (__DEV__)` so production builds fold the block away, require and all: the
+          // generator never ships.
+          if (__DEV__) {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const { makeStressExpenses } = require('./stress') as typeof import('./stress');
+            const expenses = makeStressExpenses({
+              lastMonth: monthKey(new Date()),
+              main: stateRef.current.settings.currency,
+              categoryIds: stateRef.current.categories.map((c) => c.id),
+            });
+            await repo.replaceAllExpenses(d, expenses);
+            changed();
+          }
+        }),
+    };
+  }, []);
+
+  const status = useMemo<Status>(() => ({ ready: db !== null, error, retry }), [db, error, retry]);
+  const dbValue = useMemo(() => (db ? { db, version } : null), [db, version]);
 
   return (
-    <ActionsCtx.Provider value={actions}>
-      <StateCtx.Provider value={state}>{children}</StateCtx.Provider>
-    </ActionsCtx.Provider>
+    <StatusCtx.Provider value={status}>
+      <ActionsCtx.Provider value={actions}>
+        <StateCtx.Provider value={state}>
+          <DbCtx.Provider value={dbValue}>{children}</DbCtx.Provider>
+        </StateCtx.Provider>
+      </ActionsCtx.Provider>
+    </StatusCtx.Provider>
   );
 }
 
@@ -211,6 +248,23 @@ export function useActions(): Actions {
   const a = useContext(ActionsCtx);
   if (!a) throw new Error('useActions must be used inside StoreProvider');
   return a;
+}
+
+/** Whether the database is open (`ready`), failed to open (`error`), and a way to try again. */
+export function useStoreStatus(): Status {
+  const s = useContext(StatusCtx);
+  if (!s) throw new Error('useStoreStatus must be used inside StoreProvider');
+  return s;
+}
+
+/**
+ * For the read hooks in src/data: the open database and the data version (it changes after every
+ * write, so a query keyed on it re-runs). Only rendered once the database is ready.
+ */
+export function useDb(): { db: SqlDb; version: number } {
+  const v = useContext(DbCtx);
+  if (!v) throw new Error('useDb is only available once the database is open');
+  return v;
 }
 
 export function useCategory(id: string | undefined): Category | undefined {

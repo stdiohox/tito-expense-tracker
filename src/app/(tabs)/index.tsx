@@ -21,12 +21,13 @@ import { CountUpMoney } from '@/components/use-count-up';
 import { useMonth } from '@/data/month';
 import { useCurrencyView } from '@/data/currency-view';
 import { chosenCurrencies, useStore } from '@/data/store';
-import { useSummary } from '@/data/use-summary';
+import { useRecentExpenses } from '@/data/expenses';
+import { useMonthSummaries, useSummary } from '@/data/use-summary';
 import { shortLabel, visibleCategories } from '@/domain/categories';
 import { addMonths, daysInMonth, dayOfMonth, monthName, shortDay, shortMonth } from '@/domain/dates';
 import { currencyInfo, formatMoney } from '@/domain/money';
-import { compareWords, pace, summarise } from '@/domain/summary';
-import type { CurrencyCode, Expense } from '@/domain/types';
+import { compareWords, pace } from '@/domain/summary';
+import type { CurrencyCode } from '@/domain/types';
 import { light, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -41,7 +42,7 @@ export default function Home() {
   const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, isCurrent, today } = useMonth();
-  const { expenses, categories, settings } = useStore();
+  const { categories, settings } = useStore();
   const { now, before } = useSummary(month);
   const { setView } = useCurrencyView();
   const cur = settings.currency;
@@ -66,20 +67,14 @@ export default function Home() {
   }
 
   // Each currency gets its own month summary; nothing is ever converted.
-  const summaries = useMemo(() => {
-    const codes = new Set<CurrencyCode>([...chosenCurrencies(settings), ...now.otherCurrencies.map((o) => o.currency)]);
-    for (const k of categories) if (k.budget !== null && k.budgetCurrency) codes.add(k.budgetCurrency);
-    // One pass over all expenses: bucket this month's by currency, then summarise each small bucket
-    // (with 10,000 expenses in 20 currencies, 20 full passes took longer than a frame).
-    const byCurrency = new Map<CurrencyCode, Expense[]>();
-    for (const e of expenses) {
-      if (!e.day.startsWith(month) || !codes.has(e.currency)) continue;
-      const list = byCurrency.get(e.currency);
-      if (list) list.push(e);
-      else byCurrency.set(e.currency, [e]);
-    }
-    return new Map([...codes].map((code) => [code, code === cur ? now : summarise(byCurrency.get(code) ?? [], categories, month, code)]));
-  }, [settings, now, categories, expenses, month, cur]);
+  const codes = useMemo(() => {
+    const set = new Set<CurrencyCode>([...chosenCurrencies(settings), ...now.otherCurrencies.map((o) => o.currency)]);
+    for (const k of categories) if (k.budget !== null && k.budgetCurrency) set.add(k.budgetCurrency);
+    set.delete(cur); // the main currency's summary is `now`
+    return [...set];
+  }, [settings, now, categories, cur]);
+  const others = useMonthSummaries(month, codes);
+  const summaries = useMemo(() => new Map([[cur, now], ...others]), [cur, now, others]);
 
   // One glass card per chosen currency (even at 0), then any other currency spent in this month.
   const currencyCards = [
@@ -98,14 +93,7 @@ export default function Home() {
     }))
     .sort((a, b) => (a.currency === b.currency ? b.total / b.budget - a.total / a.budget : a.currency === cur ? -1 : b.currency === cur ? 1 : 0));
 
-  const recent = useMemo(
-    () =>
-      expenses
-        .filter((e) => e.day.startsWith(month))
-        .sort((a, b) => (a.day === b.day ? b.createdAt - a.createdAt : a.day < b.day ? 1 : -1))
-        .slice(0, 4),
-    [expenses, month],
-  );
+  const recent = useRecentExpenses(month, 4);
 
   const chartLabel = `Spending in ${thisName}: ${formatMoney(p?.spentByNow ?? now.total, cur)} so far${
     p ? `, compared with ${formatMoney(p.lastMonthByNow, cur)} by the same day in ${lastName}` : ''

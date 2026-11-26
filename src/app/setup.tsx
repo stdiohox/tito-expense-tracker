@@ -13,6 +13,7 @@ import { Panel } from '@/components/panel';
 import { CurrencyPicker } from '@/components/currency-picker';
 import { Segmented } from '@/components/segmented';
 import { T } from '@/components/text';
+import { useToast } from '@/components/toast';
 import { chosenCurrencies, useActions, useStore } from '@/data/store';
 import { currencyInfo, parseAmount } from '@/domain/money';
 import type { CurrencyCode, SetupMode } from '@/domain/types';
@@ -36,6 +37,7 @@ export default function Setup() {
   const insets = useSafeAreaInsets();
   const { settings, categories } = useStore();
   const { updateSettings, saveCategory } = useActions();
+  const toast = useToast();
   const [step, setStep] = useState(0);
   const [currency, setCurrency] = useState<CurrencyCode>(settings.currency);
   const [second, setSecond] = useState<CurrencyCode | null>(settings.secondCurrency);
@@ -56,15 +58,28 @@ export default function Setup() {
   const finish = () => router.dismissTo('/');
   const next = () => (step < STEPS.length - 1 ? setStep(step + 1) : finish());
 
+  // Each step moves on only once its choices are saved; if saving fails, it stays put and says so.
+  const saving = useRef(false);
+  const saveThen = async (work: () => Promise<unknown>, then: () => void) => {
+    if (saving.current) return;
+    saving.current = true;
+    try {
+      await work();
+      then();
+    } catch {
+      toast({ message: 'Your choices couldn’t be saved. Try again.' });
+    } finally {
+      saving.current = false;
+    }
+  };
+
   const proceed = () => {
     if (step === 0) {
-      updateSettings({ currency, secondCurrency: second === currency ? null : second });
-      return next();
+      return saveThen(() => updateSettings({ currency, secondCurrency: second === currency ? null : second }), next);
     }
     if (step === 1) {
       // For now, "Full picture" turns the daily reminder on; other choices leave it as it is.
-      updateSettings(mode === 'full' ? { mode, reminderOn: true } : { mode });
-      return next();
+      return saveThen(() => updateSettings(mode === 'full' ? { mode, reminderOn: true } : { mode }), next);
     }
     setTried(true);
     const chosen = wantsBudgets ? budgetIds.filter((id) => shown[id]) : [];
@@ -73,14 +88,14 @@ export default function Setup() {
       const name = categories.find((k) => k.id === missing)?.name ?? 'this category';
       return announceError(`Enter a monthly budget for ${name}`, { current: fieldRefs.current[missing] });
     }
-    for (const cat of categories) {
+    const changes = categories.flatMap((cat) => {
       const hidden = !shown[cat.id];
       const budget = chosen.includes(cat.id) ? parseAmount(amounts[cat.id] ?? '', curOf(cat.id)) : null;
-      if (hidden !== !!cat.hidden || budget !== null) {
-        saveCategory({ ...cat, hidden, ...(budget !== null ? { budget, budgetCurrency: curOf(cat.id) } : null) });
-      }
-    }
-    finish();
+      return hidden !== !!cat.hidden || budget !== null
+        ? [{ ...cat, hidden, ...(budget !== null ? { budget, budgetCurrency: curOf(cat.id) } : null) }]
+        : [];
+    });
+    return saveThen(() => Promise.all(changes.map((cat) => saveCategory(cat))), finish);
   };
 
   const toggleShown = (id: string) => {

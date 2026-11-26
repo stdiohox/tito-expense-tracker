@@ -6,10 +6,11 @@ import { Appearance, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { StartupError, StartupLoading } from '@/components/startup';
 import { ToastProvider } from '@/components/toast';
 import { CurrencyViewProvider } from '@/data/currency-view';
 import { MonthProvider } from '@/data/month';
-import { StoreProvider, useStore } from '@/data/store';
+import { StoreProvider, useStore, useStoreStatus } from '@/data/store';
 import { startCrashReporting } from '@/lib/crash-reporting';
 import { installGlobalErrorHandlers } from '@/lib/report';
 import { fonts } from '@/theme/tokens';
@@ -27,21 +28,32 @@ export const unstable_settings = { anchor: '(tabs)' };
 export default function RootLayout() {
   const [loaded, error] = useFonts({ Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold });
 
-  useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync().catch(() => {});
-  }, [loaded, error]);
-
   if (!loaded && !error) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StoreProvider>
-          <ThemedApp />
+          <StoreGate />
         </StoreProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+/**
+ * The saved data opens before any screen shows. The splash stays up while it does (usually a few
+ * milliseconds); if it fails, a calm screen offers Try again instead of a blank app.
+ */
+function StoreGate() {
+  const { ready, error, retry } = useStoreStatus();
+  const settled = ready || error !== null;
+  useEffect(() => {
+    if (settled) SplashScreen.hideAsync().catch(() => {});
+  }, [settled]);
+  if (error) return <StartupError onRetry={retry} />;
+  if (!ready) return <StartupLoading />;
+  return <ThemedApp />;
 }
 
 /**

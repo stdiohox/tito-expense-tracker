@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,7 +14,8 @@ import { StatCard, StatRow } from '@/components/stat-card';
 import { T } from '@/components/text';
 import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
-import { useCategory, useStore } from '@/data/store';
+import { useCategoryMonth } from '@/data/expenses';
+import { useCategory } from '@/data/store';
 import { addMonths, dayLabel, monthName } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
 import { budgetFor } from '@/domain/summary';
@@ -24,7 +25,6 @@ import { useTheme } from '@/theme/use-theme';
 export default function CategoryDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const category = useCategory(id);
-  const { expenses } = useStore();
   const { month } = useMonth();
   const { view } = useCurrencyView();
   const { c } = useTheme();
@@ -32,16 +32,7 @@ export default function CategoryDetail() {
   // A budgeted category shows the currency its budget is in; otherwise the currency being viewed.
   const cur = category?.budget != null && category.budgetCurrency ? category.budgetCurrency : view;
 
-  const { items, total, lastTotal } = useMemo(() => {
-    const prev = addMonths(month, -1);
-    const mine = expenses.filter((e) => e.categoryId === id && e.currency === cur);
-    const items = mine.filter((e) => e.day.startsWith(month)).sort((a, b) => (a.day === b.day ? b.createdAt - a.createdAt : a.day < b.day ? 1 : -1));
-    return {
-      items,
-      total: items.reduce((s, e) => s + e.amount, 0),
-      lastTotal: mine.filter((e) => e.day.startsWith(prev)).reduce((s, e) => s + e.amount, 0),
-    };
-  }, [expenses, id, month, cur]);
+  const { items, total, lastTotal } = useCategoryMonth(id, cur, month);
 
   const editId = category?.id;
   const headerRight = useCallback(

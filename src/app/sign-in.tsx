@@ -41,9 +41,10 @@ export default function SignIn() {
     // Phase 2: Supabase Auth sign-in, with an error path that resets busy.
     timer.current = setTimeout(() => {
       // Settings shows the account that signed in, not whoever was stored before.
-      updateSettings({ email: email.trim() });
-      signIn();
-      router.replace('/');
+      updateSettings({ email: email.trim() })
+        .then(signIn)
+        .then(() => router.replace('/'))
+        .catch(() => setBusy(false));
     }, 500);
   };
 

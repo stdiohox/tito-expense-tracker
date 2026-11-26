@@ -70,9 +70,16 @@ export default function EditCategory() {
       budget,
       budgetCurrency: budget !== null ? cur : undefined,
       builtIn: existing?.builtIn ?? false,
-    });
-    toast({ message: existing ? 'Category saved' : `${name.trim()} added`, success: true });
-    close.current();
+      hidden: existing?.hidden,
+    })
+      .then(() => {
+        toast({ message: existing ? 'Category saved' : `${name.trim()} added`, success: true });
+        close.current();
+      })
+      .catch(() => {
+        busy.current = false;
+        toast({ message: 'This category couldn’t be saved. Try again.' });
+      });
   };
 
   const field = {

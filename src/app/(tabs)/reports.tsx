@@ -21,10 +21,11 @@ import { useToast } from '@/components/toast';
 import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
-import { useSummary } from '@/data/use-summary';
-import { addMonths, dayOfMonth, daysInMonth, monthName, monthOfDay, shortMonth } from '@/domain/dates';
+import { useFirstMonth } from '@/data/expenses';
+import { useMonthTotals, useSummary } from '@/data/use-summary';
+import { addMonths, dayOfMonth, daysInMonth, monthName, shortMonth } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
-import { budgetFor, compareWords, pace, summarise } from '@/domain/summary';
+import { budgetFor, compareWords, pace } from '@/domain/summary';
 import type { MonthKey } from '@/domain/types';
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -33,7 +34,7 @@ export default function Reports() {
   const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, current, set, isCurrent, today } = useMonth();
-  const { expenses, categories } = useStore();
+  const { categories } = useStore();
   // One currency at a time (the toggle switches); totals, charts and budgets are never converted.
   const { view: cur } = useCurrencyView();
   const { now, before } = useSummary(month, cur);
@@ -42,18 +43,16 @@ export default function Reports() {
   const lastShort = shortMonth(addMonths(month, -1));
 
   // Months before the first expense are "no data", not zero spending, so they are left out.
-  const history = useMemo(() => {
-    const first = expenses.reduce<MonthKey | null>((m, e) => {
-      const k = monthOfDay(e.day);
-      return m === null || k < m ? k : m;
-    }, null);
-    const months: MonthKey[] = [];
+  const first = useFirstMonth();
+  const months = useMemo(() => {
+    const list: MonthKey[] = [];
     for (let i = 5; i >= 0; i--) {
       const m = addMonths(month, -i);
-      if (first !== null && m >= first) months.push(m);
+      if (first !== null && m >= first) list.push(m);
     }
-    return months.map((m) => ({ month: m, total: summarise(expenses, categories, m, cur).total }));
-  }, [expenses, categories, month, cur]);
+    return list;
+  }, [first, month]);
+  const history = useMonthTotals(months, cur);
   const maxHist = Math.max(1, ...history.map((h) => h.total));
   const past = history.filter((h) => h.month < month);
   const avg = past.length ? Math.round(past.reduce((s, h) => s + h.total, 0) / past.length) : 0;

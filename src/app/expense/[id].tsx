@@ -6,14 +6,13 @@ import { Button } from '@/components/button';
 import { ExpenseForm } from '@/components/expense-form';
 import { safeBack } from '@/components/nav';
 import { T } from '@/components/text';
-import { useStore } from '@/data/store';
+import { useExpense } from '@/data/expenses';
 import type { Expense } from '@/domain/types';
 import { space } from '@/theme/tokens';
 
 export default function EditExpense() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { expenses } = useStore();
-  const found = expenses.find((e) => e.id === id);
+  const found = useExpense(id);
   // Keep showing the form while the sheet animates away after this expense is deleted.
   const [kept, setKept] = useState<Expense | undefined>(found);
   if (found && found !== kept) setKept(found);
