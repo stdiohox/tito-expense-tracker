@@ -1,7 +1,10 @@
 // Learn more https://docs.expo.dev/guides/customizing-metro
-const { getDefaultConfig } = require('expo/metro-config');
+// getSentryExpoConfig is Expo's getDefaultConfig plus the debug IDs Sentry uses to match crash
+// reports to source maps (docs/SCALE-PLAN.md §7). It changes nothing in the app itself. Sentry's
+// web session replay and feedback widget are left out: we never record screens.
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname, { includeWebReplay: false, includeWebFeedback: false });
 
 /*
  * Cap how many Metro cache files are open at once.

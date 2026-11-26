@@ -10,12 +10,15 @@ import { ToastProvider } from '@/components/toast';
 import { CurrencyViewProvider } from '@/data/currency-view';
 import { MonthProvider } from '@/data/month';
 import { StoreProvider, useStore } from '@/data/store';
+import { startCrashReporting } from '@/lib/crash-reporting';
 import { installGlobalErrorHandlers } from '@/lib/report';
 import { fonts } from '@/theme/tokens';
 import { AppearanceProvider, useTheme } from '@/theme/use-theme';
 import { applyWebFocusRing } from '@/theme/web-focus';
 
 installGlobalErrorHandlers();
+// Off unless EXPO_PUBLIC_SENTRY_DSN is set (docs/SCALE-PLAN.md §7).
+void startCrashReporting();
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // A cold deep link to a sheet (titoexpenses://expense/new) still gets the tabs underneath.

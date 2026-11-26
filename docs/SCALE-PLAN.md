@@ -81,7 +81,23 @@ Rough sizing: 200,000 active users logging about 2 expenses a day is about 12 mi
 
 ## 7. How to connect Sentry
 
-Filled in by step 3 of the reliability pass.
+Sentry is installed (`@sentry/react-native`) but **off** until you give it a DSN. Without one, Sentry is never loaded and the app runs exactly as before.
+
+**What it sends:** crashes, errors caught by the screen error boundaries and the small part boundaries, and release health (crash-free sessions). **What it never sends:** amounts, notes, names or emails. `src/lib/crash-reporting.ts` turns off default personal data, screenshots and the view hierarchy (it contains on-screen amounts), keeps only navigation breadcrumbs, and scrubs every event: user, request and extra data are removed, and every number and email in error messages is replaced (`₦4,500` becomes `₦#`).
+
+**To switch it on:**
+1. Create a free account at sentry.io and a **React Native** project (one project for iOS, Android and web).
+2. Copy the project's DSN (Settings → Projects → your project → Client Keys (DSN)).
+3. For local development, create `.env.local` in the project root (it is gitignored):
+   ```
+   EXPO_PUBLIC_SENTRY_DSN=https://…@….ingest.sentry.io/…
+   ```
+   Restart `npx expo start`. In Expo Go only JavaScript errors are reported; a development build also reports native crashes.
+4. For EAS builds, add the same variable to the EAS environment (`eas env:create --name EXPO_PUBLIC_SENTRY_DSN --value … --environment production --visibility plaintext`), or in the Expo dashboard.
+5. **Readable stack traces (source maps):** create an Organization Auth Token at sentry.io/settings/auth-tokens and add it to EAS as `SENTRY_AUTH_TOKEN` with **sensitive** visibility. Add your org and project names, either as `SENTRY_ORG` and `SENTRY_PROJECT` in EAS, or in `app.json`: `["@sentry/react-native", { "organization": "…", "project": "…" }]`. EAS Build then uploads source maps automatically. After `eas update`, run `npx sentry-expo-upload-sourcemaps dist`.
+6. In Sentry, set the alerts in §6: a new issue affecting more than 50 users, and crash-free sessions under 99.5% for an hour.
+
+To test: with a DSN set, temporarily throw an error in a screen in a development build, open that screen, and check the issue appears in Sentry with no amounts in it.
 
 ## 8. Performance at scale
 
