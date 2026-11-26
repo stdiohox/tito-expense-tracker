@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 
 import { STARTER_CATEGORIES } from '@/domain/categories';
+import { monthKey } from '@/domain/dates';
 import type { AppearanceMode, Category, CurrencyCode, Expense, SetupMode } from '@/domain/types';
 
 
@@ -64,6 +65,7 @@ type Action =
   | { type: 'restore'; expense: Expense }
   | { type: 'upsertCategory'; category: Category }
   | { type: 'settings'; patch: Partial<Settings> }
+  | { type: 'loadExpenses'; expenses: Expense[] }
   | { type: 'signIn' }
   | { type: 'signOut' }
   | { type: 'wipe' };
@@ -93,6 +95,8 @@ function reducer(state: State, action: Action): State {
       if (settings.secondCurrency === settings.currency) settings.secondCurrency = null;
       return { ...state, settings };
     }
+    case 'loadExpenses':
+      return { ...state, expenses: action.expenses };
     case 'signIn':
       return { ...state, signedIn: true };
     case 'signOut':
@@ -119,6 +123,8 @@ export type Actions = {
   signIn: () => void;
   signOut: () => void;
   deleteAccount: () => void;
+  /** Development only: replaces the expenses with 10,000 generated ones (see data/stress.ts). */
+  loadStressData: () => void;
 };
 
 const StateCtx = createContext<State | null>(null);
@@ -170,6 +176,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       signIn: () => dispatch({ type: 'signIn' }),
       signOut: () => dispatch({ type: 'signOut' }),
       deleteAccount: () => dispatch({ type: 'wipe' }),
+      loadStressData: () => {
+        // Inside `if (__DEV__)` so production builds fold the block away, require and all: the
+        // generator never ships.
+        if (__DEV__) {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          const { makeStressExpenses } = require('./stress') as typeof import('./stress');
+          const expenses = makeStressExpenses({
+            lastMonth: monthKey(new Date()),
+            main: latest.current.settings.currency,
+            categoryIds: latest.current.categories.map((c) => c.id),
+          });
+          dispatch({ type: 'loadExpenses', expenses });
+        }
+      },
     }),
     [],
   );

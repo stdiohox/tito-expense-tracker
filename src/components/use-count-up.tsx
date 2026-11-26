@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 
+import { formatMoney } from '@/domain/money';
+import type { CurrencyCode } from '@/domain/types';
+
 /**
  * A number that counts from its last value to `target` over `ms` (ease-out), for hero totals.
  * Whole minor units only, so formatMoney never sees fractions. With Reduce Motion on, it jumps
@@ -33,4 +36,12 @@ export function useCountUp(target: number, ms = 650): number {
   }, [target, ms, reduce]);
 
   return shown;
+}
+
+/**
+ * The counting amount as its own component, so each animation frame re-renders only this text,
+ * not the whole screen (with thousands of expenses, the whole Expenses list). Put it inside a <T>.
+ */
+export function CountUpMoney({ value, currency }: { value: number; currency: CurrencyCode }) {
+  return formatMoney(useCountUp(value), currency);
 }

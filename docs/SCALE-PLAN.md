@@ -101,4 +101,32 @@ To test: with a DSN set, temporarily throw an error in a screen in a development
 
 ## 8. Performance at scale
 
-Filled in by step 5 of the reliability pass.
+**Test data:** in a development build, Settings → Developer → "Load stress data (10,000 expenses)" replaces the expenses with 10,000 generated ones over 24 months in all 20 currencies (60% in the main currency). The button and the generator are inside `if (__DEV__)`, so production builds don't contain them (checked in the web export). `npm run perf` loads the same data and times the work behind each screen.
+
+**Lists are virtualised** with FlashList: the Expenses tab (one item per day) and Categories and budgets. On a phone that mounts about a screenful of rows instead of every expense in the month. The currency picker stays a plain list: it has 20 fixed rows inside the setup and Settings scroll views, where a nested virtualised list can't virtualise and only adds a warning.
+
+**Measured** with `npm run perf` on the development PC (Node, React Native test renderer, 10,000 expenses), after the fixes below:
+
+| What | Before | After |
+|---|---|---|
+| Month summary in one currency (behind Home, Expenses, Reports) | 2 ms | 2 ms |
+| Home: a summary for each of 20 currencies | 16–24 ms (20 full passes) | 2 ms (one pass) |
+| Reports: 6 months of history | 4–8 ms | 4–8 ms |
+| Expenses: group the month into days | 1 ms | 1 ms |
+| Search: one keystroke over the month | 1 ms | 1 ms |
+| Search Expenses for "fuel" (render) | 1,135 ms | 95 ms |
+| Open Expenses (render) | 2,275 ms | 1,293 ms |
+| Open Home (render) | 218 ms | 215 ms |
+| Open Reports (render) | 265 ms | 143 ms |
+
+How to read the render rows: the test renderer has no screen, so FlashList mounts all 246 expense rows of the busiest month there; this is a worst case. A phone mounts a screenful. Times are relative, for spotting regressions; on a phone, check with the React Native Perf Monitor in a development build, and in production with Sentry performance traces (§6).
+
+**Fixes made:**
+- The counting total on Home, Expenses and Reports is its own component (`CountUpMoney`). Before, its 650 ms animation set state on the whole screen every frame, so the whole Expenses list re-rendered about 40 times on each visit.
+- Each day on Expenses is a memoised component, so typing in search or a re-render doesn't redraw days whose expenses haven't changed.
+- Home summarises every currency in one pass over the expenses, not one pass per currency.
+- Summaries stay memoised per month and currency (`useSummary`, Reports history, Home).
+
+**Known limits, for Phase 2:**
+- With many currencies in use, the Expenses and Reports currency toggle gets crowded (it's designed for two or three). Make it scroll sideways when there are more than three.
+- Totals are worked out in JavaScript over every expense. Phase 2 moves them to SQL with an index on `day` (§2), so the cost no longer grows with the number of expenses.

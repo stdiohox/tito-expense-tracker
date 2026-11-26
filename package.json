@@ -6,6 +6,7 @@
     "@expo-google-fonts/outfit": "^0.4.3",
     "@expo/ui": "~58.0.27",
     "@sentry/react-native": "~8.28.0",
+    "@shopify/flash-list": "2.3.2",
     "@tabler/icons-react-native": "^3.51.0",
     "expo": "~58.0.23",
     "expo-constants": "~58.0.15",
@@ -52,7 +53,8 @@
     "typecheck": "tsc --noEmit",
     "check:dates": "node --no-warnings --import ./scripts/ts-resolve.mjs scripts/check-dates.ts",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "test": "jest"
+    "test": "jest",
+    "perf": "jest --testPathIgnorePatterns /node_modules/ /dist/ --testPathPatterns perf/"
   },
   "private": true,
   "jest": {
@@ -62,8 +64,14 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/dist/"
+      "/dist/",
+      "/perf/"
     ],
-    "globalSetup": "<rootDir>/jest.global-setup.js"
+    "globalSetup": "<rootDir>/jest.global-setup.js",
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@shopify/flash-list))",
+      "/node_modules/react-native-reanimated/plugin/",
+      "/node_modules/@react-native/babel-preset/"
+    ]
   }
 }

@@ -16,7 +16,7 @@ import { ScreenHero } from '@/components/screen-hero';
 import { StatCard, StatRow } from '@/components/stat-card';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
-import { useCountUp } from '@/components/use-count-up';
+import { CountUpMoney } from '@/components/use-count-up';
 import { useToast } from '@/components/toast';
 import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
@@ -38,7 +38,6 @@ export default function Reports() {
   const { view: cur } = useCurrencyView();
   const { now, before } = useSummary(month, cur);
   const toast = useToast();
-  const shownTotal = useCountUp(now.total);
   const lastName = monthName(addMonths(month, -1));
   const lastShort = shortMonth(addMonths(month, -1));
 
@@ -93,7 +92,7 @@ export default function Reports() {
             numberOfLines={1}
             minimumFontScale={0.6}
             accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${monthName(month)}`}>
-            {formatMoney(shownTotal, cur)}
+            <CountUpMoney value={now.total} currency={cur} />
           </T>
           <T variant="body" tone="onBrandSoft">
             {headline}

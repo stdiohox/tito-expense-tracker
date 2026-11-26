@@ -17,7 +17,7 @@ import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { Reveal } from '@/components/reveal';
 import { T } from '@/components/text';
-import { useCountUp } from '@/components/use-count-up';
+import { CountUpMoney } from '@/components/use-count-up';
 import { useMonth } from '@/data/month';
 import { useCurrencyView } from '@/data/currency-view';
 import { chosenCurrencies, useStore } from '@/data/store';
@@ -26,7 +26,7 @@ import { shortLabel, visibleCategories } from '@/domain/categories';
 import { addMonths, daysInMonth, dayOfMonth, monthName, shortDay, shortMonth } from '@/domain/dates';
 import { currencyInfo, formatMoney } from '@/domain/money';
 import { compareWords, pace, summarise } from '@/domain/summary';
-import type { CurrencyCode } from '@/domain/types';
+import type { CurrencyCode, Expense } from '@/domain/types';
 import { light, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -54,7 +54,6 @@ export default function Home() {
   const allCount = now.count + foreignCount;
   const catById = useMemo(() => new Map(categories.map((k) => [k.id, k])), [categories]);
   const quick = visibleCategories(categories);
-  const shownTotal = useCountUp(now.total);
 
   let paceLine = '';
   let paceBadge = '';
@@ -70,7 +69,16 @@ export default function Home() {
   const summaries = useMemo(() => {
     const codes = new Set<CurrencyCode>([...chosenCurrencies(settings), ...now.otherCurrencies.map((o) => o.currency)]);
     for (const k of categories) if (k.budget !== null && k.budgetCurrency) codes.add(k.budgetCurrency);
-    return new Map([...codes].map((code) => [code, code === cur ? now : summarise(expenses, categories, month, code)]));
+    // One pass over all expenses: bucket this month's by currency, then summarise each small bucket
+    // (with 10,000 expenses in 20 currencies, 20 full passes took longer than a frame).
+    const byCurrency = new Map<CurrencyCode, Expense[]>();
+    for (const e of expenses) {
+      if (!e.day.startsWith(month) || !codes.has(e.currency)) continue;
+      const list = byCurrency.get(e.currency);
+      if (list) list.push(e);
+      else byCurrency.set(e.currency, [e]);
+    }
+    return new Map([...codes].map((code) => [code, code === cur ? now : summarise(byCurrency.get(code) ?? [], categories, month, code)]));
   }, [settings, now, categories, expenses, month, cur]);
 
   // One glass card per chosen currency (even at 0), then any other currency spent in this month.
@@ -165,7 +173,7 @@ export default function Home() {
                 numberOfLines={1}
                 minimumFontScale={0.6}
                 accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${thisName}`}>
-                {formatMoney(shownTotal, cur)}
+                <CountUpMoney value={now.total} currency={cur} />
               </T>
               <T variant="body" tone="onBrandSoft">
                 {isCurrent ? `Spent so far in ${thisName}` : `Spent in ${thisName}`}
