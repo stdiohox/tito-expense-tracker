@@ -2,31 +2,51 @@ import * as Crypto from 'expo-crypto';
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 
 import { STARTER_CATEGORIES } from '@/domain/categories';
-import type { Category, CurrencyCode, Expense } from '@/domain/types';
+import type { AppearanceMode, Category, CurrencyCode, Expense, SetupMode } from '@/domain/types';
 
-import { SAMPLE_CATEGORIES, sampleExpenses } from './sample';
 
 /*
- * Phase-1 store: in memory, seeded with sample data. Phase 2 replaces the backing with
+ * Phase-1 store: in memory and empty at launch (no demo data): the app opens signed out on the
+ * onboarding, and everything in it is what the tester enters. Phase 2 replaces the backing with
  * expo-sqlite (the single read source) plus an outbox that syncs to Supabase. Screens only
  * talk to the hooks below. Known phase-2 changes (see tasks/todo.md): async mutators with
  * a ready/error state, soft deletes with tombstones, and aggregates computed in SQL.
  */
 
+/** "Ada Obi", or whichever part is set; empty when neither is. */
+export function fullName(s: Pick<Settings, 'firstName' | 'lastName'>): string {
+  return [s.firstName, s.lastName].map((x) => x.trim()).filter(Boolean).join(' ');
+}
+
+/** The user's currencies: the main one first, then the optional second. */
+export function chosenCurrencies(s: Pick<Settings, 'currency' | 'secondCurrency'>): CurrencyCode[] {
+  return s.secondCurrency && s.secondCurrency !== s.currency ? [s.currency, s.secondCurrency] : [s.currency];
+}
+
 export type Settings = {
+  /** Main currency: totals, budgets and new expenses start in it. */
   currency: CurrencyCode;
+  /** Optional second currency, tracked separately and never converted; null when there is none. */
+  secondCurrency: CurrencyCode | null;
+  appearance: AppearanceMode;
+  mode: SetupMode;
   reminderOn: boolean;
   reminderTime: string;
   firstName: string;
+  lastName: string;
   email: string;
 };
 
 /** A fresh account's settings. Deleting the account returns to these. */
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'NGN',
+  secondCurrency: null,
+  appearance: 'system',
+  mode: 'track',
   reminderOn: true,
   reminderTime: '20:00',
   firstName: '',
+  lastName: '',
   email: '',
 };
 
@@ -68,7 +88,10 @@ function reducer(state: State, action: Action): State {
     }
     case 'settings': {
       const patch = Object.fromEntries(Object.entries(action.patch).filter(([, v]) => v !== undefined));
-      return { ...state, settings: { ...state.settings, ...patch } };
+      const settings: Settings = { ...state.settings, ...patch };
+      // The two currencies are always different: making the second one main clears the second.
+      if (settings.secondCurrency === settings.currency) settings.secondCurrency = null;
+      return { ...state, settings };
     }
     case 'signIn':
       return { ...state, signedIn: true };
@@ -105,10 +128,10 @@ export const newId = (): string => Crypto.randomUUID();
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
-    expenses: sampleExpenses(),
-    categories: SAMPLE_CATEGORIES,
-    settings: { ...DEFAULT_SETTINGS, firstName: 'Ada', email: 'ada@example.com' },
-    signedIn: true,
+    expenses: [],
+    categories: STARTER_CATEGORIES.map((c) => ({ ...c })),
+    settings: { ...DEFAULT_SETTINGS },
+    signedIn: false,
   }));
   // Latest state for actions that must answer "did it exist?" without stale closures.
   const latest = useRef(state);

@@ -2,23 +2,26 @@ import { IconChevronRight } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FocusStatusBar } from '@/components/focus-status-bar';
+import { Avatar } from '@/components/avatar';
+import { CurrencyPicker } from '@/components/currency-picker';
 import { STROKE } from '@/components/icons';
+import { Segmented } from '@/components/segmented';
+import { ScreenHero } from '@/components/screen-hero';
+import { Reveal } from '@/components/reveal';
 import { switchColors } from '@/components/switch-colors';
-import { TabTitle } from '@/components/tab-title';
+import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
+import { Wordmark } from '@/components/wordmark';
 import { useToast } from '@/components/toast';
-import { useActions, useStore } from '@/data/store';
-import { CURRENCIES } from '@/domain/money';
-import type { CurrencyCode } from '@/domain/types';
-import { TARGET, radius, space } from '@/theme/tokens';
+import { fullName, useActions, useStore } from '@/data/store';
+import type { AppearanceMode } from '@/domain/types';
+import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export default function Settings() {
-  const { c, scheme } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
+  const clearance = useTabBarClearance();
   const { settings } = useStore();
   const { updateSettings, signOut } = useActions();
   const toast = useToast();
@@ -27,43 +30,65 @@ export default function Settings() {
     <ScrollView
       style={{ backgroundColor: c.ground }}
       contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + space.xxxl }}>
-      <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <TabTitle title="Settings" />
+      contentContainerStyle={{ paddingBottom: clearance + space.xxl }}>
+      <ScreenHero title="Settings">
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.m, marginTop: space.s }}>
+          <Avatar first={settings.firstName} last={settings.lastName} size={56} />
+          <View style={{ flex: 1 }}>
+            <T variant="title" tone="onBrand" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {fullName(settings) || 'Your account'}
+            </T>
+            <T variant="sub" tone="onBrandSoft" numberOfLines={1}>
+              {settings.email || 'No email yet'}
+            </T>
+          </View>
+        </View>
+      </ScreenHero>
+      <Reveal order={1} style={{ paddingHorizontal: space.l }}>
 
       <Group title="Account">
-        <Item label="Name" value={settings.firstName} />
-        <Item label="Email" value={settings.email} last />
+        <Item label="Name" value={fullName(settings)} />
+        <Item label="Email" value={settings.email} />
+        <Item label="Redo setup" onPress={() => router.push('/setup')} last />
       </Group>
 
       <Group title="Money">
         <View style={{ paddingVertical: space.m, gap: space.s, borderBottomWidth: 1, borderBottomColor: c.line }}>
-          <T variant="bodyStrong" importantForAccessibility="no">
-            Main currency
-          </T>
-          <View accessibilityRole="radiogroup" accessibilityLabel="Main currency" style={{ flexDirection: 'row', backgroundColor: c.ground, borderRadius: radius.pill, padding: 2 }}>
-            {(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => {
-              const on = settings.currency === code;
-              return (
-                <Pressable
-                  key={code}
-                  onPress={() => updateSettings({ currency: code })}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on, selected: on }}
-                  accessibilityLabel={`${CURRENCIES[code].symbol} ${CURRENCIES[code].name}`}
-                  style={{ flex: 1, minHeight: TARGET, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.surface : 'transparent' }}>
-                  <T variant="sub" tone={on ? 'ink' : 'inkMute'}>
-                    {CURRENCIES[code].symbol} {CURRENCIES[code].name}
-                  </T>
-                </Pressable>
-              );
-            })}
-          </View>
+          <CurrencyPicker
+            label="Main currency"
+            value={settings.currency}
+            onChange={(currency) => currency && updateSettings({ currency })}
+          />
+          <CurrencyPicker
+            label="Second currency (optional)"
+            value={settings.secondCurrency}
+            onChange={(secondCurrency) => updateSettings({ secondCurrency })}
+            exclude={settings.currency}
+            allowNone
+          />
           <T variant="sub" tone="inkMute">
-            Totals use this currency. Saved expenses keep the currency you entered them in, and budgets keep the currency you set them in.
+            Each currency is tracked on its own and never converted. Saved expenses keep the currency you entered them in, and budgets keep the currency you set them in.
           </T>
         </View>
         <Item label="Categories and budgets" onPress={() => router.push('/categories')} last />
+      </Group>
+
+      <Group title="Appearance">
+        <View style={{ paddingVertical: space.m, gap: space.s }}>
+          <Segmented<AppearanceMode>
+            label="Appearance"
+            value={settings.appearance}
+            onChange={(appearance) => updateSettings({ appearance })}
+            options={[
+              { key: 'system', label: 'System', a11yLabel: 'System, follows your phone' },
+              { key: 'light', label: 'Light' },
+              { key: 'dark', label: 'Dark' },
+            ]}
+          />
+          <T variant="sub" tone="inkMute">
+            System follows your phone’s light or dark setting.
+          </T>
+        </View>
       </Group>
 
       <Group title="Reminder">
@@ -103,9 +128,13 @@ export default function Settings() {
         <Item label="Delete account" tone="danger" onPress={() => router.push('/account/delete')} last />
       </Group>
 
-      <T variant="caption" tone="inkMute" style={{ textAlign: 'center', marginTop: space.xxl }}>
-        Preview build · showing sample data
-      </T>
+      <View style={{ marginTop: space.xxl, alignItems: 'center', gap: space.s }}>
+        <Wordmark align="center" />
+        <T variant="caption" tone="inkMute" style={{ textAlign: 'center' }}>
+          Preview build · your data stays until the app reloads
+        </T>
+      </View>
+      </Reveal>
     </ScrollView>
   );
 }
@@ -115,11 +144,11 @@ function Group({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <View style={{ marginTop: space.xxl }}>
       {title ? (
-        <T variant="headline" accessibilityRole="header" style={{ marginBottom: space.s }}>
+        <T variant="headline" accessibilityRole="header" style={{ marginBottom: space.s, paddingHorizontal: space.xs }}>
           {title}
         </T>
       ) : null}
-      <View style={{ backgroundColor: c.surface, borderRadius: radius.l, paddingHorizontal: space.l }}>{children}</View>
+      <View style={{ backgroundColor: c.surface, borderRadius: radius.xxl, paddingHorizontal: space.l }}>{children}</View>
     </View>
   );
 }

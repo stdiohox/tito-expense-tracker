@@ -24,7 +24,7 @@ export function Row({
   subtitle?: ReactNode;
   trailing?: ReactNode;
   trailingSub?: ReactNode;
-  trailingTone?: 'ink' | 'clay' | 'inkMute';
+  trailingTone?: 'ink' | 'burgundy' | 'inkMute';
   onPress?: () => void;
   accessibilityLabel?: string;
   accessibilityHint?: string;

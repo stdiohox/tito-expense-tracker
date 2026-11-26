@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { announceError } from '@/components/announce';
 import { Button } from '@/components/button';
 import { Field } from '@/components/field';
-import { safeBack } from '@/components/nav';
+import { backOr } from '@/components/nav';
 import { T } from '@/components/text';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -32,7 +32,7 @@ export default function Reset() {
             spam too.
           </T>
         </View>
-        <Button label="Back to sign in" onPress={safeBack} />
+        <Button label="Back to sign in" onPress={() => backOr('/sign-in')} />
       </View>
     );
   }

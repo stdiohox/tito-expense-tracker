@@ -1,4 +1,23 @@
-export type CurrencyCode = 'NGN' | 'USD';
+/** The currencies the app supports (ISO 4217). Each expense keeps its own; nothing is ever converted. */
+export const CURRENCY_CODES = [
+  // Africa
+  'NGN', 'GHS', 'KES', 'ZAR', 'XAF', 'XOF', 'EGP', 'MAD', 'UGX', 'TZS',
+  // Europe
+  'EUR', 'GBP',
+  // Americas
+  'USD', 'CAD',
+  // Middle East and Asia
+  'AED', 'SAR', 'INR', 'JPY', 'CNY',
+  // Oceania
+  'AUD',
+] as const;
+export type CurrencyCode = (typeof CURRENCY_CODES)[number];
+
+/** Light or dark: follow the phone ("system") or force one. */
+export type AppearanceMode = 'system' | 'light' | 'dark';
+
+/** How hands-on the user wants to be (setup step 2): just track, track and budgets, or the full picture. */
+export type SetupMode = 'track' | 'budgets' | 'full';
 
 /** A month in the user's local calendar, e.g. "2026-11". */
 export type MonthKey = `${number}-${string}`;
@@ -17,6 +36,8 @@ export type Category = {
   /** Currency the budget was set in; a budget never silently changes currency. */
   budgetCurrency?: CurrencyCode;
   builtIn: boolean;
+  /** Hidden from Add expense and the categories list (setup step 3); its expenses still count. */
+  hidden?: boolean;
 };
 
 export type Expense = {

@@ -1,10 +1,11 @@
-# Tito Expenses
+# TET · Tito Finance Expense Tracker
 
 A phone app (iOS and Android) for logging what you spend in seconds and seeing your month at a glance.
 Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.titofinance.com`.
 
-> **Status: phase 1, screens on sample data.** Every screen works, but the data is synthetic and
-> lives in memory. There are no real accounts, no sync and no backend yet. Phase 2 adds on-device
+> **Status: phase 1, real use in memory.** Every screen works and there is no demo data: the app
+> starts empty and everything in it is what you enter. Data lives in memory, so it is lost when the
+> app reloads. There are no real accounts, no sync and no backend yet. Phase 2 adds on-device
 > storage (expo-sqlite) and a Supabase backend owned by Koret. It starts after Mr Tito approves
 > the screens.
 
@@ -35,7 +36,7 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
 
 ## What the app does
 
-- **Log a payment fast.** A floating "Add expense" button sits on the Home and Expenses tabs. The sheet opens with
+- **Log a payment fast.** The raised **+** in the middle of the dock opens Add expense from any tab (Quick add on Home presets a category). The sheet opens with
   the keyboard on the amount. Pick a category, optionally change the date or add a note, and save.
 - **See the month at a glance.** Home shows:
   - the month's total;
@@ -50,11 +51,20 @@ Built by Koret for **Tito Finance**. It replaces the web tracker at `expenses.ti
   - a bar chart of up to six months (tap a bar to jump to that month).
 - **Categories and budgets.** The twelve starter categories come from the web tracker, and users can
   add their own. Any category can have a monthly budget. Budgets inform and never alarm: going over
-  shows in clay with words, never in red.
-- **Two currencies (NGN and USD).** Each expense keeps the currency it was entered in. Changing the
-  main currency never relabels saved amounts. Other-currency spending is counted separately and
-  never converted.
-- **Light and dark mode**, following the system setting. Both are designed as a pair.
+  shows in burgundy with words, never in red.
+- **Twenty currencies, a main one and an optional second.** Picked from a list grouped by region
+  and searchable by any country that uses the currency ("Germany" finds the euro, "Senegal" the
+  West African CFA franc):
+  - Africa: NGN, GHS, KES, ZAR, XAF, XOF, EGP, MAD, UGX, TZS
+  - Europe: EUR, GBP
+  - Americas: USD, CAD
+  - Middle East and Asia: AED, SAR, INR, JPY, CNY
+  - Oceania: AUD
+
+  Each expense keeps the currency it was entered in, and each currency is tracked on its own: its
+  own card on Home, and a toggle on Expenses and Reports. Nothing is ever converted.
+- **Light and dark mode**, following the phone or forced in **Settings → Appearance**. Both are designed as a pair.
+- **Onboarding.** Three intro slides, then a three-step setup after sign-up (main currency, how hands-on, categories and budgets); **Settings → Redo setup** reopens it.
 - **Accessible.** The app has:
   - WCAG 2.2 AA contrast, checked by a script;
   - 44 pt / 48 dp touch targets;
@@ -89,9 +99,10 @@ npx expo start          # dev server; scan the QR code with Expo Go (phone on th
 npx expo start --web    # browser preview; set the window to phone width (390 × 844)
 ```
 
-The app opens signed in as a sample user ("Ada"), with the last three months of synthetic spending in
-Lagos. To see the welcome and auth screens, use **Settings → Sign out**. **Delete account** clears the
-sample data until the next reload.
+The app opens **signed out, on the onboarding slides**, with no data. Create an account (any name,
+email and an 8-character password; nothing is sent anywhere) to go through the setup steps, or use
+"I already have an account" with any email and password. Everything you then add stays until the app
+reloads. **Settings → Sign out** returns to the slides; **Delete account** clears it all.
 
 ### Static web build
 
@@ -147,15 +158,15 @@ There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test su
     ├── app/                 Routes (Expo Router). Every file is a screen; _layout files are navigators.
     │   ├── _layout.tsx      Root: fonts, splash, providers, signed-in / signed-out stacks
     │   ├── (tabs)/          Home (index), Expenses, Reports, Settings
-    │   │   ├── _layout.tsx      Native system tab bar (iOS and Android)
-    │   │   └── _layout.web.tsx  Custom bottom tab bar for the web build
+    │   │   └── _layout.tsx      Floating finance dock with a raised + (expo-router/ui), every platform
     │   ├── expense/         new.tsx (add sheet), [id].tsx (edit sheet)
     │   ├── category/        [id].tsx (detail), edit.tsx (create/edit sheet)
     │   ├── categories.tsx   Categories and budgets list
     │   ├── account/delete.tsx
-    │   └── welcome.tsx, sign-in.tsx, sign-up.tsx, reset.tsx
+    │   ├── setup.tsx        Three-step setup after sign-up (and Settings → Redo setup)
+    │   └── welcome.tsx, sign-in.tsx, sign-up.tsx, reset.tsx   (welcome = three intro slides)
     ├── components/          Shared UI: Row, Button, Field, T (text), PaceChart, Toast, ExpenseForm, …
-    ├── data/                State: store (phase 1: in memory), month/today provider, summary hook, sample data
+    ├── data/                State: store (phase 1: in memory, empty at launch), month/today provider, summary hook
     ├── domain/              Pure TypeScript, no React: types, dates, money, summaries, starter categories
     ├── hooks/               Small platform hooks (colour scheme)
     └── theme/               Colour tokens (light and dark), type scale, spacing, web focus ring
@@ -171,17 +182,18 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Route | File | Shown as | Purpose |
 |---|---|---|---|
-| `/` | `(tabs)/index.tsx` | Tab | Home: month total, pace line and chart, where it went, latest four expenses |
-| `/expenses` | `(tabs)/expenses.tsx` | Tab | The month grouped by day, with daily totals and search |
-| `/reports` | `(tabs)/reports.tsx` | Tab | Total vs last month, by category, month-by-month bars, share as PDF (stub) |
-| `/settings` | `(tabs)/settings.tsx` | Tab | Account, main currency, categories, reminder, export, sign out, delete |
+| `/` | `(tabs)/index.tsx` | Tab | Home: greeting, month total, pace line and chart, a glass card per currency, Quick add, budget cards, where it went, latest |
+| `/expenses` | `(tabs)/expenses.tsx` | Tab | Stat cards, search, and the month grouped by day in panels |
+| `/reports` | `(tabs)/reports.tsx` | Tab | Total, comparison cards, by category, month-by-month bars, share as PDF (stub) |
+| `/settings` | `(tabs)/settings.tsx` | Tab | Account, Redo setup, main and second currency, appearance, categories, reminder, export, sign out, delete |
 | `/expense/new?category=` | `expense/new.tsx` | Sheet | Add an expense (the category can be preset) |
 | `/expense/[id]` | `expense/[id].tsx` | Sheet | Edit or delete an expense |
 | `/category/[id]` | `category/[id].tsx` | Push | Category total, budget, activity, "Add to …" |
 | `/category/edit?id=` | `category/edit.tsx` | Sheet | Create a category (no `id`) or edit one |
 | `/categories` | `categories.tsx` | Push | All categories with their budgets |
 | `/account/delete` | `account/delete.tsx` | Push | Type DELETE to confirm account deletion |
-| `/welcome` · `/sign-in` · `/sign-up` · `/reset` | root files | Stack | Signed-out screens |
+| `/setup` | `setup.tsx` | Full screen | After sign-up: your currencies (main and optional second), how hands-on, categories and up to four budgets |
+| `/welcome` · `/sign-in` · `/sign-up` · `/reset` | root files | Stack | Signed-out screens; `/welcome` is three intro slides |
 
 **Sheet** means a native form sheet on iOS and Android, and a full-screen card on the web.
 Signed-in and signed-out screens sit in separate `Stack.Protected` groups, so after sign-out, Back
@@ -194,27 +206,41 @@ can never return to the old data. The deep-link scheme is `titoexpenses://` (for
 
 The web tracker's bugs come back if these rules are broken.
 
-1. **Money is an integer in minor units** (kobo or cents), and every expense carries its `currency`.
+1. **Money is an integer in minor units** (kobo, cents; whole units for XAF, XOF, UGX and JPY,
+   which have no minor unit in ISO 4217), and every expense carries its `currency`.
+   Symbols never clash: `$` is the US dollar, `CA$`, `A$`, `CN¥` and `¥` are distinct, the CFA
+   francs are `FCFA` (XAF) and `CFA` (XOF), and letter symbols get a space (`USh 5,000`).
+   Look a currency up with `currencyInfo(code)`, never `CURRENCIES[code]`: a code that is no longer
+   on the list (older saved data) then still shows as its code with two decimals, instead of
+   crashing, and its expenses are kept.
    Use `formatMoney()` and `parseAmount()` from `src/domain/money.ts`. Never store or add floats.
 2. **Dates are local calendar strings.** A day is a `DayKey` (`"2026-11-23"`) and a month is a
    `MonthKey` (`"2026-11"`), both built from the device's local date parts. **Never use
    `toISOString()` for a date.** It returns UTC, and that is what broke month navigation in Nigeria.
    Use `src/domain/dates.ts`.
-3. **Currencies are never converted or relabelled.** Totals use the main currency. Other currencies
-   show as "Plus $14.99 in USD, counted separately". A budget only applies in the currency it was
-   set in.
-4. **Screens reach data only through hooks:** `useStore()`, `useActions()`, `useMonth()` and
-   `useSummary()`. Because of this boundary, phase 2 can replace the storage without rewriting
+3. **Currencies are never converted or relabelled.**
+   - The user picks a main currency (`settings.currency`) and an optional second one
+     (`settings.secondCurrency`, null when none). They are always different.
+   - Every total, chart and budget is in one currency. Home has a card per currency; Expenses and
+     Reports show one at a time through the shared toggle (`useCurrencyView()`).
+   - New expenses can only be in the user's currencies. Changing the main currency never relabels
+     saved amounts.
+   - A budget is in the currency it was set in (`budgetCurrency`), chosen per budget in setup and
+     in Edit category, and only counts expenses in that currency.
+   - Removing a currency keeps its expenses: they still show under that currency on Home and in
+     the toggle, and editing one keeps its currency.
+4. **Screens reach data only through hooks:** `useStore()`, `useActions()`, `useMonth()`,
+   `useCurrencyView()` and `useSummary()`. Because of this boundary, phase 2 can replace the storage without rewriting
    screens.
 5. **Add packages with `npx expo install <pkg>`**, not `npm install <pkg>`, so versions match SDK 58.
    Before using an Expo API, read the SDK 58 docs at `https://docs.expo.dev/versions/v58.0.0/`.
 6. **Design rules.** The full list is in [DESIGN.md](DESIGN.md). The main ones:
    - one primary button per task screen;
-   - gold means "today" and nothing else;
-   - clay means a budget passed or an error, and nothing is ever red;
+   - aqua mint is the one pop, only on dark or blue surfaces (teal on light ones), never a fill;
+   - burgundy means a budget passed or an error, always with words, and nothing is ever red;
+   - the navy → royal → electric gradient is only on the Home header and onboarding, and never moves;
    - category colour appears only inside the icon disc;
-   - Fraunces is for totals and large titles only;
-   - every amount uses tabular figures.
+   - Outfit everywhere; every amount uses tabular figures (Outfit's `tnum`).
 7. **Colours come only from `src/theme/tokens.ts`.** After changing one, run `npm run check:contrast`.
 
 ---
@@ -236,12 +262,15 @@ The web tracker's bugs come back if these rules are broken.
 3. When the action needs the current state, read it from the `latest` ref, not from a closure.
 
 **Add a currency.**
-1. Add the code to `CurrencyCode` in `src/domain/types.ts`.
-2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol, name, minor units per major
-   unit, and `sameBelow` (the smallest month-to-month difference worth mentioning, in minor units).
-   The pickers read `CURRENCIES`, so the UI updates on its own.
-3. Extend the symbol-stripping regex in `parseAmount`. It only strips `₦` and `$` today.
-4. Add cases to `scripts/check-dates.ts`.
+1. Add the code to `CURRENCY_CODES` in `src/domain/types.ts`.
+   Its place in the list is its place in the picker, inside its region.
+2. Add an entry to `CURRENCIES` in `src/domain/money.ts`: symbol (and whether it needs a space,
+   like `KSh 1,200`), name, flag, the country shown, region, every country or place that uses it
+   (for search), decimals (ISO 4217) and `sameBelow` (roughly a dollar's worth, in whole units).
+   Pick a symbol that doesn't clash with another (`CA$`, not `$`). `parseAmount` strips every
+   symbol and code automatically, and the pickers read `CURRENCIES`.
+3. Add its expected output to the table in `scripts/check-dates.ts`, and update the order and
+   region counts there.
 
 **Add a category icon.**
 1. Add the key to `CategoryIcon` in `src/domain/types.ts`.
@@ -266,7 +295,7 @@ There is no iOS Simulator or Android SDK on the build Mac, so on-device checks u
 2. Work through the device checklist in
    [tasks/todo.md](tasks/todo.md#check-on-real-devices-no-simulator-on-this-mac):
    - safe areas;
-   - the Add button and toast clearing the tab bar;
+   - the dock and toast clearing the home indicator and Android navigation bar;
    - the keyboard not covering Save on Android;
    - VoiceOver and TalkBack;
    - 200% text.
@@ -283,7 +312,7 @@ build** (`eas build --profile development`).
 
 | Feature | Phase 1 behaviour | Phase 2 |
 |---|---|---|
-| Data | In memory, seeded from `src/data/sample.ts` on each launch; lost on reload | expo-sqlite on the device plus an outbox, synced to Supabase |
+| Data | In memory, empty at launch (no demo data); lost on reload | expo-sqlite on the device plus an outbox, synced to Supabase |
 | Sign up / sign in | Validates the form, waits 0.5 s, then signs in locally | Supabase Auth with real error states |
 | Password reset | Shows "sent" for any valid email | `resetPasswordForEmail` |
 | Delete account | Clears local data after 0.6 s | Delete-account Edge Function, with an error path |
@@ -292,13 +321,13 @@ build** (`eas build --profile development`).
 | Daily reminder | The switch stores the setting only | Local notifications (expo-notifications) |
 | Privacy policy | Toast | Link to the published policy |
 
-The Settings footer reads "Preview build · showing sample data" so testers know what they are seeing.
+The Settings footer reads "Preview build · your data stays until the app reloads" so testers know what to expect.
 
 ---
 
 ## Roadmap
 
-- **Phase 1, screens on sample data.** Done. Waiting for Mr Tito's review and real-phone checks.
+- **Phase 1, screens in memory (no demo data).** Done. Waiting for Mr Tito's review and real-phone checks.
 - **Phase 2, real data.** See [tasks/todo.md](tasks/todo.md) and
   [docs/ARCHITECTURE.md §10](docs/ARCHITECTURE.md#10-phase-2-target-architecture). Scope:
   - expo-sqlite store and outbox;

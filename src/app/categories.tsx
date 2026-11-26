@@ -7,6 +7,7 @@ import { IconDisc } from '@/components/icon-disc';
 import { Row } from '@/components/row';
 import { T } from '@/components/text';
 import { useStore } from '@/data/store';
+import { visibleCategories } from '@/domain/categories';
 import { formatMoney } from '@/domain/money';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -17,7 +18,7 @@ export default function Categories() {
   const insets = useSafeAreaInsets();
   return (
     <ScrollView style={{ backgroundColor: c.ground }} contentContainerStyle={{ paddingHorizontal: space.xl, paddingBottom: insets.bottom + space.xxl }}>
-      {categories.map((cat) => (
+      {visibleCategories(categories).map((cat) => (
         <Row
           key={cat.id}
           leading={<IconDisc icon={cat.icon} size={36} />}
@@ -40,6 +41,11 @@ export default function Categories() {
       <T variant="sub" tone="inkMute" style={{ marginTop: space.l }}>
         Budgets are monthly and reset on the 1st.
       </T>
+      {categories.some((cat) => cat.hidden) ? (
+        <T variant="sub" tone="inkMute" style={{ marginTop: space.s }}>
+          {categories.filter((cat) => cat.hidden).length} hidden during setup. Their expenses still count. Redo setup in Settings to show them again.
+        </T>
+      ) : null}
     </ScrollView>
   );
 }

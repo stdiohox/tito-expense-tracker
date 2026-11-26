@@ -1,11 +1,11 @@
-# Architecture: Tito Expenses
+# Architecture: TET (Tito Finance Expense Tracker)
 
 How the app is built today (phase 1), why it is built that way, and the target design for phase 2
 (real data, sync and a Supabase backend).
 
 | | |
 |---|---|
-| **Applies to** | `main` at the phase-1 build (screens on sample data) |
+| **Applies to** | the phase-1 build (in memory, no demo data) |
 | **Last updated** | 2026-11-23 |
 | **Scope source** | `proposals/tito-expense-app/PLAN.md` in the Koret Tech repo. Decision D1 = **Track B**: Koret builds its own backend (2026-11-09). |
 | **Status key** | **Built**: in the code now. **Planned**: agreed in PLAN.md or `tasks/todo.md`, not built. **Proposed**: this document's recommendation, not yet decided. |
@@ -39,7 +39,7 @@ Nothing leaves the phone.
 ```mermaid
 flowchart LR
   user([Tito Finance user]) --> app["Tito Expenses app<br/>Expo / React Native<br/>iOS · Android · web preview"]
-  app --> mem[("In-memory store<br/>sample data")]
+  app --> mem[("In-memory store<br/>empty at launch")]
 ```
 
 ### Target (phase 2 and launch, planned)
@@ -71,12 +71,12 @@ owner of that backend provides an export (PLAN.md §7.2, Track B).
 | Framework | Expo SDK 58, React Native 0.88, React 19.3 | Built |
 | Language | TypeScript 6, `strict: true`, path alias `@/*` → `src/*` | Built |
 | Compiler | React Compiler (`experiments.reactCompiler` in `app.json`) | Built |
-| Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `NativeTabs` | Built |
+| Navigation | Expo Router 58: file-based routes, typed routes, `Stack.Protected`, `expo-router/ui` tabs with a floating finance dock | Built |
 | State | React Context + `useReducer` (in memory) | Built; replaced in phase 2 |
 | Charts | `react-native-svg`, hand-drawn (pace line, bars) | Built |
-| Animation | `react-native-reanimated` 4 (toast, Add button), honours Reduce Motion | Built |
-| Icons | Tabler (`@tabler/icons-react-native`), stroke 1.75; SF Symbols / Material in the native tab bar | Built |
-| Fonts | Manrope (400–800), Fraunces 600, via `@expo-google-fonts` | Built |
+| Animation | `react-native-reanimated` 4 (toast), honours Reduce Motion | Built |
+| Icons | Tabler (`@tabler/icons-react-native`), stroke 1.75, including the tab bar | Built |
+| Fonts | Outfit 400, 500, 600 via `@expo-google-fonts/outfit`; tabular figures through its `tnum` feature | Built |
 | IDs | `expo-crypto` `randomUUID()` (client-generated) | Built |
 | Haptics | `expo-haptics` | Built |
 | Local database | `expo-sqlite`, with versioned migrations | Planned |
@@ -108,8 +108,8 @@ flowchart TD
 | Layer | Folder | Holds | May import |
 |---|---|---|---|
 | **Routes** | `src/app/` | Screens and navigators. Each file is a route; `_layout.tsx` files define navigators. | everything below |
-| **Components** | `src/components/` | Reusable UI (`Row`, `Button`, `Field`, `T`, `PaceChart`, `Toast`, `ExpenseForm`, `AddButton`, `MonthSwitcher`, …) and small UI helpers (`nav.ts`, `announce.ts`, `use-fab-scroll.ts`) | data, domain, theme |
-| **Data** | `src/data/` | State providers and hooks: `store.tsx`, `month.tsx`, `use-summary.ts`, `sample.ts` | domain |
+| **Components** | `src/components/` | Reusable UI (`Row`, `Button`, `Field`, `T`, `PaceChart`, `Toast`, `ExpenseForm`, `ScreenHero`, `MonthSwitcher`, …) and small UI helpers (`nav.ts`, `announce.ts`, `tab-bar.ts`) | data, domain, theme |
+| **Data** | `src/data/` | State providers and hooks: `store.tsx`, `month.tsx`, `use-summary.ts` | domain |
 | **Domain** | `src/domain/` | Pure functions and types: `types.ts`, `dates.ts`, `money.ts`, `summary.ts`, `categories.ts` | only other domain files |
 | **Theme** | `src/theme/` | `tokens.ts` (palettes, category colours, spacing, radius, type), `use-theme.ts`, `web-focus.ts` | domain types only |
 
@@ -161,7 +161,7 @@ somewhere sensible.
 ```
 Stack (root)
 ├─ Protected guard = signedIn
-│  ├─ (tabs)                 NativeTabs on iOS/Android · custom TabList on web
+│  ├─ (tabs)                 expo-router/ui tabs, floating finance dock on every platform
 │  │  ├─ index      Home
 │  │  ├─ expenses   Expenses
 │  │  ├─ reports    Reports
@@ -171,9 +171,10 @@ Stack (root)
 │  ├─ category/[id]          push (header "Edit" button)
 │  ├─ category/edit          sheet
 │  ├─ categories             push
-│  └─ account/delete         push
+│  ├─ account/delete         push
+│  └─ setup                  full screen (after sign-up; Settings → Redo setup)
 └─ Protected guard = !signedIn
-   ├─ welcome                fade
+   ├─ welcome                fade (three intro slides)
    ├─ sign-in
    ├─ sign-up
    └─ reset
@@ -186,13 +187,23 @@ Stack (root)
   data. This matters most after account deletion.
 - **Sheets.** On iOS and Android these are native `formSheet`s (grabber, one detent at full height).
   The web stack has no form sheet, so the same options choose `card` when `Platform.OS === 'web'`.
-- **Tabs are sections, not actions.** Adding an expense is the floating `AddButton`, not a tab
-  (DESIGN.md, Layout).
-- **Native tab bar vs web.** `(tabs)/_layout.tsx` uses `NativeTabs` (the system tab bar, with SF
-  Symbols and Material icons). Automatic content insets are off, because Home's indigo header must
-  run under the status bar. Each screen applies its own safe-area padding instead.
-  `(tabs)/_layout.web.tsx` is picked automatically for web builds and draws a matching bar with
-  `expo-router/ui`.
+- **Tabs are sections, not actions.** Adding an expense is the raised + in the middle of the
+  dock, a plain button inside `TabList` (only `TabTrigger`s become tabs), not a tab.
+- **Finance dock.** `(tabs)/_layout.tsx` uses `expo-router/ui` (`Tabs`, `TabList`,
+  `TabTrigger`, `TabSlot`) to draw one floating dock of frosted white glass (88% wide, the same in
+  both modes, `dock` and `dockGlass` tokens) with a raised Add button in the middle, on iOS,
+  Android and the web. The system tab bar can't take this look, so `NativeTabs` was dropped
+  in the redesign. Every tab opens with `ScreenHero` (`components/screen-hero.tsx`): the brand
+  gradient with its top-right flare, rendered in the light palette in both modes, and fading into
+  the current mode's ground. The rest of each screen follows the Appearance setting. The bar overlays the
+  content: `useTabBarClearance()` (`components/tab-bar.ts`) tells screens and the toast how much
+  room to leave (the dock, its raised + and the safe area), and the bar steps aside while the keyboard is open.
+- **Appearance.** `settings.appearance` (System, Light, Dark) reaches `useTheme()` through
+  `AppearanceProvider`; on iOS and Android `Appearance.setColorScheme` also switches native UI.
+  `AppearanceProvider mode="dark"` is also how dark panels (Quick add, Latest, the tab bar) render
+  their contents in the dark palette in light mode.
+- **Setup.** Sign-up replaces to `/setup`; its Finish calls `router.dismissTo('/')`. Hidden
+  categories (`Category.hidden`) leave pickers but still count in every total.
 - **`safeBack()`** (`components/nav.ts`) goes back if it can, and otherwise replaces to `/`. It
   covers a sheet opened from a cold deep link, where there is nothing to go back to.
 - **Typed routes** are on, so `router.push({ pathname: '/expense/[id]', params: { id } })` is
@@ -395,18 +406,12 @@ There are two exceptions:
 - the Expenses tab's per-day subtotals;
 - the category detail's own month totals.
 
-### 7.4 Sample data (`data/sample.ts`)
+### 7.4 Starting state (no demo data)
 
-A seeded linear congruential generator builds synthetic Lagos-style spending, so it looks the same
-on every launch:
-
-- two full past months, plus the current month up to today;
-- fixed rules: rent on the 1st, bills on fixed days, tithe on Sundays, random food and transport;
-- last month scaled 1.12×, so the pace line has something to show;
-- one USD expense, to show the "counted separately" behaviour;
-- budgets on Food (₦90k), Transport (₦45k) and Airtime (₦6k).
-
-No real person's spending is used.
+The store starts empty and signed out: no expenses, the twelve starter categories with no
+budgets, and `DEFAULT_SETTINGS`. The app opens on the onboarding slides, so testers create their own
+account (sign-up leads through setup) and every figure on screen is one they entered. The earlier
+synthetic sample generator (`data/sample.ts`) has been removed.
 
 ---
 
@@ -417,7 +422,7 @@ No real person's spending is used.
 ```mermaid
 sequenceDiagram
   actor U as User
-  participant FAB as AddButton
+  participant FAB as Dock +
   participant F as ExpenseForm (sheet)
   participant D as domain/money
   participant S as Store
@@ -505,14 +510,15 @@ sequenceDiagram
 - **Text** goes through `T` (`components/text.tsx`), which applies a `variant`, a `tone` and
   optional tabular figures (`numeric`).
 - The design rules behind these tokens are in [DESIGN.md](../DESIGN.md). Light and dark are
-  designed as pairs. In dark mode, for example, the primary button becomes periwinkle with ink text,
-  because a dark indigo button would disappear on the indigo-black ground.
+  designed as pairs. In dark mode, for example, the primary button becomes periwinkle with navy text,
+  because a dark indigo button would disappear on the navy ground.
 
 ### 9.2 Charts
 
 - **`PaceChart`** (`components/pace-chart.tsx`) is drawn with `react-native-svg`. This month is a
   monotone cubic line (no overshoot below zero or past the real values) with a gradient fill. Last
-  month is a dashed ghost line. A gold dot marks today. The whole chart has one
+  month is a dashed ghost line. A mint dot marks today. It sits on `BrandGradient`, a static
+  navy → royal → electric SVG gradient with an icy glow, shared with the onboarding slides. The whole chart has one
   `accessibilityLabel` that states the numbers in words.
 - **Reports month-by-month bars** are plain `View`s sized as a percentage of the largest month. Each
   bar is a button that selects its month.
@@ -522,13 +528,13 @@ sequenceDiagram
 
 | Area | iOS | Android | Web |
 |---|---|---|---|
-| Tab bar | `NativeTabs`, SF Symbols | `NativeTabs`, Material icons | `_layout.web.tsx`, Tabler icons |
+| Tab bar | Floating `expo-router/ui` dock, Tabler icons | Same | Same |
 | Sheets | `formSheet` with grabber | `formSheet` | Full-screen `card` |
 | Touch target | 44 pt | 48 dp | 44 px |
 | Announcements | `announceForAccessibility` (no live regions) | Live regions | `aria-live`, and focus moves to the field |
 | Focus ring | System | System | `theme/web-focus.ts` adds a `:focus-visible` outline (WCAG 2.4.7) |
 | Switch colours | `trackColor` | `trackColor` | Also needs `activeTrackColor`/`activeThumbColor` |
-| Toast offset | Tab bar 49 | Tab bar 80 | Tab bar 62 |
+| Toast offset | `useTabBarClearance()` | Same | Same |
 | Back | Swipe | Predictive back (`predictiveBackGestureEnabled`) | Browser back |
 
 Tab screens stay mounted, so a plain `<StatusBar>` would leave whichever tab mounted last in charge.
@@ -552,18 +558,15 @@ indigo, and the other tabs follow the colour scheme.
 - **Text scaling** follows the OS. `maxFontSizeMultiplier` caps it at 2× for all text and fields,
   1.6× for category tile names and 1.5× for the amount input. Totals shrink to fit, down to 60%.
 - **Motion:** Reanimated animations use `ReduceMotion.System`.
-- **Contrast:** `npm run check:contrast` checks 98 pairs in light and dark (text at 4.5:1,
+- **Contrast:** `npm run check:contrast` checks 180 pairs in light and dark (text at 4.5:1,
   non-text at 3:1).
 
-### 9.5 Floating Add button
+### 9.5 Adding from the dock
 
-`useFabScroll()` turns scroll position into two flags:
-
-- **`compact`:** after 120 px of scroll, the "+ Add expense" pill shrinks to a round "+".
-- **`hidden`:** the button hides while scrolling down, so it never covers the amounts being read,
-  and comes back on any scroll up.
-
-It appears on Home and Expenses only. Those two lists reserve `120 + safe-area` bottom padding, so the last row is never hidden.
+The raised **+** in the middle of the dock opens `/expense/new` from any tab; Quick add on Home
+opens it with a category chosen. There is no separate floating Add button. Tab screens pad their
+bottom by `useTabBarClearance()` (the dock, its raised button and the safe area), so nothing hides
+behind the dock.
 
 ---
 
@@ -747,7 +750,7 @@ create index on expenses (user_id, day) where deleted_at is null;
 | Types | `npm run typecheck` | Strict TS, typed routes |
 | Lint | `npm run lint` | Expo ESLint rules, hooks rules |
 | Domain | `npm run check:dates` | Local-calendar month/day maths in `Africa/Lagos`; DST; money format and parse; summaries (unknown category, malformed day, other currency) |
-| Contrast | `npm run check:contrast` | WCAG AA for 98 text and non-text pairs in light and dark |
+| Contrast | `npm run check:contrast` | WCAG AA for 180 text and non-text pairs (header text against the worst point of the sampled brand gradient, and on glass cards over it) in light and dark |
 | Dependencies | `npx expo-doctor` | SDK 58 compatibility |
 | Visual | Web build at 390 × 844, light and dark | Layout and states |
 | Devices | Expo Go on a real iPhone and Android phone | Safe areas, keyboard, VoiceOver/TalkBack, 200% text (checklist in `tasks/todo.md`) |
@@ -773,10 +776,10 @@ So nothing is compiled or mocked.
 | AD5 | **Hand-rolled `formatMoney`** instead of `Intl.NumberFormat` | Identical output on Hermes and the web | `Intl` (output differs by engine and locale data) |
 | AD6 | **Client-generated UUIDs** for expenses | Offline creation without server ids; idempotent retries | Server integer ids (as on the web) |
 | AD7 | **Charts with `react-native-svg`**, not Victory Native/Skia | Two simple charts; Skia needs extra WebAssembly setup for the web build | Victory Native (Skia), suggested in PLAN.md §7.1 |
-| AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for sample data; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
+| AD8 | **Context + reducer** for phase-1 state, behind hooks | Smallest thing that works for phase 1; the hook boundary keeps the phase-2 swap local | Redux, Zustand, TanStack Query in phase 1 |
 | AD9 | **`Stack.Protected`** for auth gating | No back gesture into signed-out data | Redirects in `useEffect` |
-| AD10 | **System tab bar (`NativeTabs`)** on iOS and Android, custom bar on the web | Native look, feel and behaviour; the native tab view has no web form | A JS tab bar everywhere |
-| AD11 | **Brand: Tito indigo `#272c77`**, Manrope + Fraunces; JetBrains Mono dropped | PRODUCT.md brand commitments; amounts use Manrope's tabular figures | The web tracker's monospace amounts |
+| AD10 | **Floating finance dock with `expo-router/ui`** on every platform (redesign, 2026-11-24) | The design calls for a custom dark bar, which the system tab bar can't do; one layout for all platforms | The system tab bar (`NativeTabs`), used until the redesign |
+| AD11 | **Redesign palette** (navy, royal, electric, icy, one mint pop) and **Outfit** | The redesign brief; Outfit's `tnum` gives tabular amounts | The earlier Tito indigo + Manrope/Fraunces look; the web tracker's monospace amounts |
 | AD12 | **SQLite as the only read source in phase 2**, with an outbox | Offline first, instant screens, one cache | Reading straight from the network; two caches |
 
 ---
@@ -789,11 +792,11 @@ So nothing is compiled or mocked.
 - Auth, reset, delete account, PDF, CSV, the reminder and the privacy policy are UI stubs (see the
   README).
 - `summarise()` scans every expense, and Reports calls it up to six times for the month-by-month
-  bars. This is fine for sample data. Phase 2 moves it to SQL.
+  bars. This is fine for a phase-1 month of data. Phase 2 moves it to SQL.
 - Only NGN and USD exist. PLAN.md §5.5 lists NGN, USD, EUR, GBP and CAD for settings.
 - Forms use local state and inline checks. PLAN.md §7.1 suggests react-hook-form + Zod. Decide
   before phase 2 whether the extra forms justify it.
-- Toast offsets assume the system's default tab bar heights. Confirm them on devices.
+- The tab bar and toast offsets come from `useTabBarClearance()`; confirm them on devices.
 - There is no unit-test runner. Domain checks are assertions in a script.
 
 **Open questions**

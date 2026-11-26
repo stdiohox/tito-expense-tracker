@@ -1,34 +1,43 @@
 import { IconShare } from '@tabler/icons-react-native';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BudgetChart, type BudgetLine } from '@/components/budget-chart';
 import { Button } from '@/components/button';
-import { FocusStatusBar } from '@/components/focus-status-bar';
+import { CurrencyToggle } from '@/components/currency-toggle';
+import { DailyChart } from '@/components/daily-chart';
 import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
-import { Row, SectionHeader } from '@/components/row';
-import { TabTitle } from '@/components/tab-title';
+import { Panel } from '@/components/panel';
+import { Row } from '@/components/row';
+import { Reveal } from '@/components/reveal';
+import { ScreenHero } from '@/components/screen-hero';
+import { StatCard, StatRow } from '@/components/stat-card';
+import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
+import { useCountUp } from '@/components/use-count-up';
 import { useToast } from '@/components/toast';
+import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
-import { addMonths, monthName, monthOfDay, shortMonth } from '@/domain/dates';
+import { addMonths, dayOfMonth, daysInMonth, monthName, monthOfDay, shortMonth } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
-import { compareWords, pace, summarise } from '@/domain/summary';
+import { budgetFor, compareWords, pace, summarise } from '@/domain/summary';
 import type { MonthKey } from '@/domain/types';
 import { TARGET, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 export default function Reports() {
-  const { c, scheme } = useTheme();
-  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
+  const clearance = useTabBarClearance();
   const { month, current, set, isCurrent, today } = useMonth();
-  const { expenses, categories, settings } = useStore();
-  const { now, before } = useSummary(month);
+  const { expenses, categories } = useStore();
+  // One currency at a time (the toggle switches); totals, charts and budgets are never converted.
+  const { view: cur } = useCurrencyView();
+  const { now, before } = useSummary(month, cur);
   const toast = useToast();
-  const cur = settings.currency;
+  const shownTotal = useCountUp(now.total);
   const lastName = monthName(addMonths(month, -1));
   const lastShort = shortMonth(addMonths(month, -1));
 
@@ -58,65 +67,128 @@ export default function Reports() {
     headline = word === 'same' ? `About the same as ${when}` : `${formatMoney(Math.abs(vsLast.d), cur)} ${word} than ${when}`;
   }
 
+  // Every budget in the main currency, from the moment it is set (₦0 spent is still a line).
+  const budgetLines: BudgetLine[] = categories
+    .map((k) => ({ k, budget: budgetFor(k, cur) }))
+    .filter((x): x is { k: typeof x.k; budget: number } => x.budget !== null && x.budget > 0 && !x.k.hidden)
+    .map(({ k, budget }) => ({ category: k, budget, spent: now.byCategory.find((b) => b.category.id === k.id)?.total ?? 0 }))
+    .sort((a, b) => b.spent / b.budget - a.spent / a.budget);
+  const overCount = budgetLines.filter((b) => b.spent > b.budget).length;
+
+  const deltaPct = vsLast && vsLast.base > 0 ? Math.round((vsLast.d / vsLast.base) * 100) : null;
+
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
-      <FocusStatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <ScrollView
         contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: insets.top, paddingBottom: insets.bottom + space.xxxl }}>
-        <TabTitle title="Reports">
-          <MonthSwitcher />
-        </TabTitle>
-
-        <View style={{ marginTop: space.m, gap: space.xs }}>
-          <T variant="total" numeric adjustsFontSizeToFit numberOfLines={1} minimumFontScale={0.6}>
-            {formatMoney(now.total, cur)}
+        contentContainerStyle={{ paddingBottom: clearance + space.xxl }}>
+        <ScreenHero title="Reports">
+          <MonthSwitcher onBrand />
+          <T
+            variant="total"
+            tone="onBrand"
+            numeric
+            adjustsFontSizeToFit
+            numberOfLines={1}
+            minimumFontScale={0.6}
+            accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${monthName(month)}`}>
+            {formatMoney(shownTotal, cur)}
           </T>
-          <T variant="body" tone="inkSoft">
+          <T variant="body" tone="onBrandSoft">
             {headline}
           </T>
-        </View>
+        </ScreenHero>
 
-        <SectionHeader title="By category" />
-        {now.byCategory.length === 0 ? (
-          <T variant="sub" tone="inkMute">
-            Nothing logged in {monthName(month)}.
-          </T>
-        ) : (
-          now.byCategory.map((b, i) => {
-            const prev = before.byCategory.find((x) => x.category.id === b.category.id)?.total ?? 0;
-            const diff = b.total - prev;
-            const pct = Math.round((b.total / now.total) * 100);
-            const word = compareWords(diff, prev, cur);
-            const sub =
-              prev === 0
-                ? `${pct}% · none in ${lastName}`
-                : word === 'same'
-                  ? `${pct}% · same as ${lastShort}`
-                  : `${pct}% · ${formatMoney(Math.abs(diff), cur, { compact: true })} ${word} than ${lastShort}`;
-            return (
-              <Row
-                key={b.category.id}
-                leading={<IconDisc icon={b.category.icon} size={36} />}
-                title={b.category.name}
-                subtitle={sub}
-                trailing={formatMoney(b.total, cur)}
-                accessibilityLabel={`${b.category.name}, ${formatMoney(b.total, cur)}, ${sub.replace(' · ', ' of the month, ')}`}
-                divider={i < now.byCategory.length - 1}
-              />
-            );
-          })
-        )}
+        <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
+
+        <Reveal order={1} style={{ gap: space.m }}>
+        <CurrencyToggle />
+        <StatRow>
+          <StatCard
+            label={`Compared with ${lastShort}`}
+            value={deltaPct === null ? '—' : `${deltaPct > 0 ? '+' : deltaPct < 0 ? '−' : ''}${Math.abs(deltaPct)}%`}
+            note={deltaPct === null ? `No spending in ${lastName}` : isCurrent ? 'By this day of the month' : 'Whole month'}
+          />
+          <StatCard
+            label="Monthly average"
+            value={past.length ? formatMoney(avg, cur, { compact: true }) : '—'}
+            note={past.length ? `Over ${past.length} ${past.length === 1 ? 'month' : 'months'} before ${monthName(month)}` : 'Builds up month by month'}
+          />
+        </StatRow>
+        </Reveal>
+
+        <Reveal order={2}>
+        <Panel title="Day by day">
+          <DailyChart
+            perDay={now.perDay}
+            lastMonth={before.perDay}
+            monthKey={month}
+            monthShort={shortMonth(month)}
+            lastShort={lastShort}
+            lastDay={isCurrent ? dayOfMonth(today) - 1 : daysInMonth(month) - 1}
+            currency={cur}
+          />
+          <View style={{ height: space.m }} />
+        </Panel>
+        </Reveal>
+
+        {budgetLines.length > 0 ? (
+          <Reveal order={3}>
+          <Panel
+            title="Budgets"
+            action={
+              <T variant="sub" tone={overCount ? 'burgundy' : 'inkSoft'}>
+                {overCount ? `${overCount} over` : 'All on track'}
+              </T>
+            }>
+            <BudgetChart lines={budgetLines} currency={cur} monthKey={month} />
+          </Panel>
+          </Reveal>
+        ) : null}
+
+        <Reveal order={4}>
+        <Panel title="By category">
+          {now.byCategory.length === 0 ? (
+            <T variant="sub" tone="inkMute" style={{ paddingVertical: space.m }}>
+              Nothing logged in {monthName(month)}.
+            </T>
+          ) : (
+            now.byCategory.map((b, i) => {
+              const prev = before.byCategory.find((x) => x.category.id === b.category.id)?.total ?? 0;
+              const diff = b.total - prev;
+              const pct = Math.round((b.total / now.total) * 100);
+              const word = compareWords(diff, prev, cur);
+              const sub =
+                prev === 0
+                  ? `${pct}% · none in ${lastName}`
+                  : word === 'same'
+                    ? `${pct}% · same as ${lastShort}`
+                    : `${pct}% · ${formatMoney(Math.abs(diff), cur, { compact: true })} ${word} than ${lastShort}`;
+              return (
+                <Row
+                  key={b.category.id}
+                  leading={<IconDisc icon={b.category.icon} size={36} />}
+                  title={b.category.name}
+                  subtitle={sub}
+                  trailing={formatMoney(b.total, cur)}
+                  accessibilityLabel={`${b.category.name}, ${formatMoney(b.total, cur)}, ${sub.replace(' · ', ' of the month, ')}`}
+                  divider={i < now.byCategory.length - 1}
+                />
+              );
+            })
+          )}
+        </Panel>
+        </Reveal>
 
         {history.length > 1 ? (
-          <>
-            <SectionHeader title="Month by month" />
-            <T variant="sub" tone="inkSoft">
+          <Reveal order={5}>
+          <Panel title="Month by month">
+            <T variant="sub" tone="inkSoft" style={{ marginTop: space.xs }}>
               {past.length
                 ? `Average ${formatMoney(avg, cur)} a month before ${monthName(month)}${isCurrent ? `. ${monthName(month)} isn’t over yet.` : '.'}`
                 : 'Your monthly totals build up here.'}
             </T>
-            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-evenly', gap: space.m, height: 160, marginTop: space.l }}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-evenly', gap: space.m, height: 160, marginTop: space.l, marginBottom: space.m }}>
               {history.map((h) => {
                 const isSel = h.month === month;
                 return (
@@ -134,10 +206,18 @@ export default function Reports() {
                       style={{
                         width: '100%',
                         height: `${Math.max(3, (h.total / maxHist) * 70)}%`,
-                        backgroundColor: isSel ? c.button : c.barMuted,
+                        backgroundColor: isSel ? c.accent : c.barMuted,
                         borderRadius: radius.s,
-                      }}
-                    />
+                      }}>
+                      {/* The mint "crown" on the selected month: decorative; the fill and the
+                          selected state already say which month it is. */}
+                      {isSel ? (
+                        <View
+                          accessible={false}
+                          style={{ position: 'absolute', top: -5, left: '30%', width: '40%', height: 3, borderRadius: 2, backgroundColor: c.popOnGround }}
+                        />
+                      ) : null}
+                    </View>
                     <T variant="caption" tone={isSel ? 'ink' : 'inkMute'}>
                       {shortMonth(h.month)}
                     </T>
@@ -145,16 +225,18 @@ export default function Reports() {
                 );
               })}
             </View>
-          </>
+          </Panel>
+          </Reveal>
         ) : null}
 
-        <View style={{ marginTop: space.xxxl }}>
+        <Reveal order={6} style={{ marginTop: space.s }}>
           <Button
             label={`Share ${monthName(month)} as PDF`}
             variant="secondary"
             icon={<IconShare size={20} color={c.accent} strokeWidth={1.75} />}
             onPress={() => toast({ message: 'PDF sharing arrives in the next build' })}
           />
+        </Reveal>
         </View>
       </ScrollView>
     </View>
