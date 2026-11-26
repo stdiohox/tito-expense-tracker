@@ -6,16 +6,16 @@ import { announceError } from '@/components/announce';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { IconDisc } from '@/components/icon-disc';
+import { Segmented } from '@/components/segmented';
 import { PICKABLE_ICONS } from '@/components/icons';
 import { safeBack } from '@/components/nav';
 import { switchColors } from '@/components/switch-colors';
 import { T } from '@/components/text';
 import { useToast } from '@/components/toast';
 import { useFocusBorder } from '@/components/use-focus-border';
-import { useActions, useCategory, useStore } from '@/data/store';
-import { CURRENCIES, amountToInput, formatMoney, parseAmount } from '@/domain/money';
-import { budgetFor } from '@/domain/summary';
-import type { CategoryIcon } from '@/domain/types';
+import { chosenCurrencies, useActions, useCategory, useStore } from '@/data/store';
+import { CURRENCIES, amountToInput, parseAmount } from '@/domain/money';
+import type { CategoryIcon, CurrencyCode } from '@/domain/types';
 import { fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -35,15 +35,17 @@ export default function EditCategory() {
   // The sheet fills this with its animated close; until then, plain back.
   const close = useRef<() => void>(safeBack);
   const toast = useToast();
-  const cur = settings.currency;
+  // A budget is in one currency, never converted: the user's currencies, plus the one an existing
+  // budget was set in if the user has since removed it.
+  const mine = chosenCurrencies(settings);
+  const setIn = existing?.budget != null ? (existing.budgetCurrency ?? settings.currency) : null;
+  const budgetOptions = setIn && !mine.includes(setIn) ? [...mine, setIn] : mine;
 
   const [name, setName] = useState(existing?.name ?? '');
   const [icon, setIcon] = useState<CategoryIcon>(existing?.icon ?? 'savings');
-  const current = existing ? budgetFor(existing, cur) : null;
-  // A budget set in another currency is shown, never silently re-labelled as this one.
-  const foreignBudget = existing?.budget != null && existing.budgetCurrency && existing.budgetCurrency !== cur ? existing : null;
-  const [hasBudget, setHasBudget] = useState(current !== null);
-  const [budgetText, setBudgetText] = useState(current !== null ? amountToInput(current, cur) : '');
+  const [hasBudget, setHasBudget] = useState(setIn !== null);
+  const [cur, setCur] = useState<CurrencyCode>(setIn ?? settings.currency);
+  const [budgetText, setBudgetText] = useState(setIn !== null && existing?.budget != null ? amountToInput(existing.budget, setIn) : '');
   const [tried, setTried] = useState(false);
   const busy = useRef(false);
   const nameRef = useRef<ComponentRef<typeof TextInput>>(null);
@@ -61,13 +63,12 @@ export default function EditCategory() {
     if (!name.trim()) return announceError('Give the category a name', nameRef);
     if (hasBudget && budget === null) return announceError('Enter a monthly amount', budgetRef);
     busy.current = true;
-    const keepForeign = !hasBudget && foreignBudget;
     saveCategory({
       id: existing?.id,
       name: name.trim(),
       icon,
-      budget: keepForeign ? foreignBudget.budget : budget,
-      budgetCurrency: keepForeign ? foreignBudget.budgetCurrency : budget !== null ? cur : undefined,
+      budget,
+      budgetCurrency: budget !== null ? cur : undefined,
       builtIn: existing?.builtIn ?? false,
     });
     toast({ message: existing ? 'Category saved' : `${name.trim()} added`, success: true });
@@ -144,9 +145,7 @@ export default function EditCategory() {
               Monthly budget
             </T>
             <T variant="sub" tone="inkMute">
-              {foreignBudget && foreignBudget.budget !== null && foreignBudget.budgetCurrency
-                ? `Currently ${formatMoney(foreignBudget.budget, foreignBudget.budgetCurrency)}, set in ${foreignBudget.budgetCurrency}. Turn on to set one in ${cur}.`
-                : 'See how much is left as you spend.'}
+              See how much is left as you spend.
             </T>
           </View>
           <Switch
@@ -157,6 +156,16 @@ export default function EditCategory() {
             {...switchColors(c)}
           />
         </View>
+        {hasBudget && budgetOptions.length > 1 ? (
+          <View style={{ marginTop: space.s }}>
+            <Segmented
+              label="Budget currency"
+              value={cur}
+              onChange={setCur}
+              options={budgetOptions.map((code) => ({ key: code, label: `${CURRENCIES[code].symbol} ${code}`, a11yLabel: CURRENCIES[code].name }))}
+            />
+          </View>
+        ) : null}
         {hasBudget ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: space.s, ...field, ...budgetFocus.border, paddingHorizontal: space.l - budgetFocus.inset }}>
             <T variant="bodyStrong" tone="inkSoft">

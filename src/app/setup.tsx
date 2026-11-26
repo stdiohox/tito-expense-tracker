@@ -11,8 +11,9 @@ import { IconDisc } from '@/components/icon-disc';
 import { STROKE } from '@/components/icons';
 import { Panel } from '@/components/panel';
 import { CurrencyPicker } from '@/components/currency-picker';
+import { Segmented } from '@/components/segmented';
 import { T } from '@/components/text';
-import { useActions, useStore } from '@/data/store';
+import { chosenCurrencies, useActions, useStore } from '@/data/store';
 import { CURRENCIES, parseAmount } from '@/domain/money';
 import type { CurrencyCode, SetupMode } from '@/domain/types';
 import { TARGET, radius, space } from '@/theme/tokens';
@@ -42,12 +43,15 @@ export default function Setup() {
   const [shown, setShown] = useState<Record<string, boolean>>(() => Object.fromEntries(categories.map((k) => [k.id, !k.hidden])));
   const [budgetIds, setBudgetIds] = useState<string[]>([]);
   const [amounts, setAmounts] = useState<Record<string, string>>({});
+  // Each budget is in one currency, chosen here (the main one unless changed); never converted.
+  const [budgetCur, setBudgetCur] = useState<Record<string, CurrencyCode>>({});
   const [tried, setTried] = useState(false);
   const fieldRefs = useRef<Record<string, ComponentRef<typeof TextInput> | null>>({});
 
   const visibleCount = Object.values(shown).filter(Boolean).length;
   const wantsBudgets = mode !== 'track';
-  const cur = settings.currency;
+  const mine = chosenCurrencies(settings);
+  const curOf = (id: string): CurrencyCode => (budgetCur[id] && mine.includes(budgetCur[id]) ? budgetCur[id] : settings.currency);
 
   const finish = () => router.dismissTo('/');
   const next = () => (step < STEPS.length - 1 ? setStep(step + 1) : finish());
@@ -64,16 +68,16 @@ export default function Setup() {
     }
     setTried(true);
     const chosen = wantsBudgets ? budgetIds.filter((id) => shown[id]) : [];
-    const missing = chosen.find((id) => parseAmount(amounts[id] ?? '', cur) === null);
+    const missing = chosen.find((id) => parseAmount(amounts[id] ?? '', curOf(id)) === null);
     if (missing) {
       const name = categories.find((k) => k.id === missing)?.name ?? 'this category';
       return announceError(`Enter a monthly budget for ${name}`, { current: fieldRefs.current[missing] });
     }
     for (const cat of categories) {
       const hidden = !shown[cat.id];
-      const budget = chosen.includes(cat.id) ? parseAmount(amounts[cat.id] ?? '', cur) : null;
+      const budget = chosen.includes(cat.id) ? parseAmount(amounts[cat.id] ?? '', curOf(cat.id)) : null;
       if (hidden !== !!cat.hidden || budget !== null) {
-        saveCategory({ ...cat, hidden, ...(budget !== null ? { budget, budgetCurrency: cur } : null) });
+        saveCategory({ ...cat, hidden, ...(budget !== null ? { budget, budgetCurrency: curOf(cat.id) } : null) });
       }
     }
     finish();
@@ -273,21 +277,31 @@ export default function Setup() {
                     .filter((id) => shown[id])
                     .map((id) => {
                       const cat = categories.find((k) => k.id === id);
+                      const cur = curOf(id);
                       const bad = tried && parseAmount(amounts[id] ?? '', cur) === null;
                       return (
-                        <Field
-                          key={id}
-                          ref={(el) => {
-                            fieldRefs.current[id] = el;
-                          }}
-                          label={`${cat?.name ?? 'Category'}: a month, in ${CURRENCIES[cur].name}`}
-                          value={amounts[id] ?? ''}
-                          onChangeText={(t) => setAmounts({ ...amounts, [id]: t.replace(/[^\d.,]/g, '') })}
-                          keyboardType="decimal-pad"
-                          inputMode="decimal"
-                          placeholder={`${CURRENCIES[cur].symbol}50,000`}
-                          error={bad ? 'Enter a monthly amount' : null}
-                        />
+                        <View key={id} style={{ gap: space.s }}>
+                          {mine.length > 1 ? (
+                            <Segmented
+                              label={`Currency for the ${cat?.name ?? 'category'} budget`}
+                              value={cur}
+                              onChange={(code) => setBudgetCur({ ...budgetCur, [id]: code })}
+                              options={mine.map((code) => ({ key: code, label: `${CURRENCIES[code].symbol} ${code}`, a11yLabel: CURRENCIES[code].name }))}
+                            />
+                          ) : null}
+                          <Field
+                            ref={(el) => {
+                              fieldRefs.current[id] = el;
+                            }}
+                            label={`${cat?.name ?? 'Category'}: a month, in ${CURRENCIES[cur].name}`}
+                            value={amounts[id] ?? ''}
+                            onChangeText={(t) => setAmounts({ ...amounts, [id]: t.replace(/[^\d.,]/g, '') })}
+                            keyboardType="decimal-pad"
+                            inputMode="decimal"
+                            placeholder={`${CURRENCIES[cur].symbol}${CURRENCIES[cur].spaced ? ' ' : ''}50,000`}
+                            error={bad ? 'Enter a monthly amount' : null}
+                          />
+                        </View>
                       );
                     })}
                 </View>

@@ -18,12 +18,13 @@ import { Reveal } from '@/components/reveal';
 import { T } from '@/components/text';
 import { useCountUp } from '@/components/use-count-up';
 import { useMonth } from '@/data/month';
-import { useStore } from '@/data/store';
+import { useCurrencyView } from '@/data/currency-view';
+import { chosenCurrencies, useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
 import { shortLabel, visibleCategories } from '@/domain/categories';
 import { addMonths, daysInMonth, dayOfMonth, monthName, shortDay, shortMonth } from '@/domain/dates';
 import { CURRENCIES, formatMoney } from '@/domain/money';
-import { budgetFor, compareWords, pace } from '@/domain/summary';
+import { compareWords, pace, summarise } from '@/domain/summary';
 import type { CurrencyCode } from '@/domain/types';
 import { light, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -41,6 +42,7 @@ export default function Home() {
   const { month, isCurrent, today } = useMonth();
   const { expenses, categories, settings } = useStore();
   const { now, before } = useSummary(month);
+  const { setView } = useCurrencyView();
   const cur = settings.currency;
   const p = pace(now, before, today);
   const lastName = monthName(addMonths(month, -1));
@@ -63,21 +65,29 @@ export default function Home() {
     paceBadge = word === 'same' ? `Same as ${lastShort}` : `${pct > 0 ? '+' : '−'}${Math.abs(pct)}% vs ${lastShort}`;
   }
 
-  // One glass card per currency with spending this month; the main currency always comes first.
-  const currencyCards: { code: CurrencyCode; total: number; count: number }[] = [
-    { code: cur, total: now.total, count: now.count },
-    ...now.otherCurrencies.map((o) => ({ code: o.currency, total: o.total, count: o.count })),
-  ];
+  // Each currency gets its own month summary; nothing is ever converted.
+  const summaries = useMemo(() => {
+    const codes = new Set<CurrencyCode>([...chosenCurrencies(settings), ...now.otherCurrencies.map((o) => o.currency)]);
+    for (const k of categories) if (k.budget !== null && k.budgetCurrency) codes.add(k.budgetCurrency);
+    return new Map([...codes].map((code) => [code, code === cur ? now : summarise(expenses, categories, month, code)]));
+  }, [settings, now, categories, expenses, month, cur]);
 
-  const budgets = now.byCategory
-    .map((b) => ({ ...b, budget: budgetFor(b.category, cur) }))
-    .concat(
-      // Budgeted categories with nothing spent yet still get a card.
-      categories
-        .filter((k) => !k.hidden && budgetFor(k, cur) !== null && !now.byCategory.some((b) => b.category.id === k.id))
-        .map((k) => ({ category: k, total: 0, count: 0, budget: budgetFor(k, cur) })),
-    )
-    .filter((b): b is typeof b & { budget: number } => b.budget !== null);
+  // One glass card per chosen currency (even at 0), then any other currency spent in this month.
+  const currencyCards = [
+    ...chosenCurrencies(settings),
+    ...now.otherCurrencies.map((o) => o.currency).filter((code) => !chosenCurrencies(settings).includes(code)),
+  ].map((code) => ({ code, total: summaries.get(code)?.total ?? 0, count: summaries.get(code)?.count ?? 0 }));
+
+  // Every budget, in the currency it was set in, from the moment it is set (₦0 spent included).
+  const budgets = categories
+    .filter((k): k is typeof k & { budget: number; budgetCurrency: CurrencyCode } => !k.hidden && k.budget !== null && !!k.budgetCurrency)
+    .map((k) => ({
+      category: k,
+      budget: k.budget,
+      currency: k.budgetCurrency,
+      total: summaries.get(k.budgetCurrency)?.byCategory.find((b) => b.category.id === k.id)?.total ?? 0,
+    }))
+    .sort((a, b) => (a.currency === b.currency ? b.total / b.budget - a.total / a.budget : a.currency === cur ? -1 : b.currency === cur ? 1 : 0));
 
   const recent = useMemo(
     () =>
@@ -108,15 +118,21 @@ export default function Home() {
             decelerationRate="fast"
             contentContainerStyle={{ paddingHorizontal: space.l, gap: space.m, paddingTop: space.l }}>
             {currencyCards.map((card, i) => (
-              <GlassCard key={card.code} style={{ width: CARD_WIDTH, gap: space.xs }}>
-                <View
-                  accessible
-                  accessibilityLabel={`${CURRENCIES[card.code].name}: ${formatMoney(card.total, card.code)}, ${card.count} ${card.count === 1 ? 'payment' : 'payments'}${
-                    i === 0 ? (paceBadge ? `, ${paceBadge.replace('vs', 'compared with')}` : '') : ', counted separately'
-                  }`}
-                  style={{ gap: space.xs }}>
-                  <T variant="caption" tone="onBrandSoft">
-                    {CURRENCIES[card.code].symbol} {card.code}
+              <Pressable
+                key={card.code}
+                onPress={() => {
+                  setView(card.code);
+                  router.push('/expenses');
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`${CURRENCIES[card.code].name}: ${formatMoney(card.total, card.code)} in ${thisName}, ${card.count} ${card.count === 1 ? 'payment' : 'payments'}${
+                  i === 0 && paceBadge ? `, ${paceBadge.replace('vs', 'compared with')}` : ''
+                }`}
+                accessibilityHint={`Shows your ${card.code} expenses`}
+                style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] })}>
+                <GlassCard style={{ width: CARD_WIDTH, gap: space.xs }}>
+                  <T variant="caption" tone="onBrandSoft" numberOfLines={1}>
+                    {CURRENCIES[card.code].flag} {card.code} · {CURRENCIES[card.code].name}
                   </T>
                   <T variant="title" tone="onBrand" numeric numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={{ marginTop: space.l }}>
                     {formatMoney(card.total, card.code)}
@@ -124,7 +140,6 @@ export default function Home() {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.s }}>
                     <T variant="sub" tone="onBrandSoft" style={{ flexShrink: 1 }}>
                       {card.count} {card.count === 1 ? 'payment' : 'payments'}
-                      {i === 0 ? '' : ' · counted separately'}
                     </T>
                     {i === 0 && paceBadge ? (
                       <T variant="caption" numeric style={{ color: light.pop }}>
@@ -132,8 +147,8 @@ export default function Home() {
                       </T>
                     ) : null}
                   </View>
-                </View>
-              </GlassCard>
+                </GlassCard>
+              </Pressable>
             ))}
           </ScrollView>
           }>
@@ -211,7 +226,7 @@ export default function Home() {
                       category={b.category}
                       spent={b.total}
                       budget={b.budget}
-                      currency={cur}
+                      currency={b.currency}
                       onPress={() => router.push({ pathname: '/category/[id]', params: { id: b.category.id } })}
                     />
                   ))}

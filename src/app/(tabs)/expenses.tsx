@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
+import { CurrencyToggle } from '@/components/currency-toggle';
 import { IconDisc } from '@/components/icon-disc';
 import { STROKE } from '@/components/icons';
 import { MonthSwitcher } from '@/components/month-switcher';
@@ -14,12 +15,13 @@ import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useCountUp } from '@/components/use-count-up';
 import { useFocusBorder } from '@/components/use-focus-border';
+import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
 import { dayLabel, dayOfMonth, monthName } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
-import type { CurrencyCode, DayKey, Expense } from '@/domain/types';
+import type { DayKey, Expense } from '@/domain/types';
 import { TARGET, fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -27,22 +29,23 @@ export default function Expenses() {
   const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, isCurrent, today } = useMonth();
-  const { expenses, categories, settings } = useStore();
-  const { now } = useSummary(month);
+  const { expenses, categories } = useStore();
+  const { view } = useCurrencyView();
+  const { now } = useSummary(month, view);
   const [query, setQuery] = useState('');
   const searchFocus = useFocusBorder();
   const q = useDeferredValue(query.trim().toLowerCase());
   const catById = useMemo(() => new Map(categories.map((k) => [k.id, k])), [categories]);
   // Days so far: a month in progress is averaged over the days it has had, not its full length.
   const days = isCurrent ? dayOfMonth(today) : now.cumulative.length;
-  const foreign = now.otherCurrencies.reduce((s, o) => s + o.count, 0);
   const shownTotal = useCountUp(now.total);
 
   const { sections, matches } = useMemo(() => {
     const byDay = new Map<DayKey, Expense[]>();
     let matches = 0;
     for (const e of expenses) {
-      if (!e.day.startsWith(month)) continue;
+      // One currency at a time: the toggle switches between them; nothing is converted.
+      if (!e.day.startsWith(month) || e.currency !== view) continue;
       if (q) {
         const cat = catById.get(e.categoryId)?.name ?? '';
         if (!e.note.toLowerCase().includes(q) && !cat.toLowerCase().includes(q)) continue;
@@ -55,18 +58,14 @@ export default function Expenses() {
     const sections = [...byDay]
       .sort(([a], [b]) => (a < b ? 1 : -1))
       .map(([day, data]) => {
-        const totals = new Map<CurrencyCode, number>();
-        for (const e of data) totals.set(e.currency, (totals.get(e.currency) ?? 0) + e.amount);
-        const main = totals.get(settings.currency) ?? 0;
-        const extra = [...totals].filter(([k]) => k !== settings.currency).map(([k, v]) => formatMoney(v, k));
         return {
           day,
-          total: [main > 0 || extra.length === 0 ? formatMoney(main, settings.currency) : null, ...extra].filter(Boolean).join(' + '),
+          total: formatMoney(data.reduce((s, e) => s + e.amount, 0), view),
           data: [...data].sort((a, b) => b.createdAt - a.createdAt),
         };
       });
     return { sections, matches };
-  }, [expenses, catById, month, q, settings.currency]);
+  }, [expenses, catById, month, q, view]);
 
   // Tell screen-reader users how many results a search returned (debounced by the deferred value).
   useEffect(() => {
@@ -90,18 +89,18 @@ export default function Expenses() {
             adjustsFontSizeToFit
             numberOfLines={1}
             minimumFontScale={0.6}
-            accessibilityLabel={`${formatMoney(now.total, settings.currency)} spent in ${monthName(month)}`}>
-            {formatMoney(shownTotal, settings.currency)}
+            accessibilityLabel={`${formatMoney(now.total, view)} spent in ${monthName(month)}`}>
+            {formatMoney(shownTotal, view)}
           </T>
           <T variant="sub" tone="onBrandSoft" numeric>
-            {now.count + foreign} {now.count + foreign === 1 ? 'payment' : 'payments'} · about {formatMoney(Math.round(now.total / days), settings.currency, { compact: true })} a day
-            {foreign ? ` · plus ${foreign} in other currencies` : ''}
+            {now.count} {now.count === 1 ? 'payment' : 'payments'} · about {formatMoney(Math.round(now.total / days), view, { compact: true })} a day
           </T>
         </ScreenHero>
 
         <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
 
-        <Reveal order={1}>
+        <Reveal order={1} style={{ gap: space.m }}>
+        <CurrencyToggle />
         <View
           style={{
             flexDirection: 'row',
@@ -176,7 +175,6 @@ export default function Expenses() {
                     title={item.note || cat?.name || 'Expense'}
                     subtitle={item.note ? (cat?.name ?? 'Other') : undefined}
                     trailing={formatMoney(item.amount, item.currency)}
-                    trailingSub={item.currency !== settings.currency ? item.currency : undefined}
                     onPress={() => router.push({ pathname: '/expense/[id]', params: { id: item.id } })}
                     accessibilityHint="Opens this expense to edit or delete"
                     divider={index < section.data.length - 1}

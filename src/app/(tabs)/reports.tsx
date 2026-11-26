@@ -4,6 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { BudgetChart, type BudgetLine } from '@/components/budget-chart';
 import { Button } from '@/components/button';
+import { CurrencyToggle } from '@/components/currency-toggle';
 import { DailyChart } from '@/components/daily-chart';
 import { IconDisc } from '@/components/icon-disc';
 import { MonthSwitcher } from '@/components/month-switcher';
@@ -16,6 +17,7 @@ import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
 import { useCountUp } from '@/components/use-count-up';
 import { useToast } from '@/components/toast';
+import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
 import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
@@ -30,11 +32,12 @@ export default function Reports() {
   const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { month, current, set, isCurrent, today } = useMonth();
-  const { expenses, categories, settings } = useStore();
-  const { now, before } = useSummary(month);
+  const { expenses, categories } = useStore();
+  // One currency at a time (the toggle switches); totals, charts and budgets are never converted.
+  const { view: cur } = useCurrencyView();
+  const { now, before } = useSummary(month, cur);
   const toast = useToast();
   const shownTotal = useCountUp(now.total);
-  const cur = settings.currency;
   const lastName = monthName(addMonths(month, -1));
   const lastShort = shortMonth(addMonths(month, -1));
 
@@ -98,7 +101,8 @@ export default function Reports() {
 
         <View style={{ paddingHorizontal: space.l, gap: space.m, marginTop: space.m }}>
 
-        <Reveal order={1}>
+        <Reveal order={1} style={{ gap: space.m }}>
+        <CurrencyToggle />
         <StatRow>
           <StatCard
             label={`Compared with ${lastShort}`}

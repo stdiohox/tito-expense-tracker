@@ -2,17 +2,19 @@ import { useMemo } from 'react';
 
 import { addMonths } from '@/domain/dates';
 import { summarise, type MonthSummary } from '@/domain/summary';
-import type { MonthKey } from '@/domain/types';
+import type { CurrencyCode, MonthKey } from '@/domain/types';
 
 import { useStore } from './store';
 
-export function useSummary(month: MonthKey): { now: MonthSummary; before: MonthSummary } {
+/** This month and last month in one currency (the main one unless given). Never converts. */
+export function useSummary(month: MonthKey, currency?: CurrencyCode): { now: MonthSummary; before: MonthSummary } {
   const { expenses, categories, settings } = useStore();
+  const cur = currency ?? settings.currency;
   return useMemo(
     () => ({
-      now: summarise(expenses, categories, month, settings.currency),
-      before: summarise(expenses, categories, addMonths(month, -1), settings.currency),
+      now: summarise(expenses, categories, month, cur),
+      before: summarise(expenses, categories, addMonths(month, -1), cur),
     }),
-    [expenses, categories, month, settings.currency],
+    [expenses, categories, month, cur],
   );
 }

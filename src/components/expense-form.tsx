@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { useToday } from '@/data/month';
-import { useActions, useStore } from '@/data/store';
+import { chosenCurrencies, useActions, useStore } from '@/data/store';
 import { shortLabel } from '@/domain/categories';
 import { addDays, dayLabel } from '@/domain/dates';
 import { CURRENCIES, amountToInput, formatMoney, parseAmount } from '@/domain/money';
@@ -37,6 +37,8 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
   // Hidden categories are not offered, except the one this expense (or the preset) already uses.
   const offered = categories.filter((k) => !k.hidden || k.id === existing?.categoryId || k.id === validPreset);
   const [currency, setCurrency] = useState<CurrencyCode>(existing?.currency ?? settings.currency);
+  // The user's currencies; an expense in a currency they have since removed keeps it as an option.
+  const offeredCurrencies = [...chosenCurrencies(settings), ...(existing && !chosenCurrencies(settings).includes(existing.currency) ? [existing.currency] : [])];
   const [amountText, setAmountText] = useState(existing ? amountToInput(existing.amount, existing.currency) : '');
   const [categoryId, setCategoryId] = useState<string | undefined>(existing?.categoryId ?? validPreset);
   const [day, setDay] = useState<DayKey>(existing?.day ?? today);
@@ -123,11 +125,16 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
             <T variant="sub" tone="inkSoft" nativeID="amountLabel" importantForAccessibility="no">
               Amount
             </T>
+            {offeredCurrencies.length < 2 ? (
+              <T variant="caption" tone="inkMute" accessibilityLabel={`In ${CURRENCIES[currency].name}`}>
+                {CURRENCIES[currency].symbol} {currency}
+              </T>
+            ) : (
             <View
               accessibilityRole="radiogroup"
               accessibilityLabel="Currency"
               style={{ flexDirection: 'row', backgroundColor: c.ground, borderRadius: radius.pill, padding: 2 }}>
-              {(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => {
+              {offeredCurrencies.map((code) => {
                 const on = code === currency;
                 return (
                   <Pressable
@@ -144,6 +151,7 @@ export function ExpenseForm({ existing, presetCategory }: { existing?: Expense; 
                 );
               })}
             </View>
+            )}
           </View>
           <View
             style={{

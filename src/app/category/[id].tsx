@@ -12,6 +12,7 @@ import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
 import { StatCard, StatRow } from '@/components/stat-card';
 import { T } from '@/components/text';
+import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
 import { useCategory, useStore } from '@/data/store';
 import { addMonths, dayLabel, monthName } from '@/domain/dates';
@@ -23,11 +24,13 @@ import { useTheme } from '@/theme/use-theme';
 export default function CategoryDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const category = useCategory(id);
-  const { expenses, settings } = useStore();
+  const { expenses } = useStore();
   const { month } = useMonth();
+  const { view } = useCurrencyView();
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
-  const cur = settings.currency;
+  // A budgeted category shows the currency its budget is in; otherwise the currency being viewed.
+  const cur = category?.budget != null && category.budgetCurrency ? category.budgetCurrency : view;
 
   const { items, total, lastTotal } = useMemo(() => {
     const prev = addMonths(month, -1);

@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ToastProvider } from '@/components/toast';
+import { CurrencyViewProvider } from '@/data/currency-view';
 import { MonthProvider } from '@/data/month';
 import { StoreProvider, useStore } from '@/data/store';
 import { fonts } from '@/theme/tokens';
@@ -89,9 +90,11 @@ function Navigation() {
   return (
     <ThemeProvider value={navTheme}>
       <MonthProvider>
-        <ToastProvider>
-          <Routes screenOptions={screenOptions} sheet={sheet} />
-        </ToastProvider>
+        <CurrencyViewProvider>
+          <ToastProvider>
+            <Routes screenOptions={screenOptions} sheet={sheet} />
+          </ToastProvider>
+        </CurrencyViewProvider>
       </MonthProvider>
     </ThemeProvider>
   );
