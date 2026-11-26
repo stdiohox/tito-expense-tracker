@@ -11,11 +11,12 @@ import { MonthSwitcher } from '@/components/month-switcher';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
 import { Reveal } from '@/components/reveal';
+import { PartUnavailable, SafePart } from '@/components/route-error';
 import { ScreenHero } from '@/components/screen-hero';
 import { StatCard, StatRow } from '@/components/stat-card';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
-import { useCountUp } from '@/components/use-count-up';
+import { CountUpMoney } from '@/components/use-count-up';
 import { useToast } from '@/components/toast';
 import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
@@ -37,7 +38,6 @@ export default function Reports() {
   const { view: cur } = useCurrencyView();
   const { now, before } = useSummary(month, cur);
   const toast = useToast();
-  const shownTotal = useCountUp(now.total);
   const lastName = monthName(addMonths(month, -1));
   const lastShort = shortMonth(addMonths(month, -1));
 
@@ -92,7 +92,7 @@ export default function Reports() {
             numberOfLines={1}
             minimumFontScale={0.6}
             accessibilityLabel={`${formatMoney(now.total, cur)} spent in ${monthName(month)}`}>
-            {formatMoney(shownTotal, cur)}
+            <CountUpMoney value={now.total} currency={cur} />
           </T>
           <T variant="body" tone="onBrandSoft">
             {headline}
@@ -119,6 +119,7 @@ export default function Reports() {
 
         <Reveal order={2}>
         <Panel title="Day by day">
+          <SafePart name="daily chart" fallback={<PartUnavailable label="The daily chart" />}>
           <DailyChart
             perDay={now.perDay}
             lastMonth={before.perDay}
@@ -128,6 +129,7 @@ export default function Reports() {
             lastDay={isCurrent ? dayOfMonth(today) - 1 : daysInMonth(month) - 1}
             currency={cur}
           />
+          </SafePart>
           <View style={{ height: space.m }} />
         </Panel>
         </Reveal>
@@ -141,7 +143,9 @@ export default function Reports() {
                 {overCount ? `${overCount} over` : 'All on track'}
               </T>
             }>
-            <BudgetChart lines={budgetLines} currency={cur} monthKey={month} />
+            <SafePart name="budget chart" fallback={<PartUnavailable label="The budget chart" />}>
+              <BudgetChart lines={budgetLines} currency={cur} monthKey={month} />
+            </SafePart>
           </Panel>
           </Reveal>
         ) : null}
@@ -183,6 +187,7 @@ export default function Reports() {
         {history.length > 1 ? (
           <Reveal order={5}>
           <Panel title="Month by month">
+            <SafePart name="month by month" fallback={<PartUnavailable label="The month-by-month chart" />}>
             <T variant="sub" tone="inkSoft" style={{ marginTop: space.xs }}>
               {past.length
                 ? `Average ${formatMoney(avg, cur)} a month before ${monthName(month)}${isCurrent ? `. ${monthName(month)} isn’t over yet.` : '.'}`
@@ -225,6 +230,7 @@ export default function Reports() {
                 );
               })}
             </View>
+            </SafePart>
           </Panel>
           </Reveal>
         ) : null}
@@ -242,3 +248,6 @@ export default function Reports() {
     </View>
   );
 }
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';

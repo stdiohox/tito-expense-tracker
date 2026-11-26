@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BrandGradient } from '@/components/brand-gradient';
 import { IntroScene } from '@/components/intro-scene';
+import { SafePart } from '@/components/route-error';
 import { T } from '@/components/text';
 import { Wordmark } from '@/components/wordmark';
 import { TARGET, radius, space } from '@/theme/tokens';
@@ -117,7 +118,11 @@ export default function Welcome() {
                 importantForAccessibility={i === index ? 'auto' : 'no-hide-descendants'}
                 accessibilityElementsHidden={i !== index}>
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} onLayout={(e) => i === 0 && setHeroHeight(e.nativeEvent.layout.height)}>
-                  {heroHeight > 0 ? <IntroScene slide={i as 0 | 1 | 2} active={i === index} width={width - space.xl * 2} height={Math.min(heroHeight, 320)} /> : null}
+                  {heroHeight > 0 ? (
+                    <SafePart name={`intro scene ${i + 1}`}>
+                      <IntroScene slide={i as 0 | 1 | 2} active={i === index} width={width - space.xl * 2} height={Math.min(heroHeight, 320)} />
+                    </SafePart>
+                  ) : null}
                 </View>
                 <T variant="hero" tone="onBrand" accessibilityRole="header">
                   {s.title}
@@ -179,3 +184,6 @@ export default function Welcome() {
     </BrandGradient>
   );
 }
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';

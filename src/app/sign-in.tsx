@@ -63,3 +63,6 @@ export default function SignIn() {
     </KeyboardAvoidingView>
   );
 }
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';

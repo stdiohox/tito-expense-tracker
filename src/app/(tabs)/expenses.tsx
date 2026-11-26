@@ -1,7 +1,8 @@
 import { IconSearch, IconX } from '@tabler/icons-react-native';
 import { router } from 'expo-router';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { AccessibilityInfo, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { memo, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { FlashList } from '@shopify/flash-list';
+import { AccessibilityInfo, Platform, Pressable, TextInput, View } from 'react-native';
 
 import { CurrencyToggle } from '@/components/currency-toggle';
 import { IconDisc } from '@/components/icon-disc';
@@ -13,7 +14,7 @@ import { Reveal } from '@/components/reveal';
 import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { T } from '@/components/text';
-import { useCountUp } from '@/components/use-count-up';
+import { CountUpMoney } from '@/components/use-count-up';
 import { useFocusBorder } from '@/components/use-focus-border';
 import { useCurrencyView } from '@/data/currency-view';
 import { useMonth } from '@/data/month';
@@ -21,7 +22,7 @@ import { useStore } from '@/data/store';
 import { useSummary } from '@/data/use-summary';
 import { dayLabel, dayOfMonth, monthName } from '@/domain/dates';
 import { formatMoney } from '@/domain/money';
-import type { DayKey, Expense } from '@/domain/types';
+import type { Category, DayKey, Expense } from '@/domain/types';
 import { TARGET, fonts, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -38,7 +39,6 @@ export default function Expenses() {
   const catById = useMemo(() => new Map(categories.map((k) => [k.id, k])), [categories]);
   // Days so far: a month in progress is averaged over the days it has had, not its full length.
   const days = isCurrent ? dayOfMonth(today) : now.cumulative.length;
-  const shownTotal = useCountUp(now.total);
 
   const { sections, matches } = useMemo(() => {
     const byDay = new Map<DayKey, Expense[]>();
@@ -76,10 +76,16 @@ export default function Expenses() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.ground }}>
-      <ScrollView
-        contentInsetAdjustmentBehavior="never"
+      {/* A virtualised list of days: smooth with thousands of expenses. The hero, currency toggle,
+          search and empty state are its header (an element, so the search keeps focus). */}
+      <FlashList
+        data={sections}
+        keyExtractor={(section) => section.day}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: clearance + space.l }}>
+        contentInsetAdjustmentBehavior="never"
+        contentContainerStyle={{ paddingBottom: clearance + space.l }}
+        ListHeaderComponent={
+          <View>
         <ScreenHero title="Expenses">
           <MonthSwitcher onBrand />
           <T
@@ -90,7 +96,7 @@ export default function Expenses() {
             numberOfLines={1}
             minimumFontScale={0.6}
             accessibilityLabel={`${formatMoney(now.total, view)} spent in ${monthName(month)}`}>
-            {formatMoney(shownTotal, view)}
+            <CountUpMoney value={now.total} currency={view} />
           </T>
           <T variant="sub" tone="onBrandSoft" numeric>
             {now.count} {now.count === 1 ? 'payment' : 'payments'} · about {formatMoney(Math.round(now.total / days), view, { compact: true })} a day
@@ -141,7 +147,7 @@ export default function Expenses() {
         </View>
         </Reveal>
 
-        {sections.length === 0 ? (
+          {sections.length === 0 ? (
           <Reveal order={2}>
           <Panel>
             <View style={{ paddingVertical: space.l, gap: space.s }} accessibilityLiveRegion="polite">
@@ -154,39 +160,55 @@ export default function Expenses() {
             </View>
           </Panel>
           </Reveal>
-        ) : (
-          sections.map((section, si) => (
-            <Reveal key={section.day} order={si + 2}>
-            <Panel>
-              <View
-                accessibilityRole="header"
-                style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: space.m, gap: space.m }}>
-                <T variant="headline">{dayLabel(section.day)}</T>
-                <T variant="sub" tone="inkSoft" numeric>
-                  {section.total}
-                </T>
-              </View>
-              {section.data.map((item, index) => {
-                const cat = catById.get(item.categoryId);
-                return (
-                  <Row
-                    key={item.id}
-                    leading={cat ? <IconDisc icon={cat.icon} size={36} /> : undefined}
-                    title={item.note || cat?.name || 'Expense'}
-                    subtitle={item.note ? (cat?.name ?? 'Other') : undefined}
-                    trailing={formatMoney(item.amount, item.currency)}
-                    onPress={() => router.push({ pathname: '/expense/[id]', params: { id: item.id } })}
-                    accessibilityHint="Opens this expense to edit or delete"
-                    divider={index < section.data.length - 1}
-                  />
-                );
-              })}
-            </Panel>
-            </Reveal>
-          ))
-        )}
+          ) : null}
         </View>
-      </ScrollView>
+          </View>
+        }
+        renderItem={({ item: section, index: si }) => <DaySection section={section} order={si + 2} catById={catById} />}
+      />
     </View>
   );
 }
+
+type Section = { day: DayKey; total: string; data: Expense[] };
+
+/**
+ * One day's panel. Memoised, so typing in search or a re-render of the screen doesn't redraw days
+ * whose expenses haven't changed (sections and catById keep their identity until data changes).
+ */
+const DaySection = memo(function DaySection({ section, order, catById }: { section: Section; order: number; catById: Map<string, Category> }) {
+  return (
+    <View style={{ paddingHorizontal: space.l, marginTop: space.m }}>
+      <Reveal key={section.day} order={order}>
+      <Panel>
+        <View
+          accessibilityRole="header"
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: space.m, gap: space.m }}>
+          <T variant="headline">{dayLabel(section.day)}</T>
+          <T variant="sub" tone="inkSoft" numeric>
+            {section.total}
+          </T>
+        </View>
+        {section.data.map((item, index) => {
+          const cat = catById.get(item.categoryId);
+          return (
+            <Row
+              key={item.id}
+              leading={cat ? <IconDisc icon={cat.icon} size={36} /> : undefined}
+              title={item.note || cat?.name || 'Expense'}
+              subtitle={item.note ? (cat?.name ?? 'Other') : undefined}
+              trailing={formatMoney(item.amount, item.currency)}
+              onPress={() => router.push({ pathname: '/expense/[id]', params: { id: item.id } })}
+              accessibilityHint="Opens this expense to edit or delete"
+              divider={index < section.data.length - 1}
+            />
+          );
+        })}
+      </Panel>
+      </Reveal>
+    </View>
+  );
+});
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';

@@ -23,7 +23,7 @@ export default function Settings() {
   const { c } = useTheme();
   const clearance = useTabBarClearance();
   const { settings } = useStore();
-  const { updateSettings, signOut } = useActions();
+  const { updateSettings, signOut, loadStressData } = useActions();
   const toast = useToast();
 
   return (
@@ -116,6 +116,20 @@ export default function Settings() {
         <Item label="Privacy policy" onPress={() => toast({ message: 'Opens the privacy policy once it is published' })} last />
       </Group>
 
+      {/* Development builds only: production builds remove this block (__DEV__ is false there). */}
+      {__DEV__ ? (
+        <Group title="Developer">
+          <Item
+            label="Load stress data (10,000 expenses)"
+            onPress={() => {
+              loadStressData();
+              toast({ message: 'Loaded 10,000 expenses over 24 months in 20 currencies' });
+            }}
+            last
+          />
+        </Group>
+      ) : null}
+
       <Group>
         <Item
           label="Sign out"
@@ -187,3 +201,6 @@ function Item({
     </Pressable>
   );
 }
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';
