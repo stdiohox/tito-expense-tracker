@@ -122,12 +122,13 @@ npx expo export -p web   # writes a single-page app to dist/ (git-ignored)
 | `npm run lint` | `expo lint` (ESLint 9 flat config, `eslint-config-expo`) |
 | `npm run check:dates` | Date, money and summary assertions run with `TZ=Africa/Lagos`. Guards against the web tracker's bug B1 (month navigation broken in UTC+1) and bug B3 (yesterday's date just after midnight), and checks amount parsing and month summaries. |
 | `npm run check:contrast` | Checks every text/background pair in `src/theme/tokens.ts` against WCAG AA, in light and dark. Exits non-zero on any failure. |
+| `npm test` | Jest (jest-expo, React Native Testing Library), in `Africa/Lagos`: unit tests for money (all 20 currencies), dates, summaries, budgets and pace, and flow tests that render the real app (sign up → setup → Home; add, edit, delete and undo; the currency toggle; a budget at ₦0; the error screens). |
 | `npx expo-doctor` | Checks dependency versions and config against SDK 58 |
 
 **Before you push**, run:
 
 ```bash
-npm run typecheck && npm run lint && npm run check:dates && npm run check:contrast && npx expo-doctor
+npm run typecheck && npm run lint && npm run check:dates && npm run check:contrast && npm test && npx expo-doctor
 ```
 
 There is no unit-test runner yet. `scripts/check-dates.ts` is the domain test suite: plain

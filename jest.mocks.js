@@ -63,6 +63,14 @@ function mockReanimated() {
     cancelAnimation: () => {},
     runOnJS: (fn) => fn,
     runOnUI: (fn) => fn,
+    // Used by react-native-gesture-handler.
+    isSharedValue: (v) => Boolean(v) && typeof v === 'object' && typeof v.get === 'function' && 'value' in v,
+    makeMutable: shared,
+    useEvent: () => () => {},
+    useComposedEventHandler: () => () => {},
+    useHandler: () => ({ context: {}, doDependenciesDiffer: false, useWeb: false }),
+    setGestureState: () => {},
+    NativeEventsManager: undefined,
   };
 }
 
