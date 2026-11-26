@@ -18,8 +18,16 @@ export function fullName(s: Pick<Settings, 'firstName' | 'lastName'>): string {
   return [s.firstName, s.lastName].map((x) => x.trim()).filter(Boolean).join(' ');
 }
 
+/** The user's currencies: the main one first, then the optional second. */
+export function chosenCurrencies(s: Pick<Settings, 'currency' | 'secondCurrency'>): CurrencyCode[] {
+  return s.secondCurrency && s.secondCurrency !== s.currency ? [s.currency, s.secondCurrency] : [s.currency];
+}
+
 export type Settings = {
+  /** Main currency: totals, budgets and new expenses start in it. */
   currency: CurrencyCode;
+  /** Optional second currency, tracked separately and never converted; null when there is none. */
+  secondCurrency: CurrencyCode | null;
   appearance: AppearanceMode;
   mode: SetupMode;
   reminderOn: boolean;
@@ -32,6 +40,7 @@ export type Settings = {
 /** A fresh account's settings. Deleting the account returns to these. */
 export const DEFAULT_SETTINGS: Settings = {
   currency: 'NGN',
+  secondCurrency: null,
   appearance: 'system',
   mode: 'track',
   reminderOn: true,
@@ -79,7 +88,10 @@ function reducer(state: State, action: Action): State {
     }
     case 'settings': {
       const patch = Object.fromEntries(Object.entries(action.patch).filter(([, v]) => v !== undefined));
-      return { ...state, settings: { ...state.settings, ...patch } };
+      const settings: Settings = { ...state.settings, ...patch };
+      // The two currencies are always different: making the second one main clears the second.
+      if (settings.secondCurrency === settings.currency) settings.secondCurrency = null;
+      return { ...state, settings };
     }
     case 'signIn':
       return { ...state, signedIn: true };

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
+import { CurrencyPicker } from '@/components/currency-picker';
 import { STROKE } from '@/components/icons';
 import { Segmented } from '@/components/segmented';
 import { ScreenHero } from '@/components/screen-hero';
@@ -14,8 +15,7 @@ import { T } from '@/components/text';
 import { Wordmark } from '@/components/wordmark';
 import { useToast } from '@/components/toast';
 import { fullName, useActions, useStore } from '@/data/store';
-import { CURRENCIES } from '@/domain/money';
-import type { AppearanceMode, CurrencyCode } from '@/domain/types';
+import type { AppearanceMode } from '@/domain/types';
 import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -54,20 +54,20 @@ export default function Settings() {
 
       <Group title="Money">
         <View style={{ paddingVertical: space.m, gap: space.s, borderBottomWidth: 1, borderBottomColor: c.line }}>
-          <T variant="bodyStrong" importantForAccessibility="no">
-            Main currency
-          </T>
-          <Segmented
+          <CurrencyPicker
             label="Main currency"
             value={settings.currency}
-            onChange={(currency) => updateSettings({ currency })}
-            options={(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => ({
-              key: code,
-              label: `${CURRENCIES[code].symbol} ${CURRENCIES[code].name}`,
-            }))}
+            onChange={(currency) => currency && updateSettings({ currency })}
+          />
+          <CurrencyPicker
+            label="Second currency (optional)"
+            value={settings.secondCurrency}
+            onChange={(secondCurrency) => updateSettings({ secondCurrency })}
+            exclude={settings.currency}
+            allowNone
           />
           <T variant="sub" tone="inkMute">
-            Totals use this currency. Saved expenses keep the currency you entered them in, and budgets keep the currency you set them in.
+            Each currency is tracked on its own and never converted. Saved expenses keep the currency you entered them in, and budgets keep the currency you set them in.
           </T>
         </View>
         <Item label="Categories and budgets" onPress={() => router.push('/categories')} last />

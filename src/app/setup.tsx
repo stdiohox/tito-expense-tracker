@@ -10,7 +10,7 @@ import { Field } from '@/components/field';
 import { IconDisc } from '@/components/icon-disc';
 import { STROKE } from '@/components/icons';
 import { Panel } from '@/components/panel';
-import { Segmented } from '@/components/segmented';
+import { CurrencyPicker } from '@/components/currency-picker';
 import { T } from '@/components/text';
 import { useActions, useStore } from '@/data/store';
 import { CURRENCIES, parseAmount } from '@/domain/money';
@@ -23,7 +23,7 @@ const MODES: { key: SetupMode; title: string; text: string }[] = [
   { key: 'budgets', title: 'Track and budgets', text: 'Add monthly budgets to the categories you choose.' },
   { key: 'full', title: 'Full picture', text: 'Budgets, plus a daily reminder if you haven’t logged anything.' },
 ];
-const STEPS = ['Main currency', 'How hands-on', 'Your categories'] as const;
+const STEPS = ['Your currencies', 'How hands-on', 'Your categories'] as const;
 const MAX_BUDGETS = 4;
 
 /**
@@ -37,6 +37,7 @@ export default function Setup() {
   const { updateSettings, saveCategory } = useActions();
   const [step, setStep] = useState(0);
   const [currency, setCurrency] = useState<CurrencyCode>(settings.currency);
+  const [second, setSecond] = useState<CurrencyCode | null>(settings.secondCurrency);
   const [mode, setMode] = useState<SetupMode>(settings.mode);
   const [shown, setShown] = useState<Record<string, boolean>>(() => Object.fromEntries(categories.map((k) => [k.id, !k.hidden])));
   const [budgetIds, setBudgetIds] = useState<string[]>([]);
@@ -53,7 +54,7 @@ export default function Setup() {
 
   const proceed = () => {
     if (step === 0) {
-      updateSettings({ currency });
+      updateSettings({ currency, secondCurrency: second === currency ? null : second });
       return next();
     }
     if (step === 1) {
@@ -130,11 +131,11 @@ export default function Setup() {
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: space.l, paddingTop: space.xl, paddingBottom: space.xxl, gap: space.m }}>
         <View style={{ paddingHorizontal: space.xs, gap: space.s }}>
           <T variant="largeTitle" accessibilityRole="header">
-            {step === 0 ? 'Your main currency' : step === 1 ? 'How hands-on do you want to be?' : 'Your categories'}
+            {step === 0 ? 'Your currencies' : step === 1 ? 'How hands-on do you want to be?' : 'Your categories'}
           </T>
           <T variant="body" tone="inkSoft">
             {step === 0
-              ? 'Totals and budgets use it. Each expense keeps the currency you enter it in.'
+              ? 'Pick the currency you spend in most. Add a second if you also spend in another one: each is tracked on its own and never converted.'
               : step === 1
                 ? 'You can change this any time in Settings → Redo setup.'
                 : 'Untick the ones you don’t need. Expenses already in them still count.'}
@@ -143,12 +144,23 @@ export default function Setup() {
 
         {step === 0 ? (
           <Panel>
-            <View style={{ paddingVertical: space.m }}>
-              <Segmented
+            <View style={{ paddingVertical: space.m, gap: space.xl }}>
+              <CurrencyPicker
                 label="Main currency"
                 value={currency}
-                onChange={setCurrency}
-                options={(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => ({ key: code, label: `${CURRENCIES[code].symbol} ${CURRENCIES[code].name}` }))}
+                onChange={(code) => {
+                  if (!code) return;
+                  setCurrency(code);
+                  if (code === second) setSecond(null);
+                }}
+              />
+              <CurrencyPicker
+                label="Second currency (optional)"
+                value={second}
+                onChange={setSecond}
+                exclude={currency}
+                allowNone
+                hint="For example, US dollars if you are paid or spend in both."
               />
             </View>
           </Panel>
