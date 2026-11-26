@@ -140,6 +140,9 @@ assert.equal(parseAmount('1,500', 'JPY'), 1_500);
 assert.equal(parseAmount('¥1500', 'JPY'), 1_500);
 assert.equal(formatMoney(1_500, 'JPY'), '¥1,500');
 assert.equal(formatMoney(-1_500, 'JPY'), '−¥1,500');
+// A corrupt amount never crashes or shows NaN.
+assert.equal(formatMoney(Number.NaN, 'NGN'), '₦—');
+assert.equal(formatMoney(Number.POSITIVE_INFINITY, 'KES'), 'KSh —');
 assert.equal(parseAmount('1500.', 'JPY'), 1_500);
 // Symbols that contain other symbols are stripped whole, never half.
 assert.equal(parseAmount('CA$12.50', 'CAD'), 1_250);

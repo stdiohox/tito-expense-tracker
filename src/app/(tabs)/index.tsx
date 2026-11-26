@@ -12,6 +12,7 @@ import { MonthSwitcher } from '@/components/month-switcher';
 import { PaceChart } from '@/components/pace-chart';
 import { Panel } from '@/components/panel';
 import { Row } from '@/components/row';
+import { PartUnavailable, SafePart } from '@/components/route-error';
 import { ScreenHero } from '@/components/screen-hero';
 import { useTabBarClearance } from '@/components/tab-bar';
 import { Reveal } from '@/components/reveal';
@@ -111,6 +112,7 @@ export default function Home() {
           title={settings.firstName ? `Hello, ${settings.firstName}` : 'Hello'}
           leading={<Avatar first={settings.firstName} last={settings.lastName} size={32} />}
           bleed={
+          <SafePart name="currency cards" fallback={<View style={{ paddingHorizontal: space.l }}><PartUnavailable label="Your currency totals" onBrand /></View>}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -151,6 +153,7 @@ export default function Home() {
               </Pressable>
             ))}
           </ScrollView>
+          </SafePart>
           }>
             <MonthSwitcher onBrand />
             <View style={{ marginTop: space.s, gap: space.xs }}>
@@ -175,6 +178,7 @@ export default function Home() {
             </View>
             {now.total > 0 || before.total > 0 ? (
               <View style={{ marginTop: space.l }}>
+                <SafePart name="pace chart" fallback={<PartUnavailable label="The chart" onBrand />}>
                 <PaceChart
                   current={now.cumulative}
                   previous={before.cumulative}
@@ -183,6 +187,7 @@ export default function Home() {
                   labels={[`1 ${shortMonth(month)}`, isCurrent ? 'Today' : '', `${daysInMonth(month)} ${shortMonth(month)}`]}
                   accessibilityLabel={chartLabel}
                 />
+                </SafePart>
                 <View
                   style={{ flexDirection: 'row', gap: space.l, marginTop: space.s }}
                   importantForAccessibility="no-hide-descendants"
@@ -342,3 +347,6 @@ function Legend({ color, label, dashed }: { color: string; label: string; dashed
     </View>
   );
 }
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';

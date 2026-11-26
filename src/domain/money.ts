@@ -132,6 +132,8 @@ export function formatMoney(
   opts: { compact?: boolean; signed?: boolean } = {},
 ): string {
   const { symbol, spaced, minor: per, decimals } = currencyInfo(currency);
+  // A corrupt amount (NaN, Infinity) shows as a dash, never "NaN" and never a crash.
+  if (!Number.isFinite(minor)) return `${symbol}${spaced ? ' ' : ''}—`;
   const value = Math.round(minor);
   const neg = value < 0;
   const abs = Math.abs(value);

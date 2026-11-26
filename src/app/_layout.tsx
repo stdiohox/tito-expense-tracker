@@ -10,10 +10,12 @@ import { ToastProvider } from '@/components/toast';
 import { CurrencyViewProvider } from '@/data/currency-view';
 import { MonthProvider } from '@/data/month';
 import { StoreProvider, useStore } from '@/data/store';
+import { installGlobalErrorHandlers } from '@/lib/report';
 import { fonts } from '@/theme/tokens';
 import { AppearanceProvider, useTheme } from '@/theme/use-theme';
 import { applyWebFocusRing } from '@/theme/web-focus';
 
+installGlobalErrorHandlers();
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // A cold deep link to a sheet (titoexpenses://expense/new) still gets the tabs underneath.
@@ -132,3 +134,6 @@ function Routes({ screenOptions, sheet }: { screenOptions: object; sheet: object
     </Stack>
   );
 }
+
+// A crash in this screen shows a calm error screen, never a white screen.
+export { RouteErrorBoundary as ErrorBoundary } from '@/components/route-error';
