@@ -1,6 +1,6 @@
 # TET: project status
 
-Branch `feature/nike-polish` (from `feature/nike-redesign`), 25 November 2026.
+Branch `feature/nike-reliability` (from `main`), 26 November 2026.
 
 ## 1. What the app is
 
@@ -45,6 +45,9 @@ Branch `feature/nike-polish` (from `feature/nike-redesign`), 25 November 2026.
 - Expo Router for navigation.
 - react-native-svg for the gradient and charts, and Reanimated for motion.
 - Outfit for all text, and Tabler icons.
+- FlashList for the long lists (Expenses, Categories).
+- Sentry for crash reporting (off until a DSN is set; no personal data).
+- Jest with jest-expo and React Native Testing Library; GitHub Actions for CI.
 - Data lives in memory for now. Phase 2 adds SQLite on the phone and Supabase online.
 
 ## 3. What has changed since I joined
@@ -145,6 +148,15 @@ Everything after commit `3529e3d` (README and architecture docs).
 - `ca00fc5` Setup and Settings: pick a main currency and an optional second from a searchable list.
 - `ab9c916` Each currency tracked on its own: a Home card each, a toggle on Expenses and Reports, budgets in their own currency, and a removed currency's expenses kept.
 - Final list of twenty currencies (adds XAF, MAD, UGX and TZS), grouped by region in the picker, searchable by every country that uses each one; a currency no longer on the list keeps working.
+- `0df279c` Dev server: Metro opens at most 64 cache files at once, which stops the EMFILE crash on Windows.
+
+**Reliability** (branch `feature/nike-reliability`)
+- `724b883` docs/SCALE-PLAN.md: how the app stays stable from 10,000 to 200,000 users, with a 99.5% crash-free target.
+- `1076ea0` No white screens: every screen has a calm "Something went wrong" screen with Try again and Go home; charts and animations fail on their own; unhandled errors are logged.
+- `1d54423` Crash reporting with Sentry, off until a DSN is set, with amounts, notes, names and emails stripped.
+- `9228268`, `0f0d0ea` 122 automatic tests: money in all 20 currencies, Lagos dates, summaries, budgets and pace, plus the main journeys run through the real app.
+- `bafc038` Long lists use FlashList; a development-only button loads 10,000 test expenses; the slow spots found with it are fixed.
+- `7be1096` GitHub Actions runs every check, the tests and a web build on each pull request and push to main.
 
 ## 4. What works fully vs. what is a placeholder
 
@@ -163,6 +175,10 @@ Everything after commit `3529e3d` (README and architecture docs).
 | Appearance (System, Light, Dark) | Works |
 | Twenty currencies (by region, searchable by country); a main and an optional second, each tracked separately, never converted | Works (tested with the date and money checks; check on real phones) |
 | Budgets in their own currency, picked per budget | Works |
+| Error screens instead of white screens; charts and animations fail on their own | Works (tested) |
+| Crash reporting (Sentry) | Ready; off until you add a Sentry DSN |
+| Automatic tests (`npm test`) and CI on GitHub | Works; CI runs from the first pull request |
+| Smooth with 10,000 expenses | Works in tests (`npm run perf`); check on a real phone |
 | Saving data between launches | Placeholder: in memory only |
 | Real accounts (sign up, sign in) | Placeholder: no server yet |
 | Reset password | Placeholder: no email is sent |
@@ -203,18 +219,21 @@ In suggested order:
 
 ## 7. Scale and reliability (10,000–500,000 users)
 
-What's needed before launch:
-- **Crash reporting** (for example Sentry), so crashes show up with enough detail to fix.
-- **Tests:** automatic tests for the money, date and budget rules, plus a few end-to-end runs (sign up, add, edit, delete, sync).
-- **CI:** every push runs typecheck, lint, the checks and tests, and builds with EAS.
+The full plan is in `docs/SCALE-PLAN.md`. Already done:
+- **Crash reporting:** Sentry is installed and wired to the error screens; it needs a DSN to switch on.
+- **Tests:** 122 automatic tests (`npm test`), including the main journeys; sync tests come with Phase 2.
+- **CI:** GitHub Actions runs every check, the tests and a web build on each pull request.
+- **Performance:** checked with 10,000 expenses (`npm run perf`).
+
+Still needed before launch:
 - **Supabase setup:** a paid plan with backups, every table locked to its owner, indexes on dates and users, rate limits on login, and syncing in small batches. Saving on the phone first keeps server load low.
 - **Staged releases:** TestFlight and Play internal testing first, then a gradual rollout. Over-the-air updates go out in channels so a bad update can be rolled back.
 - **Store basics:** a privacy policy, in-app account deletion (both stores require it), and the final icon.
 
 ## 8. Recommended next 5 steps
 
-1. Test `feature/nike-polish` and `feature/nike-currencies` in Expo Go on an iPhone and an Android phone (sheet drag and keyboard, onboarding motion, Reduce Motion, VoiceOver/TalkBack on the new charts), then push both branches, open the pull requests and get client sign-off.
+1. Merge `feature/nike-reliability` once CI passes on its pull request, turn on branch protection for `main`, and connect Sentry (docs/SCALE-PLAN.md §7). Test in Expo Go on an iPhone and an Android phone (sheet drag and keyboard, onboarding motion, Reduce Motion, VoiceOver/TalkBack on the new charts), then push both branches, open the pull requests and get client sign-off.
 2. Set up Supabase: schema, access rules, and real sign-up (with first and last name), sign-in, reset and delete.
 3. Add SQLite storage with the sync queue, and make the store wait for each save.
-4. Add crash reporting, tests and CI.
+4. Add the Phase 2 tests: offline sync (add 5 offline, reconnect, exactly 5 sync), SQL totals matching the JavaScript ones, and the two-account access test.
 5. Finish the app icon, CSV and PDF export and the daily reminder, then send the first TestFlight and Play internal test builds.
